@@ -11,6 +11,21 @@
 :root{--gold:#f4d68a;--gold2:#9e6e2e;--green:#0b3029;--ink:#061313;--muted:#b5c7bf}*{box-sizing:border-box}body{margin:0;color:#f8f5e9;font-family:system-ui,'Noto Sans JP',sans-serif;background:radial-gradient(ellipse at 50% -10%,#174c3b 0,transparent 52%),linear-gradient(145deg,#06110f,#0a2522 55%,#030a0b);min-height:100vh}body:before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.15;background:repeating-linear-gradient(90deg,transparent 0 69px,#e0c17b 70px,transparent 71px)}.wrap{width:min(1100px,94%);margin:auto}.top{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid #8d723b55}.brand{font-size:12px;letter-spacing:.24em;color:var(--gold)}.live{font-size:11px;color:#d8e5d9;border:1px solid #5d8b76;border-radius:20px;padding:8px 12px}.live:before{content:'●';color:#8ad2ac;margin-right:7px}.hero{text-align:center;padding:48px 10px 34px;position:relative}.eyebrow{color:#d4b36c;letter-spacing:.36em;font-size:11px}.hero h1{font-family:Georgia,'Yu Mincho',serif;font-weight:600;letter-spacing:.09em;font-size:clamp(34px,7vw,68px);line-height:1.1;margin:14px 0 8px;color:#fff6da;text-shadow:0 3px 30px #e5b85a77}.hero h1 span{display:block;font-family:system-ui,sans-serif;letter-spacing:.32em;font-size:clamp(12px,2.3vw,20px);color:#e7c477;margin-top:14px}.sub{font-size:13px;color:#c2d4c8;letter-spacing:.12em}.line{height:2px;width:min(480px,85%);margin:24px auto;background:linear-gradient(90deg,transparent,#d8aa58,transparent)}.arena{border:1px solid #bd934d;border-radius:18px;padding:8px;background:linear-gradient(145deg,#af8846,#3d2a15 22%,#d2b16d 49%,#493016 80%,#a47d3d);box-shadow:0 18px 65px #0009,0 0 40px #b68d3933}.arena-inner{border:1px solid #d6b36b77;border-radius:11px;background:radial-gradient(ellipse at 50% 0,#1a5045,#09221f 65%,#071815);min-height:290px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:25px 12px;position:relative;overflow:hidden}.arena-inner:before{content:'';position:absolute;inset:0;background:linear-gradient(transparent 97%,#e4c78013 100%);background-size:100% 12px;pointer-events:none}.arena-tag{border:1px solid #d6b36b;color:#f6d98b;font-size:11px;letter-spacing:.2em;padding:8px 20px;background:#071614a8}.horse{font-size:72px;filter:drop-shadow(0 6px 15px #000);margin:12px 0}.arena-title{font-family:Georgia,serif;color:#f7e3ac;font-size:clamp(23px,4vw,36px);letter-spacing:.1em}.arena-desc{color:#b6c9bd;font-size:13px;max-width:470px;line-height:1.8;text-align:center}.lights{display:flex;gap:13px;margin-top:15px}.lights i{height:7px;width:7px;border-radius:50%;background:#cda24b;box-shadow:0 0 13px #eac367}.section{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0 40px}.panel{background:linear-gradient(150deg,#173b33,#0b201e 65%);border:1px solid #95743e;border-radius:12px;box-shadow:inset 0 1px #e7c87d25,0 10px 30px #0004;padding:24px 20px;min-height:190px}.panel .num{font-family:Georgia,serif;font-size:12px;color:#bda46e;letter-spacing:.2em}.panel h2{font-size:20px;color:#f8e5ad;margin:12px 0}.panel p{color:#c5d0c9;font-size:13px;line-height:1.8}.status{display:inline-block;color:#ffe2a2;background:#9b6b251c;border:1px solid #aa843e;padding:7px 12px;font-size:12px;border-radius:5px}.footer{text-align:center;border-top:1px solid #a0834c55;padding:25px 10px 36px;font-size:11px;letter-spacing:.14em;color:#8fa69b}.small{font-size:11px;color:#9cb2a6;margin-top:10px}@media(max-width:720px){.hero{padding:38px 0 20px}.section{grid-template-columns:1fr}.panel{min-height:0}.arena-inner{min-height:250px}.top{padding:15px 0}.brand{letter-spacing:.1em}}
 
 .secretary-guide{display:flex;align-items:center;gap:22px;margin:22px 0 4px;padding:18px;background:linear-gradient(110deg,#123a31,#071b1b);border:1px solid #b89551;border-radius:14px;box-shadow:0 12px 30px #0005}.secretary-guide img{width:150px;height:200px;object-fit:cover;object-position:center 12%;border:2px solid #caa75e;border-radius:10px;box-shadow:0 0 20px #e4bb6733}.secretary-guide .guide-label{font-size:11px;color:#e5c67e;letter-spacing:.2em}.secretary-guide h2{color:#ffe9b1;margin:9px 0;font-size:23px}.secretary-guide p{font-size:14px;line-height:1.9;color:#d3ded5;margin:0}@media(max-width:520px){.secretary-guide{gap:13px;padding:12px}.secretary-guide img{width:112px;height:160px}.secretary-guide h2{font-size:18px}.secretary-guide p{font-size:12px}}
+
+/* 公式VS：10分枠の現在レースと観戦室。既存の外観には手を加えない */
+#live-race-panel .race-name{font-size:18px;font-weight:750;color:#ffe6a4;min-height:1.7em;margin:16px 0 6px}
+#live-race-panel .race-footnote{font-size:11px;color:#aab9b1;margin:10px 0 0}
+.vs-watch-btn{display:block;border:1px solid #ebce87;border-radius:8px;padding:12px 20px;min-height:45px;background:linear-gradient(180deg,#f8dfa3,#c49643);color:#152920;font:inherit;font-weight:900;cursor:pointer;max-width:100%}
+.vs-watch-btn:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.4)}
+#vs-watchroom[hidden],#vs-watchroom-loading[hidden]{display:none!important}
+#vs-watchroom{margin:18px 0 38px;border:1px solid #b89551;border-radius:12px;padding:16px;background:#0b2520}
+#vs-watchroom-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+#vs-watchroom-title{color:#ffe6a4;font-size:18px;margin:0}
+#vs-watchroom-state{font-size:13px;line-height:1.8;color:#d8e1cf;margin:0 0 12px}
+#vs-watchroom-frame{display:block;width:100%;height:max(680px,85vh);border:1px solid #b89551;border-radius:8px;background:#091915}
+#vs-watchroom-loading{padding:16px;line-height:1.8;color:#f5d88c;white-space:pre-line}
+body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{display:none!important}
+@media(max-width:720px){#vs-watchroom-frame{height:calc(100dvh - 175px);min-height:480px}}
   </style>
 </head>
 <body>
@@ -49,11 +64,14 @@
       </section>
 
       <div class="section">
-        <section class="panel">
+        <section class="panel" id="live-race-panel" aria-label="開催中のVSレース">
           <div class="num">01 / RACE SCHEDULE</div>
-          <h2>次回開催レース</h2>
-          <span class="status">開催準備中</span>
-          <p>開催予定は準備中です。</p>
+          <h2>開催中のレース</h2>
+          <span class="status" id="live-race-status">確認中</span>
+          <p class="race-name" id="live-race-name">レース記録を確認しています。</p>
+          <p id="live-race-info" aria-live="polite">10分ごとの開催枠を確認中です。</p>
+          <button type="button" class="vs-watch-btn" id="live-watch-button" disabled>▶ 観戦する</button>
+          <p class="race-footnote" id="live-race-next"></p>
         </section>
         <section class="panel">
           <div class="num">02 / ENTRY</div>
@@ -70,10 +88,214 @@
       </div>
     </main>
 
+
+    <section id="vs-watchroom" hidden aria-label="公式VSレース観戦室">
+      <div id="vs-watchroom-top">
+        <h2 id="vs-watchroom-title">公式VSレース 観戦室</h2>
+        <button type="button" class="vs-watch-btn" id="vs-watchroom-back">ホームへ戻る</button>
+      </div>
+      <p id="vs-watchroom-state" role="status" aria-live="polite">開催中のレースを確認しています。</p>
+      <div id="vs-watchroom-loading" role="status">レース記録を確認しています。</div>
+      <iframe id="vs-watchroom-frame" hidden title="DBF公式VSレース・競馬新聞" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
+    </section>
     <footer class="footer">
       DERBY FANTASY © VS ARENA
-      <div class="small">※ 現在はホームページのみです。出走登録・自動レース・ライブ観戦には対応していません。</div>
+      <div class="small">※ 完成済みのレース記録が公開されている開催枠のみ観戦できます。新しいレースの自動生成・出走登録は未接続です。</div>
     </footer>
   </div>
+
+<script>
+(()=>{
+ 'use strict';
+ const SLOT_MS=600000, PAPER_MS=30000;
+ const $=id=>document.getElementById(id);
+ const state={playlist:[],playlistError:'',slot:-1,race:null,record:null,serial:0,watchSerial:0,enginePromise:null};
+ const watchMode=new URLSearchParams(location.search).get('watch')==='live';
+ const slotAt=now=>Math.floor(now/SLOT_MS);
+ const two=n=>String(n).padStart(2,'0');
+ const clock=ms=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms));
+ const slotLabel=slot=>clock(slot*SLOT_MS)+'～'+clock((slot+1)*SLOT_MS);
+ const countdown=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return two(Math.floor(s/60))+':'+two(s%60)};
+ const safeFile=value=>typeof value==='string' && /^(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.json$/.test(value) && !value.includes('..') && value.length<=256;
+ const recordCheck=obj=>!!obj && obj.schema==='derby-fantasy-official-vs-replay' && obj.version===2 && obj.status==='complete' &&
+   typeof obj.race?.name==='string' && obj.race.name.length<=150 &&
+   Number.isFinite(obj.durationMs) && obj.durationMs>0 && obj.durationMs<=3600000 &&
+   obj.newspaper && typeof obj.newspaper.heading==='string' && typeof obj.newspaper.entries==='string' &&
+   Array.isArray(obj.frames) && obj.frames.length>=2 && Array.isArray(obj.results) && obj.results.length>0;
+ function showAvailability(){
+   const now=Date.now(),slot=slotAt(now),start=slot*SLOT_MS,end=start+SLOT_MS;
+   const btn=$('live-watch-button');
+   $('live-race-next').textContent='開催枠（日本時間）：'+slotLabel(slot)+' ／ 次の切替まで '+countdown(end-now);
+   if(!state.record){
+     $('live-race-status').textContent='開催準備中';
+     $('live-race-name').textContent='配信できるレース記録がありません';
+     $('live-race-info').textContent=state.playlistError||'ゲームで保存した完走記録をサイトへ配置すると、10分ごとに自動で切り替わります。';
+     btn.disabled=true;return;
+   }
+   const r=state.record,finished=now-start>=PAPER_MS+r.durationMs;
+   $('live-race-status').textContent=finished?'レース終了・再生可能':'開催中';
+   $('live-race-name').textContent=r.race.name;
+   $('live-race-info').textContent=(r.race.venue||'')+' '+(r.race.surface||'芝')+r.race.distance+'m ／ '+(r.race.going||'')+
+     (finished?' ／ 記録済みレースを観戦できます':now-start<PAPER_MS?' ／ 競馬新聞を表示中':' ／ 保存済みレースを放映中');
+   btn.disabled=false;
+ }
+ async function fetchJSON(path){
+   const response=await fetch(path,{cache:'no-store'});
+   if(!response.ok)throw Error('記録ファイルが取得できません（HTTP '+response.status+'）。');
+   return response.json();
+ }
+ async function readPlaylist(){
+   try{
+     const playlist=await fetchJSON('./race_playlist.json');
+     if(playlist?.version!==1||!Array.isArray(playlist.races)||playlist.races.length>1000 ||
+        !playlist.races.every(row=>row && safeFile(row.file)))throw Error('レース一覧の形式が不正です。');
+     state.playlist=playlist.races;
+     state.playlistError=playlist.races.length?'':'保存されたレースの登録がまだありません。';
+   }catch(e){state.playlistError='レース一覧が未配置か取得できません。';state.playlist=[];}
+ }
+ async function loadSlot(slot){
+   const mySerial=++state.serial;
+   state.slot=slot;state.record=null;state.race=null;
+   showAvailability();
+   if(!state.playlist.length){if(watchMode)displayWatchError(state.playlistError);return;}
+   // Every observer chooses the same recorded race for the same 10-minute slot.
+   const index=((slot%state.playlist.length)+state.playlist.length)%state.playlist.length;
+   const race=state.playlist[index];
+   try{
+     const record=await fetchJSON('./'+race.file);
+     if(mySerial!==state.serial)return;
+     if(!recordCheck(record))throw Error('保存済みの競馬新聞・完走記録の形式が正しくありません。');
+     state.race=race;state.record=record;showAvailability();
+     if(watchMode)startWatch(slot,record);
+   }catch(e){
+     if(mySerial!==state.serial)return;
+     state.playlistError='レース記録の読み込みに失敗：'+(e.message||e);
+     showAvailability();if(watchMode)displayWatchError(state.playlistError);
+   }
+ }
+ function displayWatchError(message){
+   $('vs-watchroom-state').textContent='開催中のレースは観戦できません。';
+   $('vs-watchroom-loading').textContent=message;
+   $('vs-watchroom-loading').hidden=false;
+   $('vs-watchroom-frame').hidden=true;
+ }
+ function prepareEngineHTML(html){
+   const hook='window.DFOfficialVSProduction.start();';
+   const anchor='window.DFOfficialVSProduction=dfOfficialVSProduction;';
+   if(html.split(hook).length!==2||html.split(anchor).length!==2)
+     throw Error('ゲームの記録・再生エンジンが対応版ではありません。');
+   // Spectator mode only: suppress creating a NEW random race during boot.
+   // The engine's racing physics, 3D renderer and saved-record playback are unchanged.
+   html=html.replace(hook,'if(!window.__dfOfficialSpectator)'+hook);
+   const bridge=`\nwindow.DFOfficialViewerBridge=Object.freeze({
+     prepare(record){
+       const result=window.DFOfficialVSReplay.play(record);
+       if(!result?.ok)throw Error('保存したレースを準備できませんでした。');
+       document.getElementById('newspaperRaceStart').disabled=true;
+       dfV2SetGameScreenNow('newspaper');
+       if(document.body.dataset.gameScreen!=='newspaper')throw Error('競馬新聞を開けませんでした。');
+     },
+     playAt(offsetMs){
+       dfV2SetGameScreenNow('race-view');
+       if(document.body.dataset.gameScreen!=='race-view')throw Error('レース画面を開けませんでした。');
+       document.getElementById('start').click();
+       if(race!=='running')throw Error('記録映像の再生に失敗しました。');
+       if(offsetMs>0&&!window.DFOfficialVSReplay.seek(offsetMs))throw Error('再生位置を設定できませんでした。');
+     }
+   });\n`;
+   html=html.replace(anchor,anchor+bridge);
+   const shim=`<script>(function(){window.__dfOfficialSpectator=true;
+     const values=new Map();const store={getItem(k){k=String(k);return values.has(k)?values.get(k):null},
+     setItem(k,v){values.set(String(k),String(v))},removeItem(k){values.delete(String(k))},
+     clear(){values.clear()},key(i){return [...values.keys()][i]??null},get length(){return values.size}};
+     Object.defineProperty(window,'localStorage',{configurable:true,value:store});
+   })();<\/script>`;
+   return html.replace(/<head[^>]*>/i,tag=>tag+shim);
+ }
+ async function loadEngine(){
+   if(!state.enginePromise)state.enginePromise=Promise.all(['vs_replay_engine_part1.txt','vs_replay_engine_part2.txt']
+     .map(name=>fetch('./'+name).then(r=>{if(!r.ok)throw Error('レースエンジンの'+name+'がありません。');return r.text();})))
+     .then(parts=>prepareEngineHTML(parts.join(''))).catch(e=>{state.enginePromise=null;throw e;});
+   return state.enginePromise;
+ }
+ function loadFrame(html,serial){
+   return new Promise((resolve,reject)=>{
+     const frame=$('vs-watchroom-frame');
+     const timer=setTimeout(()=>{cleanup();reject(Error('ゲームエンジンの読み込みが時間切れです。'));},150000);
+     const cleanup=()=>{clearTimeout(timer);frame.removeEventListener('load',onload);frame.removeEventListener('error',onerror)};
+     const onload=()=>{cleanup();serial===state.watchSerial?resolve(frame.contentWindow):reject(Error('開催枠が切り替わりました。'))};
+     const onerror=()=>{cleanup();reject(Error('ゲームエンジンが起動できません。'))};
+     frame.addEventListener('load',onload);frame.addEventListener('error',onerror);
+     frame.srcdoc=html;
+   });
+ }
+ async function waitEngine(w,serial){
+   const start=performance.now();let booted=false;
+   while(serial===state.watchSerial){
+     if(w.__df47BootError)throw Error('3D起動エラー：'+w.__df47BootError);
+     if(!booted && typeof w.__df47Start3D==='function'){booted=true;w.__df47Start3D();}
+     if(w.__raceReady3D && w.DFOfficialViewerBridge)return;
+     if(performance.now()-start>120000)throw Error('3Dエンジンの準備が完了しませんでした。');
+     await new Promise(resolve=>setTimeout(resolve,300));
+   }
+   throw Error('開催枠が切り替わりました。');
+ }
+ async function startWatch(slot,record){
+   const serial=++state.watchSerial;
+   const frame=$('vs-watchroom-frame');frame.hidden=true;
+   $('vs-watchroom-loading').hidden=false;
+   $('vs-watchroom-loading').textContent='保存済みレースとDBFエンジンを準備中です。';
+   $('vs-watchroom-title').textContent='公式VS観戦：'+record.race.name;
+   try{
+     const html=await loadEngine();if(serial!==state.watchSerial)return;
+     const w=await loadFrame(html,serial);if(serial!==state.watchSerial)return;
+     await waitEngine(w,serial);if(serial!==state.watchSerial)return;
+     w.DFOfficialViewerBridge.prepare(record);
+     const startTime=slot*SLOT_MS;
+     const now=Date.now();
+     frame.hidden=false;$('vs-watchroom-loading').hidden=true;
+     const startVideo=()=>{
+       const offset=Date.now()-startTime-PAPER_MS;
+       w.DFOfficialViewerBridge.playAt(Math.max(0,Math.min(offset,record.durationMs)));
+       $('vs-watchroom-state').textContent=offset>=record.durationMs?'レース終了：保存済み映像を再生しています。':'開催中：全観客共通の記録映像を再生しています。';
+     };
+     if(now-startTime<PAPER_MS){
+       $('vs-watchroom-state').textContent='保存済み競馬新聞を表示中（発走まで '+countdown(startTime+PAPER_MS-now)+'）';
+       while(serial===state.watchSerial && slotAt(Date.now())===slot && Date.now()<startTime+PAPER_MS){
+         $('vs-watchroom-state').textContent='保存済み競馬新聞を表示中（発走まで '+countdown(startTime+PAPER_MS-Date.now())+'）';
+         await new Promise(resolve=>setTimeout(resolve,200));
+       }
+       if(serial!==state.watchSerial||slotAt(Date.now())!==slot)return;
+       startVideo();
+     }else if(now-startTime>=PAPER_MS+record.durationMs){
+       // Race has already finished in this slot: replay the SAME record from the start.
+       $('vs-watchroom-state').textContent='この枠のレースは終了しました。保存済みレースを最初から再生します。';
+       w.DFOfficialViewerBridge.playAt(0);
+     }else startVideo();
+   }catch(e){if(serial===state.watchSerial)displayWatchError(String(e.message||e));}
+ }
+ async function refresh(){
+   const slot=slotAt(Date.now());
+   if(slot!==state.slot){
+     if(watchMode){++state.watchSerial;
+       const frame=$('vs-watchroom-frame');frame.hidden=true;frame.removeAttribute('srcdoc');}
+     await readPlaylist();
+     if(slotAt(Date.now())!==slot)return refresh();
+     await loadSlot(slot);
+   }
+   showAvailability();
+ }
+ $('live-watch-button').addEventListener('click',()=>{
+   if(!state.record)return;
+   const url=new URL(location.href);url.searchParams.set('watch','live');location.href=url.toString();
+ });
+ $('vs-watchroom-back').addEventListener('click',()=>{
+   const url=new URL(location.href);url.searchParams.delete('watch');location.href=url.toString();
+ });
+ if(watchMode){document.body.classList.add('vs-watch-view');$('vs-watchroom').hidden=false;}
+ setInterval(()=>{refresh().catch(e=>{state.playlistError=String(e.message||e);showAvailability();});},1000);
+ refresh().catch(e=>{state.playlistError=String(e.message||e);showAvailability();});
+})();
+</script>
 </body>
 </html>
