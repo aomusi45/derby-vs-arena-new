@@ -110,7 +110,8 @@ def build_game(card: dict) -> str:
       if(!incoming.length)return originals;
       const selected=incoming.slice(0,18);
       const names=new Set(selected.map(x=>x.runner.name));
-      const field=selected.map(x=>({...x.runner,registrationId:x.registrationId,isCom:false}));
+      const field=selected.map(x=>({...x.runner,registrationId:x.registrationId,
+        ownerName:x.ownerName||'',isCom:false}));
       const count=Math.min(18,Math.max(originals.length,field.length));
       const fillers=originals.filter(h=>!names.has(h.name));
       field.push(...fillers.slice(0,Math.max(0,count-field.length)).map(h=>({...h,isCom:true})));
@@ -118,7 +119,8 @@ def build_game(card: dict) -> str:
         const j=Math.floor(Math.random()*(i+1));
         [field[i],field[j]]=[field[j],field[i]];
       }
-      window.__dfOfficialSelectedOrder=field.filter(x=>x.registrationId).map(x=>({registrationId:x.registrationId,name:x.name}));
+      window.__dfOfficialSelectedOrder=field.filter(x=>x.registrationId).map(x=>({
+        registrationId:x.registrationId,name:x.name,ownerName:x.ownerName||''}));
       return field;
     })();"""
     if original.count('const field=fromPreparedField();') != 1:
@@ -195,6 +197,7 @@ async def record_in_browser(card: dict, entrants: list[dict] | None = None) -> d
                                 for registered in selected:
                                     if registered['name'] not in names:
                                         raise ValueError('登録馬が完走記録に存在しません: '+registered['name'])
+                                stamp_record_owners(record, entrants)
                                 record['registrations']=[x['registrationId'] for x in selected]
                                 record['horseTokens']=[x['horseToken'] for x in entrants]
                             return record
@@ -208,6 +211,67 @@ async def record_in_browser(card: dict, entrants: list[dict] | None = None) -> d
         finally:
             server.shutdown()
             server.server_close()
+
+
+def stamp_record_owners(record: dict, entrants: list[dict]) -> None:
+    """Preserve user-supplied PUBLIC owner display names in genuine finished results.
+
+    Identify horses by the recorder's registration receipt and/or verified
+    horse number. Only use unique-name fallback when there are no collisions.
+    COM horses never receive an owner. UID and source JSON remain private.
+    """
+    field = record.get('field', [])
+    results = record.get('results', [])
+    if not isinstance(field, list) or not isinstance(results, list):
+        return
+    by_receipt = {entry['registrationId']: entry for entry in entrants}
+    names = {}
+    for entry in entrants:
+        names.setdefault(entry['runner']['name'], []).append(entry)
+    field_names = [row.get('name') for row in field if isinstance(row, dict)]
+    result_names = [row.get('name') for row in results if isinstance(row, dict)]
+
+    def row_number(row):
+        if not isinstance(row, dict):
+            return None
+        for key in ('no', 'number', 'horseNo', 'horseNumber'):
+            value = row.get(key)
+            if type(value) is int and 1 <= value <= 18:
+                return value
+        return None
+
+    by_number = {}
+    by_unique_name = {}
+    for item in field:
+        if not isinstance(item, dict):
+            continue
+        entry = by_receipt.get(item.get('registrationId'))
+        name = item.get('name')
+        if entry is None and isinstance(name, str) and field_names.count(name) == 1 and len(names.get(name, [])) == 1:
+            entry = names[name][0]
+        if not entry or entry['runner']['name'] != name:
+            continue
+        owner = entry.get('ownerName', '')
+        if not owner:
+            continue
+        item['ownerName'] = owner
+        number = row_number(item)
+        if number is not None:
+            by_number[number] = (name, owner)
+        if field_names.count(name) == 1 and result_names.count(name) == 1:
+            by_unique_name[name] = owner
+
+    for row in results:
+        if not isinstance(row, dict):
+            continue
+        # Only a verified Firestore registration may supply a public owner.
+        row.pop('ownerName', None)
+        name, number = row.get('name'), row_number(row)
+        found = by_number.get(number)
+        if found is not None and found[0] == name:
+            row['ownerName'] = found[1]
+        elif name in by_unique_name:
+            row['ownerName'] = by_unique_name[name]
 
 
 def validate_record(record: dict, card: dict) -> None:
@@ -249,7 +313,8 @@ def metadata_for(record: dict, card: dict, slot: int) -> dict:
         'results': [{
             'place': row['place'], 'no': row['no'], 'name': row['name'],
             'timeSeconds': row['timeSeconds'], 'margin': row.get('margin', '―'),
-            'prizeYen': price_for(row['place'], card)
+            'prizeYen': price_for(row['place'], card),
+            **({'ownerName': row['ownerName']} if row.get('ownerName') else {})
         } for row in record['results']]
     }
 
