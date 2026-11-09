@@ -27,6 +27,38 @@ def _num(value, minimum: float, maximum: float):
     return value
 
 
+def timestamp_us(value: str) -> int:
+    """Canonical Firestore server timestamp, with microsecond precision."""
+    if not isinstance(value, str) or not value:
+        raise ValueError('Firestore登録日時がありません')
+    dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    if dt.tzinfo is None:
+        raise ValueError('Firestore登録日時にタイムゾーンがありません')
+    delta = dt.astimezone(timezone.utc) - datetime(1970, 1, 1, tzinfo=timezone.utc)
+    return (delta.days * 86400 + delta.seconds) * 1_000_000 + delta.microseconds
+
+
+def registration_id(owner: str, horse_id: str, updated_at: str) -> str:
+    # One receipt per submission, not per login/horse: re-registering gets a new receipt.
+    return hashlib.sha256((owner+'|'+horse_id+'|'+str(timestamp_us(updated_at))).encode()).hexdigest()[:24]
+
+
+def horse_token(horse_id: str, runner: dict) -> str:
+    """Fingerprint the same exported horse, not every owner's local horse ID.
+
+    Different players may legitimately have the SAME local sourceHorseId.
+    Including verified racing parameters prevents those players from being
+    merged merely because their games assigned the same local ID.
+    """
+    payload = json.dumps({'horseId': horse_id, 'runner': runner},
+                         ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+    return hashlib.sha256(('dbf-export-v3|'+payload).encode()).hexdigest()[:24]
+
+
+def legacy_registration_id(owner: str, horse_id: str) -> str:
+    return hashlib.sha256((owner+'|'+horse_id).encode()).hexdigest()[:24]
+
+
 def normalize(row: dict) -> dict:
     """Revalidate ALL racing inputs received through untrusted user documents."""
     if not isinstance(row, dict):
@@ -63,9 +95,10 @@ def normalize(row: dict) -> dict:
         runner[k] = source[k]
     runner['going'] = {k:going[k] for k in ('良','稍重','重','不良')}
     runner['isCom'] = False
-    registration_id = hashlib.sha256((owner+'|'+horse_id).encode()).hexdigest()[:24]
-    return {'registrationId': registration_id, 'runner': runner,
-            'updatedAt': row.get('updatedAt',''), 'ownerUid': owner}
+    submitted_at = row.get('updatedAt', '')
+    ident = registration_id(owner, horse_id, submitted_at)
+    return {'registrationId': ident, 'horseToken': horse_token(horse_id, runner),
+            'horseId': horse_id, 'legacyId': legacy_registration_id(owner, horse_id), 'runner': runner, 'updatedAt': submitted_at, 'ownerUid': owner}
 
 
 def _firestore_value(value: dict):
@@ -95,8 +128,10 @@ def _decode_document(document: dict) -> dict:
     doc_id = document.get('name','').rsplit('/',1)[-1]
     if fields.get('ownerUid') != doc_id:
         raise ValueError('登録者IDとドキュメントIDが一致しません')
-    # registration time from Firestore server, never from a client timestamp.
-    fields['updatedAt'] = document.get('updateTime','')
+    # Firestore rules require serverTimestamp() == request.time for each write.
+    # Use its persisted value (also available in the Web SDK) for the receipt ID.
+    if not isinstance(fields.get('updatedAt'), str):
+        raise ValueError('登録日時はFirestoreのサーバー日時が必要です')
     return normalize(fields)
 
 
@@ -147,30 +182,49 @@ def load() -> list[dict]:
     return rows
 
 
+def unique_horse_count(entries: list[dict]) -> int:
+    """Same exported horse uploaded from new guest accounts counts just once."""
+    return len({e['horseToken'] for e in entries})
+
+
 def choose(entries: list[dict], card: dict, slot: int, published: list[dict]) -> list[dict]:
-    """One group of <=18, one appearance per *horse* per G1 per JST day."""
+    """One ticket -> one race; unique horse per heat; same G1 only once/day/owner."""
     slot_start_ms = slot * 900_000
     today = datetime.fromtimestamp(slot_start_ms / 1000, JST).date()
-    already=set()
+    used_receipts = set()
+    used_horse_before = {}
+    daily_horse_tokens = set()
     for meta in published:
-        if meta.get('name') != card['name'] or not isinstance(meta.get('slot'),int):
+        if not isinstance(meta.get('slot'), int):
             continue
-        interval = int(meta.get('intervalMinutes',10))
-        if datetime.fromtimestamp(meta['slot']*interval*60,JST).date() != today:
-            continue
-        already.update(meta.get('registrations',[]))
-    eligible=[];seen=set()
-    for row in entries:
-        ident=row['registrationId']
-        if ident in seen or ident in already:
+        interval = int(meta.get('intervalMinutes', 10))
+        recorded_ids = meta.get('registrations', [])
+        if isinstance(recorded_ids, list):
+            used_receipts.update(recorded_ids)
+        snapshot_ms = meta.get('registrationSnapshotMs')
+        if isinstance(snapshot_ms, int) and snapshot_ms > 0:
+            for token in meta.get('horseTokens', []):
+                used_horse_before[token] = max(snapshot_ms, used_horse_before.get(token, 0))
+        if (meta.get('name') == card['name'] and
+                datetime.fromtimestamp(meta['slot'] * interval * 60, JST).date() == today):
+            daily_horse_tokens.update(meta.get('horseTokens', []))
+            # Older production records used the stable horse token as registrationId.
+            daily_horse_tokens.update(recorded_ids)
+    eligible_by_horse = {}
+    # If a guest logged in again and uploaded the SAME JSON, prefer the latest
+    # registration without reducing a distinct player's differently trained horse.
+    for row in sorted(entries, key=lambda item: timestamp_us(item['updatedAt']), reverse=True):
+        ident = row['registrationId']
+        if (ident in used_receipts or row['horseToken'] in daily_horse_tokens or
+                row['legacyId'] in daily_horse_tokens or
+                timestamp_us(row['updatedAt']) <= used_horse_before.get(row['horseToken'], -1) * 1000):
             continue
         try:
-            updated = datetime.fromisoformat(row['updatedAt'].replace('Z','+00:00'))
-            if updated.tzinfo is None or updated.timestamp()*1000 > slot_start_ms:
+            if timestamp_us(row['updatedAt']) > slot_start_ms * 1000:
                 continue
-        except (ValueError,TypeError,AttributeError):
+        except (ValueError, TypeError, AttributeError):
             continue
-        seen.add(ident)
-        eligible.append(row)
+        eligible_by_horse.setdefault(row['horseToken'], row)
+    eligible = list(eligible_by_horse.values())
     random.Random(slot).shuffle(eligible)
     return eligible[:18]
