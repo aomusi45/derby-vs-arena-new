@@ -196,6 +196,7 @@ async def record_in_browser(card: dict, entrants: list[dict] | None = None) -> d
                                     if registered['name'] not in names:
                                         raise ValueError('登録馬が完走記録に存在しません: '+registered['name'])
                                 record['registrations']=[x['registrationId'] for x in selected]
+                                record['horseTokens']=[x['horseToken'] for x in entrants]
                             return record
                         if probe['startReady'] and not probe['ready']:
                             await page.evaluate('''() => window.__df47Start3D()''')
@@ -235,6 +236,8 @@ def validate_record(record: dict, card: dict) -> None:
 def metadata_for(record: dict, card: dict, slot: int) -> dict:
     return {
         'registrations': record.get('registrations', []),
+        'horseTokens': record.get('horseTokens', []),
+        'registrationSnapshotMs': record.get('registrationSnapshotMs', 0),
         'slot': slot,
         'intervalMinutes': 15,
         'file': f'races/{slot}.json.gz',
@@ -280,7 +283,7 @@ def public_registration_summary(entries: list[dict], catalog: dict,
         final = False
     return {
         'version': 1,
-        'registeredCount': len(entries),
+        'registeredCount': registered_horses.unique_horse_count(entries),
         'asOfMs': as_of_ms,
         'nextSlot': next_slot,
         'nextCandidateCount': candidate_count,
@@ -427,6 +430,8 @@ async def main() -> None:
                     traceback.print_exc()
                     print('WARNING: registered roster failed; retrying established COM field.',flush=True)
                     record = await record_in_browser(card,[])
+            if record.get('registrations') and registered_at_ms is not None:
+                record['registrationSnapshotMs'] = registered_at_ms
             print('Recording finished:',record.get('durationMs'),'ms',len(record.get('results',[])),'horses', flush=True)
             print('Remaining records:',publish_record(record,card,slot,now_ms,
                   registered,catalog,registered_at_ms), flush=True)
