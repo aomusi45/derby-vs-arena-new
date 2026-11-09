@@ -1,6 +1,12 @@
 name: Official VS G1 race cycle
 
 on:
+  # Start the first regular recording automatically when this workflow is installed.
+  # Published race-data commits do not match this path and cannot loop.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/vs-race-cycle.yml'
   workflow_dispatch:
   schedule:
     # 7 minutes before each 10-minute boundary, UTC minutes = JST minutes.
