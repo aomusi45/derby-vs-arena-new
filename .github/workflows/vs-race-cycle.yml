@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/vs-race-cycle.yml'
       - 'tools/scheduled_vs.py'
+      - 'tools/push_recorded_races.py'
       - 'site.js'
   workflow_dispatch:
   schedule:
@@ -50,14 +51,7 @@ jobs:
       - name: Run original DBF VS race and record all horse motion
         run: python tools/scheduled_vs.py
       - name: Commit only recorded races and 24h manifest
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A race_playlist.json races/
-          if ! git diff --cached --quiet; then
-            git commit -m 'Official VS scheduled G1 record and 24h retention'
-            git push origin HEAD:main
-          fi
+        run: python tools/push_recorded_races.py
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Stage site files only
