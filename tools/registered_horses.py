@@ -70,6 +70,12 @@ def normalize(row: dict) -> dict:
     if (not isinstance(source, dict) or not isinstance(source.get('name'), str)
             or not 1 <= len(source['name']) <= 60 or source.get('name') != row.get('horseName')):
         raise ValueError('馬名が不正です')
+    owner_name = row.get('ownerName', '')
+    # Legacy entries have no public owner name. Never expose ownerUid as a fallback.
+    if (not isinstance(owner_name, str) or len(owner_name)>24 or
+            any(ord(ch)<32 or ord(ch)==127 for ch in owner_name)):
+        raise ValueError('オーナー名が不正です')
+    owner_name = owner_name.strip()
     if source.get('sex') not in ('牡','牝','セ') or source.get('tactic') not in ('逃げ','先行','差し','追込'):
         raise ValueError('性別または脚質が不正です')
     if source.get('growth') not in ('持続','早熟','普通','晩成'):
@@ -98,7 +104,9 @@ def normalize(row: dict) -> dict:
     submitted_at = row.get('updatedAt', '')
     ident = registration_id(owner, horse_id, submitted_at)
     return {'registrationId': ident, 'horseToken': horse_token(horse_id, runner),
-            'horseId': horse_id, 'legacyId': legacy_registration_id(owner, horse_id), 'runner': runner, 'updatedAt': submitted_at, 'ownerUid': owner}
+            'horseId': horse_id, 'legacyId': legacy_registration_id(owner, horse_id),
+            'runner': runner, 'updatedAt': submitted_at, 'ownerUid': owner,
+            'ownerName': owner_name}
 
 
 def _firestore_value(value: dict):
