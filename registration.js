@@ -7,7 +7,10 @@
   const file=$('vs-entry-file'),submit=$('vs-entry-submit'),message=$('vs-entry-message');
   const preview=$('vs-entry-preview'),loginStatus=$('vs-entry-login-status');
   const google=$('vs-entry-google'),guest=$('vs-entry-guest');
-  if(!file||!submit||!message||!preview||!loginStatus||!google||!guest)return;
+  const ownerInput=$('vs-entry-ownername');
+  if(!file||!submit||!message||!preview||!loginStatus||!google||!guest||!ownerInput)return;
+  const cleanOwner=value=>typeof value==='string' ? value.trim().replace(/[\u0000-\u001f\u007f]/g,'') : '';
+  const validOwner=value=>value.length>=1 && [...value].length<=24 && !/[\u0000-\u001f\u007f]/.test(value);
   const cfg=window.VS_FIREBASE_CONFIG;
   let auth=null,db=null, sdk=null,chosen=null,busy=false,ready=false;
   const say=s=>{message.textContent=s;};
@@ -156,7 +159,8 @@
     if(auth?.currentUser?.uid!==user.uid)return;
     ownRegistration=docData;ownRegistrationId=null;
     if(docData?.horseName)lastRegistrationName=String(docData.horseName);
-    renderPublicStatus();
+    if(docData?.ownerName && !ownerInput.value)ownerInput.value=cleanOwner(docData.ownerName);
+    updateSubmit();renderPublicStatus();
     if(docData?.horseId){
       try{
         const id=await hashRegisteredHorse(user.uid,docData.horseId,docData.updatedAt);
@@ -211,9 +215,17 @@
       going:Object.fromEntries(['良','稍重','重','不良'].map(k=>[k,num(going[k],100,0,200)]))
     };
     if(runner.aptMin>runner.aptMax)throw Error('距離適性の範囲が不正です。');
-    return {horseId,name,runner};
+    // The current DBF game can embed an owner's public name in its VS JSON.
+    // Older exports have none; the player can enter a public name separately.
+    const ownerCandidates=[snapshot.ownerName,snapshot.playerName,snapshot.owner,
+      snapshot.owner?.name,snapshot.player?.name,snapshot.horse?.ownerName,
+      snapshot.horse?.owner,snapshot.horse?.owner?.name,
+      snapshot.profile?.ownerName,snapshot.farm?.ownerName];
+    const jsonOwner=ownerCandidates.map(cleanOwner).find(validOwner)||'';
+    return {horseId,name,runner,jsonOwner};
   }
-  const updateSubmit=()=>{submit.disabled=busy||!ready||!chosen||!auth?.currentUser;};
+  const updateSubmit=()=>{submit.disabled=busy||!ready||!chosen||!auth?.currentUser||!validOwner(cleanOwner(ownerInput.value));};
+  ownerInput.addEventListener('input',updateSubmit);
   async function init(){
     if(!cfg||cfg.projectId!=='derby-vs-arena'||!cfg.apiKey){
       say('Firebaseの公開設定が見つかりません。登録機能は停止中です。');return;
@@ -238,6 +250,7 @@
         if(auth.currentUser?.uid!==user.uid)return;
         if(snap.exists()){
           say('現在の登録馬：'+String(snap.data().horseName||'不明')+'。1回出走後に登録解除されます。別の馬で上書き登録できます。');
+          if(snap.data().ownerName && !ownerInput.value)ownerInput.value=cleanOwner(snap.data().ownerName);
           await updateOwnFromDocument(user,snap.data());
         }else{
           say('登録受付中。ゲームの対戦馬JSONを選んでください。');
@@ -282,6 +295,11 @@
     }
     try{
       chosen=normalize(JSON.parse(await f.text()));
+      if(chosen.jsonOwner)ownerInput.value=chosen.jsonOwner;
+      else if(!ownerInput.value && auth?.currentUser?.displayName){
+        const publicName=cleanOwner(auth.currentUser.displayName);
+        if(validOwner(publicName))ownerInput.value=publicName;
+      }
       preview.textContent='登録予定：'+chosen.name+' ／ '+chosen.runner.age+'歳 ／ 装備反映後の7能力';
       say(auth?.currentUser?'「この馬を公式VSに登録する」を押してください。':'ログインしてから登録してください。');
     }catch(err){say('読み込めません：'+String(err.message||err));}
@@ -289,17 +307,19 @@
   });
   submit.addEventListener('click',async()=>{
     if(!ready||!chosen||!auth.currentUser||busy)return;
+    const ownerName=cleanOwner(ownerInput.value);
+    if(!validOwner(ownerName)){say('公開するオーナー名を1〜24文字で入力してください。');return;}
     busy=true;updateSubmit();say('Firebaseに登録情報を保存中…');
     try{
       const user=auth.currentUser;
-      const payload={ownerUid:user.uid,horseId:chosen.horseId,horseName:chosen.name,
+      const payload={ownerUid:user.uid,ownerName,horseId:chosen.horseId,horseName:chosen.name,
         roster:chosen.runner,updatedAt:sdk.serverTimestamp()};
       await sdk.setDoc(sdk.doc(db,'vs_entries',user.uid),payload);
       // Server-confirmed write, then read to verify the saved horse.
       const result=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
       if(!result.exists()||result.data().horseId!==chosen.horseId)
         throw Error('登録情報を読み戻せませんでした。');
-      say('登録完了：'+chosen.name+'。1回出走すると登録が解除されます。再出走するにはもう一度登録してください。');
+      say('登録完了：'+chosen.name+'（オーナー：'+ownerName+'）。1回出走すると登録が解除されます。再出走するにはもう一度登録してください。');
       preview.textContent='※ 1登録1出走・最大18頭。同じ馬が同じGⅠに出走できるのは日本時間で1日1回まで。';
       await updateOwnFromDocument(user,result.data());
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
