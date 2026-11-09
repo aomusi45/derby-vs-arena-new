@@ -8,11 +8,15 @@ on:
     paths:
       - '.github/workflows/vs-race-cycle.yml'
       - 'tools/scheduled_vs.py'
+      - 'site.js'
   workflow_dispatch:
   schedule:
-    # 6 minutes before each 15-minute boundary, UTC minutes = JST minutes.
+    # 7 minutes before each 15-minute boundary, UTC minutes = JST minutes.
     # GitHub can delay or skip scheduled runs; this is not a hard real-time service.
-    - cron: '9,24,39,54 * * * *'
+    - cron: '8,23,38,53 * * * *'
+    # Redundant preparation trigger: retries/skipped schedule events cannot
+    # produce duplicate races because the recorder checks existing slot files.
+    - cron: '6,21,36,51 * * * *'
 
 permissions:
   contents: write
@@ -26,7 +30,7 @@ concurrency:
 jobs:
   record-and-publish:
     runs-on: ubuntu-24.04
-    timeout-minutes: 9
+    timeout-minutes: 14
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
