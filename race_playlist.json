@@ -2,6 +2,164 @@
   "version": 2,
   "records": [
     {
+      "slot": 1993577,
+      "intervalMinutes": 15,
+      "file": "races/1993577.json.gz",
+      "raceId": "dfvs-mw93s5pf-xbgg546n",
+      "name": "ヴィクトリアマイル",
+      "venue": "東京",
+      "distance": 1600,
+      "month": 5,
+      "durationMs": 94825,
+      "firstPrizeYen": 150000000,
+      "results": [
+        {
+          "place": 1,
+          "no": 7,
+          "name": "グランアレグリラ",
+          "timeSeconds": 88.21484706320497,
+          "margin": "―",
+          "prizeYen": 150000000
+        },
+        {
+          "place": 2,
+          "no": 1,
+          "name": "ブエナビスター",
+          "timeSeconds": 88.25549790736115,
+          "margin": "クビ",
+          "prizeYen": 60000000
+        },
+        {
+          "place": 3,
+          "no": 3,
+          "name": "ウオッカナ",
+          "timeSeconds": 88.77866598381868,
+          "margin": "4 1/2馬身",
+          "prizeYen": 37500000
+        },
+        {
+          "place": 4,
+          "no": 5,
+          "name": "ダイワスカーレッタ",
+          "timeSeconds": 89.28431204809486,
+          "margin": "4 1/4馬身",
+          "prizeYen": 22500000
+        },
+        {
+          "place": 5,
+          "no": 11,
+          "name": "ノースフライデー",
+          "timeSeconds": 89.87460589699775,
+          "margin": "4 3/4馬身",
+          "prizeYen": 15000000
+        },
+        {
+          "place": 6,
+          "no": 14,
+          "name": "マルセリーヌ",
+          "timeSeconds": 90.09368464770021,
+          "margin": "1 3/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 7,
+          "no": 15,
+          "name": "ラッキーライラッキ",
+          "timeSeconds": 90.90295998631012,
+          "margin": "6 1/2馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 8,
+          "no": 13,
+          "name": "エアグルービー",
+          "timeSeconds": 91.0043730253937,
+          "margin": "3/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 9,
+          "no": 17,
+          "name": "アスコリピチェーネ",
+          "timeSeconds": 91.14677996074933,
+          "margin": "1馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 10,
+          "no": 2,
+          "name": "リスグラシュガー",
+          "timeSeconds": 91.18419776948373,
+          "margin": "クビ",
+          "prizeYen": 0
+        },
+        {
+          "place": 11,
+          "no": 6,
+          "name": "ソングライオン",
+          "timeSeconds": 91.29714888516935,
+          "margin": "1馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 12,
+          "no": 4,
+          "name": "メジロドーベリー",
+          "timeSeconds": 91.52963491853096,
+          "margin": "1 3/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 13,
+          "no": 9,
+          "name": "アユサンド",
+          "timeSeconds": 91.7980415153916,
+          "margin": "2馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 14,
+          "no": 16,
+          "name": "クロノジェネシア",
+          "timeSeconds": 91.85334140100318,
+          "margin": "クビ",
+          "prizeYen": 0
+        },
+        {
+          "place": 15,
+          "no": 8,
+          "name": "ダブルハートバンド",
+          "timeSeconds": 92.4384860506492,
+          "margin": "4 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 16,
+          "no": 10,
+          "name": "ストレイトガールズ",
+          "timeSeconds": 92.75361632117908,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 17,
+          "no": 12,
+          "name": "ファレノプシズ",
+          "timeSeconds": 93.21698157723726,
+          "margin": "3 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 18,
+          "no": 18,
+          "name": "ニシノフラワン",
+          "timeSeconds": 94.8151442553864,
+          "margin": "大差",
+          "prizeYen": 0
+        }
+      ]
+    },
+    {
       "slot": 2990354,
       "file": "races/2990354.json.gz",
       "raceId": "dfvs-mw8zi659-3jp6kbct",
