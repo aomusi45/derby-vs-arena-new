@@ -10,9 +10,9 @@ on:
       - 'tools/scheduled_vs.py'
   workflow_dispatch:
   schedule:
-    # 7 minutes before each 15-minute boundary, UTC minutes = JST minutes.
+    # 6 minutes before each 15-minute boundary, UTC minutes = JST minutes.
     # GitHub can delay or skip scheduled runs; this is not a hard real-time service.
-    - cron: '8,23,38,53 * * * *'
+    - cron: '9,24,39,54 * * * *'
 
 permissions:
   contents: write
