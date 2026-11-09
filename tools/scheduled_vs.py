@@ -58,7 +58,19 @@ def build_game(card: dict) -> str:
     original = ''.join(p.read_text(encoding='utf-8') for p in paths)
     name = json.dumps(card['name'], ensure_ascii=False)
     venue = json.dumps(card['venue'], ensure_ascii=False)
+    # The newspaper-first boot calls chooseMonthlyRace(), which can choose a
+    # different race from the scheduled card. Select the scheduled G1 explicitly
+    # before prepareNewRace(), otherwise the VS race may run at the wrong distance.
+    scheduled_card = (
+        "const initialCard=monthlyRaceCards(GRADED_MONTH_CORRECTIONS[" + name + "]||" +
+        str(int(card['month'])) + ").find(r=>"
+        "r.name===" + name + "&&r.venue===" + venue +
+        "&&r.distance===" + str(int(card['distance'])) +
+        "&&r.layout===" + json.dumps(card['layout'], ensure_ascii=False) +
+        "&&r.surface==='芝'&&r.grade==='GⅠ');"
+    )
     replacements = [
+        ('const initialCard=chooseMonthlyRace();', scheduled_card),
         (
             'let currentRace=GRADED_RACES_V78[0];',
             'let currentRace=GRADED_RACES_V78.find(r=>r.name==='+name+')||GRADED_RACES_V78[0];'
