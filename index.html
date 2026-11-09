@@ -43,6 +43,11 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
 .vs-result-item .vs-watch-btn{font-size:12px;min-height:36px;padding:7px 12px}
 #vs-ranking-description{color:#b5c7bf;font-size:12px;margin:6px 0 14px}
 @media(max-width:520px){.vs-ranking-grid{font-size:12px}.vs-ranking-grid th,.vs-ranking-grid td{padding:9px 4px}}
+  #vs-entry-file{display:block;width:100%;padding:10px 0;color:#f1e1b6;font-size:13px}
+  .vs-entry-label{display:block;margin-top:13px;color:#ffe6ae;font-size:13px}
+  #vs-entry-submit{margin:12px 0;width:100%}
+  #vs-entry-preview{color:#f2db9c!important;font-weight:700}
+  #vs-entry-message{white-space:pre-line}
   </style>
 </head>
 <body>
@@ -76,7 +81,7 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
         <div>
           <div class="guide-label">RACE CONCIERGE</div>
           <h2>秘書からのご案内</h2>
-          <p>ようこそ、公式VSレース会場へ♡<br>ただいま開催準備中です。出走受付が始まるまで、もう少しお待ちくださいね。</p>
+          <p>ようこそ、公式VSレース会場へ♡<br>ゲームの対戦馬JSONを登録して、公式VSレースに参加できます。</p>
         </div>
       </section>
 
@@ -93,8 +98,18 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
         <section class="panel">
           <div class="num">02 / ENTRY</div>
           <h2>出走馬登録</h2>
-          <span class="status">受付準備中</span>
-          <p>出走馬の登録受付は、まだ始まっていません。</p>
+          <span class="status" id="vs-entry-state">登録馬受付</span>
+          <p>ゲームの「対戦馬一覧」から「この馬のJSONを書き出す」を押し、そのファイルを選んでください。登録は1アカウントにつき1頭です。</p>
+          <div class="vs-entry-auth" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
+            <button class="vs-watch-btn" id="vs-entry-google" type="button">Googleでログイン</button>
+            <button class="vs-watch-btn" id="vs-entry-guest" type="button">ゲストでログイン</button>
+          </div>
+          <p class="small" id="vs-entry-login-status" aria-live="polite">未ログイン</p>
+          <label for="vs-entry-file" class="vs-entry-label">対戦馬JSONを選ぶ</label>
+          <input id="vs-entry-file" type="file" accept=".json,application/json">
+          <p id="vs-entry-preview" aria-live="polite"></p>
+          <button class="vs-watch-btn" id="vs-entry-submit" type="button" disabled>この馬を公式VSに登録する</button>
+          <p id="vs-entry-message" role="status" aria-live="polite">登録受付サービスの接続状況を確認しています。</p>
         </section>
         <section class="panel">
           <div class="num">03 / RESULTS</div>
@@ -128,5 +143,7 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
   </div>
 
 <script src="site.js" defer></script>
+<script src="firebase-config.js" defer></script>
+<script src="registration.js" defer></script>
 </body>
 </html>
