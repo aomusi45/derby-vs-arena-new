@@ -241,13 +241,26 @@ def publish_record(record: dict | None, card: dict | None, slot: int, now_ms: in
     return len(records), len(list((ROOT/'races').glob('*.json.gz')))
 
 
+def scheduled_slot(now_ms: int) -> int:
+    """For the :08/:23/:38/:53 cron, do not skip a race if GitHub starts late.
+
+    Before the :15 boundary, record the upcoming race. If the runner starts
+    after that boundary (up to the next scheduled preparation), record the
+    still-current race rather than skipping it for the following slot.
+    This never creates two slots in one run.
+    """
+    current = now_ms // SLOT_MS
+    elapsed = now_ms % SLOT_MS
+    return current + (1 if elapsed >= 8 * 60_000 else 0)
+
+
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--slot', type=int, help='test/manual exact epoch 15-minute slot')
     parser.add_argument('--record-file', type=Path, help='test-only: use genuine saved record JSON instead of Chromium')
     args = parser.parse_args()
     now_ms = int(time.time()*1000)
-    slot = args.slot if args.slot is not None else now_ms // SLOT_MS + 1
+    slot = args.slot if args.slot is not None else scheduled_slot(now_ms)
     catalog = load_catalog()
     card = cycle_card(slot, catalog)
     path = ROOT/'races'/f'{slot}.json.gz'
