@@ -130,6 +130,11 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
           <p class="small" id="vs-entry-login-status" aria-live="polite">未ログイン</p>
           <label for="vs-entry-file" class="vs-entry-label">対戦馬JSONを選ぶ</label>
           <input id="vs-entry-file" type="file" accept=".json,application/json">
+          <label for="vs-entry-ownername" class="vs-entry-label">オーナー名（賞金ランキングに公開）</label>
+          <input id="vs-entry-ownername" type="text" maxlength="24" autocomplete="nickname"
+                 placeholder="例：山田牧場（24文字以内）"
+                 style="width:100%;box-sizing:border-box;min-height:42px;padding:9px 11px;border-radius:7px;border:1px solid #b89551;background:#102523;color:#ffe6ae">
+          <p class="small">対戦馬JSONにオーナー名が含まれる場合は自動入力します。ランキングに表示する公開名です。</p>
           <p id="vs-entry-preview" aria-live="polite"></p>
           <button class="vs-watch-btn" id="vs-entry-submit" type="button" disabled>この馬を公式VSに登録する</button>
           <p id="vs-entry-message" role="status" aria-live="polite">登録受付サービスの接続状況を確認しています。</p>
@@ -166,6 +171,7 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
   </div>
 
 <script src="site.js" defer></script>
+<script src="owner-ranking.js" defer></script>
 <script src="firebase-config.js" defer></script>
 <script src="registration.js" defer></script>
 </body>
