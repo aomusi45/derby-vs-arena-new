@@ -27,19 +27,29 @@
 body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{display:none!important}
 @media(max-width:720px){#vs-watchroom-frame{height:calc(100dvh - 175px);min-height:480px}}
 
-/* Saved DBF record preview: scoped to the race panel only. */
-.vs-local-source{margin-top:18px;padding-top:16px;border-top:1px solid #ae905155}
-.vs-local-source label{display:block;color:#f2d993;font-weight:750;font-size:13px;margin-bottom:8px}
-.vs-local-source input{display:block;max-width:100%;width:100%;font:inherit;font-size:13px;color:#e0e8df;margin:5px 0 10px}
-.vs-local-source .vs-local-note{font-size:12px;color:#d1d8ce;line-height:1.6;margin:8px 0}
-.vs-local-source .vs-watch-btn{margin-top:10px}
+/* Official VS results / daily prize rankings only. */
+#vs-ranking-panel{margin-bottom:30px;min-height:0}
+#vs-ranking-panel h2{color:#f8e5ad;margin:12px 0}
+.vs-ranking-grid{width:100%;border-collapse:collapse;font-size:13px}
+.vs-ranking-grid th,.vs-ranking-grid td{padding:10px 7px;text-align:left;border-bottom:1px solid #b8955144}
+.vs-ranking-grid th{font-weight:500;color:#d0b67b}.vs-ranking-grid td:last-child,.vs-ranking-grid th:last-child{text-align:right}
+.vs-ranking-grid td:nth-child(1){color:#edcf82;font-weight:800;width:55px}
+.vs-ranking-grid td:last-child{font-variant-numeric:tabular-nums}
+#vs-result-list{max-height:340px;overflow-y:auto;margin-top:11px}
+.vs-result-item{padding:11px 0;border-top:1px solid #a78f5755}
+.vs-result-item:first-child{border-top:0}
+.vs-result-title{color:#f5db98;font-size:13px;font-weight:700}
+.vs-result-info{color:#b5c7bf;font-size:12px;margin:4px 0 8px}
+.vs-result-item .vs-watch-btn{font-size:12px;min-height:36px;padding:7px 12px}
+#vs-ranking-description{color:#b5c7bf;font-size:12px;margin:6px 0 14px}
+@media(max-width:520px){.vs-ranking-grid{font-size:12px}.vs-ranking-grid th,.vs-ranking-grid td{padding:9px 4px}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="top">
       <div class="brand">◆ DERBY FANTASY ◆</div>
-      <div class="live">VS ARENA · 準備中</div>
+      <div class="live" id="vs-header-status">VS ARENA · 準備中</div>
     </div>
 
     <header class="hero">
@@ -78,12 +88,6 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
           <p class="race-name" id="live-race-name">レース記録を確認しています。</p>
           <p id="live-race-info" aria-live="polite">10分ごとの開催枠を確認中です。</p>
           <button type="button" class="vs-watch-btn" id="live-watch-button" disabled>▶ 観戦する</button>
-          <div class="vs-local-source" id="vs-local-source">
-            <label for="vs-local-file">ゲームで保存したレース記録を読み込んで観戦</label>
-            <input type="file" id="vs-local-file" accept=".json,application/json">
-            <p id="vs-local-message" class="vs-local-note" role="status" aria-live="polite">記録JSONを選ぶと、この端末で新聞とレースを観戦できます。ほかの観客にはまだ配信されません。</p>
-            <button type="button" class="vs-watch-btn" id="vs-local-watch-button" disabled>▶ 読み込んだレースを観戦</button>
-          </div>
           <p class="race-footnote" id="live-race-next"></p>
         </section>
         <section class="panel">
@@ -95,10 +99,16 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
         <section class="panel">
           <div class="num">03 / RESULTS</div>
           <h2>レース結果</h2>
-          <span class="status">公開準備中</span>
-          <p>レース結果の公開は準備中です。</p>
+          <span class="status" id="vs-result-status">開催記録なし</span>
+          <div id="vs-result-list" aria-live="polite"><p>直近24時間のレース記録を確認しています。</p></div>
         </section>
       </div>
+      <section class="panel" id="vs-ranking-panel" aria-label="当日獲得賞金ランキング">
+        <div class="num">04 / DAILY PRIZE RANKING</div>
+        <h2>本日の獲得賞金 TOP10</h2>
+        <p id="vs-ranking-description">日本時間 0:00～23:59／レース終了ごとに更新</p>
+        <table class="vs-ranking-grid"><thead><tr><th>順位</th><th>馬名</th><th>獲得賞金</th></tr></thead><tbody id="vs-ranking-body"><tr><td colspan="3">集計中です。</td></tr></tbody></table>
+      </section>
     </main>
 
 
@@ -113,232 +123,10 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
     </section>
     <footer class="footer">
       DERBY FANTASY © VS ARENA
-      <div class="small">※ 完成済みのレース記録が公開されている開催枠のみ観戦できます。新しいレースの自動生成・出走登録は未接続です。</div>
+      <div class="small">※ 観戦は完成した記録が配信されているレースのみ可能です。記録がない時間帯は開催準備中と表示します。</div>
     </footer>
   </div>
 
-<script>
-(()=>{
- 'use strict';
- const SLOT_MS=600000, PAPER_MS=30000;
- const $=id=>document.getElementById(id);
- const state={playlist:[],playlistError:'',slot:-1,race:null,record:null,serial:0,watchSerial:0,enginePromise:null};
- let watchMode=new URLSearchParams(location.search).get('watch')==='live';
- let localPreview=false,localRecord=null,previewStart=0;
- const slotAt=now=>Math.floor(now/SLOT_MS);
- const two=n=>String(n).padStart(2,'0');
- const clock=ms=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms));
- const slotLabel=slot=>clock(slot*SLOT_MS)+'～'+clock((slot+1)*SLOT_MS);
- const countdown=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return two(Math.floor(s/60))+':'+two(s%60)};
- const safeFile=value=>typeof value==='string' && /^(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.json$/.test(value) && !value.includes('..') && value.length<=256;
- const recordCheck=obj=>!!obj && obj.schema==='derby-fantasy-official-vs-replay' && obj.version===2 && obj.status==='complete' &&
-   typeof obj.race?.name==='string' && obj.race.name.length<=150 &&
-   Number.isFinite(obj.durationMs) && obj.durationMs>0 && obj.durationMs<=3600000 &&
-   obj.newspaper && typeof obj.newspaper.heading==='string' && typeof obj.newspaper.entries==='string' &&
-   Array.isArray(obj.field) && obj.field.length>=1 && obj.field.length<=18 &&
-   Array.isArray(obj.frames) && obj.frames.length>=2 && Array.isArray(obj.results) && obj.results.length===obj.field.length;
- function showAvailability(){
-   const now=Date.now(),slot=slotAt(now),start=slot*SLOT_MS,end=start+SLOT_MS;
-   const btn=$('live-watch-button');
-   $('live-race-next').textContent='開催枠（日本時間）：'+slotLabel(slot)+' ／ 次の切替まで '+countdown(end-now);
-   if(!state.record){
-     $('live-race-status').textContent='開催準備中';
-     $('live-race-name').textContent='配信できるレース記録がありません';
-     $('live-race-info').textContent=state.playlistError||'ゲームで保存した完走記録をサイトへ配置すると、10分ごとに自動で切り替わります。';
-     btn.disabled=true;return;
-   }
-   const r=state.record,finished=now-start>=PAPER_MS+r.durationMs;
-   $('live-race-status').textContent=finished?'レース終了・再生可能':'開催中';
-   $('live-race-name').textContent=r.race.name;
-   $('live-race-info').textContent=(r.race.venue||'')+' '+(r.race.surface||'芝')+r.race.distance+'m ／ '+(r.race.going||'')+
-     (finished?' ／ 記録済みレースを観戦できます':now-start<PAPER_MS?' ／ 競馬新聞を表示中':' ／ 保存済みレースを放映中');
-   btn.disabled=false;
- }
- async function fetchJSON(path){
-   const response=await fetch(path,{cache:'no-store'});
-   if(!response.ok)throw Error('記録ファイルが取得できません（HTTP '+response.status+'）。');
-   return response.json();
- }
- async function readPlaylist(){
-   try{
-     const playlist=await fetchJSON('./race_playlist.json');
-     if(playlist?.version!==1||!Array.isArray(playlist.races)||playlist.races.length>1000 ||
-        !playlist.races.every(row=>row && safeFile(row.file)))throw Error('レース一覧の形式が不正です。');
-     state.playlist=playlist.races;
-     state.playlistError=playlist.races.length?'':'保存されたレースの登録がまだありません。';
-   }catch(e){state.playlistError='レース一覧が未配置か取得できません。';state.playlist=[];}
- }
- async function loadSlot(slot){
-   const mySerial=++state.serial;
-   state.slot=slot;state.record=null;state.race=null;
-   showAvailability();
-   if(!state.playlist.length){if(watchMode&&!localPreview)displayWatchError(state.playlistError);return;}
-   // Every observer chooses the same recorded race for the same 10-minute slot.
-   const index=((slot%state.playlist.length)+state.playlist.length)%state.playlist.length;
-   const race=state.playlist[index];
-   try{
-     const record=await fetchJSON('./'+race.file);
-     if(mySerial!==state.serial)return;
-     if(!recordCheck(record))throw Error('保存済みの競馬新聞・完走記録の形式が正しくありません。');
-     state.race=race;state.record=record;showAvailability();
-     if(watchMode&&!localPreview)startWatch(slot,record);
-   }catch(e){
-     if(mySerial!==state.serial)return;
-     state.playlistError='レース記録の読み込みに失敗：'+(e.message||e);
-     showAvailability();if(watchMode&&!localPreview)displayWatchError(state.playlistError);
-   }
- }
- function displayWatchError(message){
-   $('vs-watchroom-state').textContent='開催中のレースは観戦できません。';
-   $('vs-watchroom-loading').textContent=message;
-   $('vs-watchroom-loading').hidden=false;
-   $('vs-watchroom-frame').hidden=true;
- }
- function prepareEngineHTML(html){
-   const hook='window.DFOfficialVSProduction.start();';
-   const anchor='window.DFOfficialVSProduction=dfOfficialVSProduction;';
-   if(html.split(hook).length!==2||html.split(anchor).length!==2)
-     throw Error('ゲームの記録・再生エンジンが対応版ではありません。');
-   // Spectator mode only: suppress creating a NEW random race during boot.
-   // The engine's racing physics, 3D renderer and saved-record playback are unchanged.
-   html=html.replace(hook,'if(!window.__dfOfficialSpectator)'+hook);
-   const bridge=`\nwindow.DFOfficialViewerBridge=Object.freeze({
-     prepare(record){
-       const result=window.DFOfficialVSReplay.play(record);
-       if(!result?.ok)throw Error('保存したレースを準備できませんでした。');
-       document.getElementById('newspaperRaceStart').disabled=true;
-       dfV2SetGameScreenNow('newspaper');
-       if(document.body.dataset.gameScreen!=='newspaper')throw Error('競馬新聞を開けませんでした。');
-     },
-     playAt(offsetMs){
-       dfV2SetGameScreenNow('race-view');
-       if(document.body.dataset.gameScreen!=='race-view')throw Error('レース画面を開けませんでした。');
-       document.getElementById('start').click();
-       if(race!=='running')throw Error('記録映像の再生に失敗しました。');
-       if(offsetMs>0&&!window.DFOfficialVSReplay.seek(offsetMs))throw Error('再生位置を設定できませんでした。');
-     }
-   });\n`;
-   html=html.replace(anchor,anchor+bridge);
-   const shim=`<script>(function(){window.__dfOfficialSpectator=true;
-     const values=new Map();const store={getItem(k){k=String(k);return values.has(k)?values.get(k):null},
-     setItem(k,v){values.set(String(k),String(v))},removeItem(k){values.delete(String(k))},
-     clear(){values.clear()},key(i){return [...values.keys()][i]??null},get length(){return values.size}};
-     Object.defineProperty(window,'localStorage',{configurable:true,value:store});
-   })();<\/script>`;
-   return html.replace(/<head[^>]*>/i,tag=>tag+shim);
- }
- async function loadEngine(){
-   if(!state.enginePromise)state.enginePromise=Promise.all(['vs_replay_engine_part1.txt','vs_replay_engine_part2.txt']
-     .map(name=>fetch('./'+name).then(r=>{if(!r.ok)throw Error('レースエンジンの'+name+'がありません。');return r.text();})))
-     .then(parts=>prepareEngineHTML(parts.join(''))).catch(e=>{state.enginePromise=null;throw e;});
-   return state.enginePromise;
- }
- function loadFrame(html,serial){
-   return new Promise((resolve,reject)=>{
-     const frame=$('vs-watchroom-frame');
-     const timer=setTimeout(()=>{cleanup();reject(Error('ゲームエンジンの読み込みが時間切れです。'));},150000);
-     const cleanup=()=>{clearTimeout(timer);frame.removeEventListener('load',onload);frame.removeEventListener('error',onerror)};
-     const onload=()=>{cleanup();serial===state.watchSerial?resolve(frame.contentWindow):reject(Error('開催枠が切り替わりました。'))};
-     const onerror=()=>{cleanup();reject(Error('ゲームエンジンが起動できません。'))};
-     frame.addEventListener('load',onload);frame.addEventListener('error',onerror);
-     frame.srcdoc=html;
-   });
- }
- async function waitEngine(w,serial){
-   const start=performance.now();let booted=false;
-   while(serial===state.watchSerial){
-     if(w.__df47BootError)throw Error('3D起動エラー：'+w.__df47BootError);
-     if(!booted && typeof w.__df47Start3D==='function'){booted=true;w.__df47Start3D();}
-     if(w.__raceReady3D && w.DFOfficialViewerBridge)return;
-     if(performance.now()-start>120000)throw Error('3Dエンジンの準備が完了しませんでした。');
-     await new Promise(resolve=>setTimeout(resolve,300));
-   }
-   throw Error('開催枠が切り替わりました。');
- }
- async function startWatch(slot,record){
-   const serial=++state.watchSerial;
-   const frame=$('vs-watchroom-frame');frame.hidden=true;
-   $('vs-watchroom-loading').hidden=false;
-   $('vs-watchroom-loading').textContent='保存済みレースとDBFエンジンを準備中です。';
-   $('vs-watchroom-title').textContent='公式VS観戦：'+record.race.name;
-   try{
-     const html=await loadEngine();if(serial!==state.watchSerial)return;
-     const w=await loadFrame(html,serial);if(serial!==state.watchSerial)return;
-     await waitEngine(w,serial);if(serial!==state.watchSerial)return;
-     w.DFOfficialViewerBridge.prepare(record);
-     const startTime=localPreview?previewStart:slot*SLOT_MS;
-     const now=Date.now();
-     frame.hidden=false;$('vs-watchroom-loading').hidden=true;
-     const startVideo=()=>{
-       const offset=Date.now()-startTime-PAPER_MS;
-       w.DFOfficialViewerBridge.playAt(Math.max(0,Math.min(offset,record.durationMs)));
-       $('vs-watchroom-state').textContent=offset>=record.durationMs?'レース終了：保存済み映像を再生しています。':'開催中：全観客共通の記録映像を再生しています。';
-     };
-     if(now-startTime<PAPER_MS){
-       $('vs-watchroom-state').textContent='保存済み競馬新聞を表示中（発走まで '+countdown(startTime+PAPER_MS-now)+'）';
-       while(serial===state.watchSerial && (localPreview||slotAt(Date.now())===slot) && Date.now()<startTime+PAPER_MS){
-         $('vs-watchroom-state').textContent='保存済み競馬新聞を表示中（発走まで '+countdown(startTime+PAPER_MS-Date.now())+'）';
-         await new Promise(resolve=>setTimeout(resolve,200));
-       }
-       if(serial!==state.watchSerial||(!localPreview&&slotAt(Date.now())!==slot))return;
-       startVideo();
-     }else if(now-startTime>=PAPER_MS+record.durationMs){
-       // Race has already finished in this slot: replay the SAME record from the start.
-       $('vs-watchroom-state').textContent='この枠のレースは終了しました。保存済みレースを最初から再生します。';
-       w.DFOfficialViewerBridge.playAt(0);
-     }else startVideo();
-   }catch(e){if(serial===state.watchSerial)displayWatchError(String(e.message||e));}
- }
- async function refresh(){
-   const slot=slotAt(Date.now());
-   if(slot!==state.slot){
-     if(watchMode&&!localPreview){++state.watchSerial;
-       const frame=$('vs-watchroom-frame');frame.hidden=true;frame.removeAttribute('srcdoc');}
-     await readPlaylist();
-     if(slotAt(Date.now())!==slot)return refresh();
-     await loadSlot(slot);
-   }
-   showAvailability();
- }
- function openWatch(record,isLocal){
-   if(!record)return;
-   localPreview=!!isLocal;
-   previewStart=Date.now();
-   watchMode=true;
-   document.body.classList.add('vs-watch-view');
-   $('vs-watchroom').hidden=false;
-   if(!isLocal){
-     const url=new URL(location.href);url.searchParams.set('watch','live');history.replaceState(null,'',url);
-   }
-   startWatch(state.slot,record);
- }
- $('live-watch-button').addEventListener('click',()=>openWatch(state.record,false));
- $('vs-local-file').addEventListener('change',async event=>{
-   const file=event.target.files?.[0];
-   localRecord=null;
-   $('vs-local-watch-button').disabled=true;
-   if(!file){$('vs-local-message').textContent='記録JSONを選択してください。';return;}
-   try{
-     if(file.size>45000000)throw Error('レース記録は45MB以下のJSONにしてください。');
-     const parsed=JSON.parse(await file.text());
-     if(!recordCheck(parsed))throw Error('ゲームが保存した完走済み公式VSレース記録ではありません。');
-     localRecord=parsed;
-     $('vs-local-message').textContent='読み込み完了：'+parsed.race.name+'／'+parsed.results.length+'頭。観戦できます（この端末のみ）。';
-     $('vs-local-watch-button').disabled=false;
-   }catch(error){$('vs-local-message').textContent='読み込み失敗：'+String(error.message||error);}
- });
- $('vs-local-watch-button').addEventListener('click',()=>openWatch(localRecord,true));
- $('vs-watchroom-back').addEventListener('click',()=>{
-   ++state.watchSerial;
-   watchMode=false;localPreview=false;
-   const frame=$('vs-watchroom-frame');frame.hidden=true;frame.removeAttribute('srcdoc');
-   $('vs-watchroom').hidden=true;document.body.classList.remove('vs-watch-view');
-   const url=new URL(location.href);url.searchParams.delete('watch');history.replaceState(null,'',url);
- });
- if(watchMode){document.body.classList.add('vs-watch-view');$('vs-watchroom').hidden=false;}
- setInterval(()=>{refresh().catch(e=>{state.playlistError=String(e.message||e);showAvailability();});},1000);
- refresh().catch(e=>{state.playlistError=String(e.message||e);showAvailability();});
-})();
-</script>
+<script src="site.js" defer></script>
 </body>
 </html>
