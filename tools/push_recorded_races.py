@@ -91,9 +91,29 @@ def snapshot_generated() -> dict[int, tuple[dict, bytes]]:
     return generated
 
 
-def integrate(generated: dict[int, tuple[dict, bytes]], now_ms: int) -> tuple[int, int]:
-    """Merge generated slots with freshly fetched remote state; remote wins ties."""
-    current = load_manifest()
+def entry_summary_from(raw: dict) -> dict | None:
+    """Validate a public aggregate; never accept user details in the manifest."""
+    entry = raw.get('registrationSummary')
+    if not isinstance(entry, dict) or set(entry) != {
+            'version', 'registeredCount', 'asOfMs', 'nextSlot',
+            'nextCandidateCount', 'nextFinal'}:
+        return None
+    if (entry['version'] != 1 or type(entry['registeredCount']) is not int or
+            not 0 <= entry['registeredCount'] <= 150 or
+            type(entry['asOfMs']) is not int or entry['asOfMs'] < 1 or
+            type(entry['nextSlot']) is not int or entry['nextSlot'] < 1 or
+            type(entry['nextCandidateCount']) is not int or
+            not 0 <= entry['nextCandidateCount'] <= 18 or
+            type(entry['nextFinal']) is not bool):
+        return None
+    return entry
+
+
+def integrate(generated: dict[int, tuple[dict, bytes]], now_ms: int,
+              generated_summary: dict | None = None) -> tuple[int, int]:
+    """Merge generated slots and summary. Newest aggregate wins; remote wins race ties."""
+    current_raw = json.loads((ROOT / 'race_playlist.json').read_text(encoding='utf-8'))
+    current = manifest_rows(current_raw)
     records = {slot: row for slot, row in current.items() if not expired(row, now_ms)}
     added = 0
     for slot, (row, data) in generated.items():
@@ -116,8 +136,15 @@ def integrate(generated: dict[int, tuple[dict, bytes]], now_ms: int) -> tuple[in
     for path in race_dir.glob('*.json.gz'):
         if path.relative_to(ROOT).as_posix() not in keep:
             path.unlink()
-    if records != current:
-        manifest = {'version': 2, 'records': [records[k] for k in sorted(records)]}
+    manifest = {'version': 2, 'records': [records[k] for k in sorted(records)]}
+    remote_summary = entry_summary_from(current_raw)
+    winner = remote_summary
+    if generated_summary is not None and (remote_summary is None or
+            generated_summary['asOfMs'] > remote_summary['asOfMs']):
+        winner = generated_summary
+    if winner is not None:
+        manifest['registrationSummary'] = winner
+    if manifest != current_raw:
         (ROOT / 'race_playlist.json').write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     return added, len(records)
@@ -126,6 +153,9 @@ def integrate(generated: dict[int, tuple[dict, bytes]], now_ms: int) -> tuple[in
 def main() -> None:
     # Take the only snapshot before any hard reset of the temporary CI checkout.
     generated = snapshot_generated()
+    # Capture the aggregate BEFORE reset --hard clears runner-generated files.
+    summary_raw = json.loads((ROOT / 'race_playlist.json').read_text(encoding='utf-8'))
+    generated_summary = entry_summary_from(summary_raw)
     print(f'Race records to integrate: {len(generated)}', flush=True)
     git('config', 'user.name', 'github-actions[bot]')
     git('config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com')
@@ -136,7 +166,7 @@ def main() -> None:
         # reset the remote branch, nor use --force.
         git('reset', '--hard', 'origin/main')
         git('clean', '-fd', '--', 'races/')
-        added, count = integrate(generated, int(time.time() * 1000))
+        added, count = integrate(generated, int(time.time() * 1000), generated_summary)
         git('add', '-A', '--', 'race_playlist.json', 'races/')
         if git('diff', '--cached', '--quiet', check=False).returncode == 0:
             print(f'Published data already current ({count} records, {added} new).', flush=True)

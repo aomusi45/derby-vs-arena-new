@@ -260,7 +260,38 @@ def has_expired(row: dict, at_ms: int) -> bool:
     return completed + DAY_MS <= at_ms
 
 
-def publish_record(record: dict | None, card: dict | None, slot: int, now_ms: int) -> tuple[int, int]:
+def public_registration_summary(entries: list[dict], catalog: dict,
+                                records: list[dict], as_of_ms: int,
+                                published_at_ms: int | None = None) -> dict:
+    """Only publish aggregate counts. Never publish personal IDs or horse stats.
+
+    A recorded upcoming slot already has its final selected entrants; an
+    unrecorded slot has only candidates. Both are labelled explicitly.
+    """
+    next_slot = ((int(time.time() * 1000) if published_at_ms is None else published_at_ms) // SLOT_MS) + 1
+    card = cycle_card(next_slot, catalog)
+    published = next((row for row in records if row.get('intervalMinutes') == 15
+                      and row.get('slot') == next_slot), None)
+    if published is not None:
+        candidate_count = len(published.get('registrations', []))
+        final = True
+    else:
+        candidate_count = len(registered_horses.choose(entries, card, next_slot, records))
+        final = False
+    return {
+        'version': 1,
+        'registeredCount': len(entries),
+        'asOfMs': as_of_ms,
+        'nextSlot': next_slot,
+        'nextCandidateCount': candidate_count,
+        'nextFinal': final,
+    }
+
+
+def publish_record(record: dict | None, card: dict | None, slot: int, now_ms: int,
+                   registered: list[dict] | None = None,
+                   catalog: dict | None = None,
+                   registered_at_ms: int | None = None) -> tuple[int, int]:
     manifest_path = ROOT / 'race_playlist.json'
     current = json.loads(manifest_path.read_text(encoding='utf-8')) if manifest_path.exists() else {'version': 2,'records': []}
     if current.get('version') != 2:
@@ -284,6 +315,15 @@ def publish_record(record: dict | None, card: dict | None, slot: int, now_ms: in
     if len(records) > 160:
         raise ValueError('保存期間を超える記録が残っています')
     manifest = {'version': 2, 'records': records}
+    # Preserve the previous valid snapshot if Firebase is temporarily unreachable.
+    snapshot = current.get('registrationSummary')
+    if registered is not None and catalog is not None and registered_at_ms is not None:
+        try:
+            snapshot = public_registration_summary(registered, catalog, records, registered_at_ms)
+        except Exception as error:
+            print('WARNING: entry count summary unavailable:', repr(error), flush=True)
+    if isinstance(snapshot, dict):
+        manifest['registrationSummary'] = snapshot
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     keep = {row['file'] for row in records}
     for file in (ROOT/'races').glob('*.json.gz'):
@@ -345,25 +385,33 @@ async def main() -> None:
         if manifest.get('version') != 2:
             raise ValueError('開催記録一覧の版が不正です')
         slots = pending_record_slots(now_ms, catalog, manifest['records'])
+    # Reuse the existing one-time server-side Firestore read; never expose entries.
+    # A missing secret / failed read is "unknown", not falsely "zero registered".
+    registered = None
+    registered_at_ms = None
+    if os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON', '').strip():
+        try:
+            registered = registered_horses.load()
+            registered_at_ms = int(time.time() * 1000)
+            print('Official VS registered horses loaded:',len(registered),flush=True)
+        except Exception as error:
+            # Never stop the established race because the registration DB is down.
+            print('WARNING: registration database unavailable, COM-only race continues:',
+                  repr(error),flush=True)
+    else:
+        print('VS registration: secret missing; aggregate count unavailable.',flush=True)
     if not slots:
         print('Current race already recorded; checking 24-hour retention.', flush=True)
-        print('Remaining records:', publish_record(None,None,scheduled_slot(now_ms),now_ms), flush=True)
+        print('Remaining records:', publish_record(None,None,scheduled_slot(now_ms),now_ms,
+              registered,catalog,registered_at_ms), flush=True)
         return
     print('Recording slots (scheduled, missing):', slots, flush=True)
-    try:
-        registered = registered_horses.load()
-        print('Official VS registered horses loaded:',len(registered),flush=True)
-    except Exception as error:
-        # Never disable the working 15-minute COM race due to registration DB outage.
-        print('WARNING: registration database unavailable, COM-only race continues:',
-              repr(error),flush=True)
-        registered = []
     for i,slot in enumerate(slots):
         card = cycle_card(slot, catalog)
         print('G1 slot:', datetime.fromtimestamp(slot*SLOT_MS/1000,timezone.utc).isoformat(), card['name'], flush=True)
         try:
             existing = json.loads((ROOT/'race_playlist.json').read_text(encoding='utf-8'))['records']
-            entrants = registered_horses.choose(registered,card,slot,existing)
+            entrants = registered_horses.choose(registered or [],card,slot,existing)
             print('Registered entrants for',card['name'],':',len(entrants),flush=True)
             if args.record_file:
                 record = json.loads(args.record_file.read_text(encoding='utf-8'))
@@ -380,7 +428,8 @@ async def main() -> None:
                     print('WARNING: registered roster failed; retrying established COM field.',flush=True)
                     record = await record_in_browser(card,[])
             print('Recording finished:',record.get('durationMs'),'ms',len(record.get('results',[])),'horses', flush=True)
-            print('Remaining records:',publish_record(record,card,slot,now_ms), flush=True)
+            print('Remaining records:',publish_record(record,card,slot,now_ms,
+                  registered,catalog,registered_at_ms), flush=True)
         except Exception:
             if i==0 or args.slot is not None:
                 raise
