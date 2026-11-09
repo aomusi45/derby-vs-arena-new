@@ -24,7 +24,7 @@ from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SLOT_MS = 600_000
+SLOT_MS = 900_000
 DAY_MS = 86_400_000
 PAPER_MS = 30_000
 RECORD_NAME = 'derby-fantasy-official-vs-replay'
@@ -32,7 +32,7 @@ RECORD_NAME = 'derby-fantasy-official-vs-replay'
 
 def load_catalog() -> dict:
     data = json.loads((ROOT / 'race_catalog.json').read_text(encoding='utf-8'))
-    if data['version'] != 1 or data['intervalMinutes'] != 10 or not data['races']:
+    if data['version'] != 1 or data['intervalMinutes'] != 15 or not data['races']:
         raise ValueError('公式GⅠ番組表が不正です')
     return data
 
@@ -185,6 +185,7 @@ def validate_record(record: dict, card: dict) -> None:
 def metadata_for(record: dict, card: dict, slot: int) -> dict:
     return {
         'slot': slot,
+        'intervalMinutes': 15,
         'file': f'races/{slot}.json.gz',
         'raceId': record['raceId'],
         'name': card['name'], 'venue': card['venue'],
@@ -200,8 +201,11 @@ def metadata_for(record: dict, card: dict, slot: int) -> dict:
 
 
 def has_expired(row: dict, at_ms: int) -> bool:
-    # The 24-hour period begins after the published race finishes.
-    completed = row['slot']*SLOT_MS + PAPER_MS + row['durationMs']
+    # Preserve the 24-hour retention of existing 10-minute records after the changeover.
+    interval = int(row.get('intervalMinutes', 10))
+    if interval not in (10, 15):
+        raise ValueError('記録の開催間隔が不正です')
+    completed = row['slot'] * interval * 60_000 + PAPER_MS + row['durationMs']
     return completed + DAY_MS <= at_ms
 
 
@@ -239,7 +243,7 @@ def publish_record(record: dict | None, card: dict | None, slot: int, now_ms: in
 
 async def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--slot', type=int, help='test/manual exact epoch 10-minute slot')
+    parser.add_argument('--slot', type=int, help='test/manual exact epoch 15-minute slot')
     parser.add_argument('--record-file', type=Path, help='test-only: use genuine saved record JSON instead of Chromium')
     args = parser.parse_args()
     now_ms = int(time.time()*1000)
