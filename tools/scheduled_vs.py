@@ -266,24 +266,66 @@ def scheduled_slot(now_ms: int) -> int:
     return current + (1 if elapsed >= 8 * 60_000 else 0)
 
 
+def pending_record_slots(now_ms: int, catalog: dict, records: list[dict]) -> list[int]:
+    """Prioritize the next scheduled race, then backfill the newest missing slot.
+
+    Bound each invocation to two recordings so a long backlog cannot block the
+    next 15-minute GitHub Actions run. Only repair slots still within 24 hours.
+    A repeated/late workflow is idempotent and will not overwrite valid races.
+    """
+    primary = scheduled_slot(now_ms)
+    valid = {row['slot'] for row in records
+             if row.get('intervalMinutes') == 15 and
+             (ROOT / row['file']).is_file() and not has_expired(row, now_ms)}
+    anchor = int(datetime.fromisoformat(catalog['cycleStartsAt']).timestamp()*1000)//SLOT_MS
+    earliest = max(anchor, (now_ms-DAY_MS+SLOT_MS-1)//SLOT_MS)
+    current = now_ms//SLOT_MS
+    pending = []
+    if primary not in valid:
+        pending.append(primary)
+    # The current slot must not be treated as a missed slot if it is the primary.
+    for slot in range(current, earliest-1, -1):
+        if len(pending)>=2:
+            break
+        if slot!=primary and slot not in valid:
+            pending.append(slot)
+    return pending
+
+
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--slot', type=int, help='test/manual exact epoch 15-minute slot')
     parser.add_argument('--record-file', type=Path, help='test-only: use genuine saved record JSON instead of Chromium')
     args = parser.parse_args()
     now_ms = int(time.time()*1000)
-    slot = args.slot if args.slot is not None else scheduled_slot(now_ms)
     catalog = load_catalog()
-    card = cycle_card(slot, catalog)
-    path = ROOT/'races'/f'{slot}.json.gz'
-    print('Scheduled G1:', datetime.fromtimestamp(slot*SLOT_MS/1000,timezone.utc).isoformat(), card['name'])
-    if path.exists():
-        print('Record already generated for slot; checking retention only.')
-        print('Remaining records:',publish_record(None,None,slot,now_ms))
+    if args.slot is not None:
+        slots = [args.slot]
+    else:
+        manifest = json.loads((ROOT/'race_playlist.json').read_text(encoding='utf-8'))
+        if manifest.get('version') != 2:
+            raise ValueError('開催記録一覧の版が不正です')
+        slots = pending_record_slots(now_ms, catalog, manifest['records'])
+    if not slots:
+        print('Current race already recorded; checking 24-hour retention.', flush=True)
+        print('Remaining records:', publish_record(None,None,scheduled_slot(now_ms),now_ms), flush=True)
         return
-    record = json.loads(args.record_file.read_text(encoding='utf-8')) if args.record_file else await record_in_browser(card)
-    print('Recording finished:',record.get('durationMs'),'ms',len(record.get('results',[])),'horses')
-    print('Remaining records:',publish_record(record,card,slot,now_ms))
+    print('Recording slots (scheduled, missing):', slots, flush=True)
+    for i,slot in enumerate(slots):
+        card = cycle_card(slot, catalog)
+        print('G1 slot:', datetime.fromtimestamp(slot*SLOT_MS/1000,timezone.utc).isoformat(), card['name'], flush=True)
+        try:
+            record = json.loads(args.record_file.read_text(encoding='utf-8')) if args.record_file else await record_in_browser(card)
+            print('Recording finished:',record.get('durationMs'),'ms',len(record.get('results',[])),'horses', flush=True)
+            print('Remaining records:',publish_record(record,card,slot,now_ms), flush=True)
+        except Exception:
+            if i==0 or args.slot is not None:
+                raise
+            # A failed historical backfill must not suppress publication of the
+            # successfully recorded upcoming race. Expose the full failure in logs.
+            import traceback
+            traceback.print_exc()
+            print('Warning: missed slot will be retried by a later run:',slot,flush=True)
 
 
 if __name__=='__main__':
