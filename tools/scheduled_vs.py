@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from functools import partial
 from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
+import registered_horses
 
 ROOT = Path(__file__).resolve().parents[1]
 SLOT_MS = 900_000
@@ -101,7 +102,28 @@ def build_game(card: dict) -> str:
         if count != 1:
             raise ValueError(f'エンジンの対応部分が変更されています（{count}件）：{old[:65]}')
         original = original.replace(old, new, 1)
-    # 3D engine, race outcomes and replay calculations are NOT modified.
+    # Only the official production's roster SOURCE is switched. The original
+    # physics, motion, camera, finish and recorder remain untouched.
+    injection = r"""const field=(()=>{
+      const originals=fromPreparedField();
+      const incoming=Array.isArray(window.__dfOfficialEntries)?window.__dfOfficialEntries:[];
+      if(!incoming.length)return originals;
+      const selected=incoming.slice(0,18);
+      const names=new Set(selected.map(x=>x.runner.name));
+      const field=selected.map(x=>({...x.runner,registrationId:x.registrationId,isCom:false}));
+      const count=Math.min(18,Math.max(originals.length,field.length));
+      const fillers=originals.filter(h=>!names.has(h.name));
+      field.push(...fillers.slice(0,Math.max(0,count-field.length)).map(h=>({...h,isCom:true})));
+      for(let i=field.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [field[i],field[j]]=[field[j],field[i]];
+      }
+      window.__dfOfficialSelectedOrder=field.filter(x=>x.registrationId).map(x=>({registrationId:x.registrationId,name:x.name}));
+      return field;
+    })();"""
+    if original.count('const field=fromPreparedField();') != 1:
+        raise ValueError('公式出走馬フィールドの接続箇所が変更されています')
+    original = original.replace('const field=fromPreparedField();', injection, 1)
     return original
 
 
@@ -115,7 +137,7 @@ class ThreadedServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
 
 
-async def record_in_browser(card: dict) -> dict:
+async def record_in_browser(card: dict, entrants: list[dict] | None = None) -> dict:
     from playwright.async_api import async_playwright
 
     html = build_game(card)
@@ -140,6 +162,10 @@ async def record_in_browser(card: dict) -> dict:
                 try:
                     context = await browser.new_context(viewport={'width': 960, 'height': 720},
                                                        device_scale_factor=1)
+                    # Playwright sets the official entrants before the original
+                    # module initializes. None/[] preserves existing COM fields.
+                    await context.add_init_script(script='window.__dfOfficialEntries='+
+                        json.dumps(entrants or [],ensure_ascii=False,separators=(',',':'))+';')
                     page = await context.new_page()
                     errors = []
                     page.on('pageerror', lambda e: errors.append(str(e)[:250]))
@@ -158,6 +184,18 @@ async def record_in_browser(card: dict) -> dict:
                             record = await page.evaluate('''async () => await window.DFOfficialVSReplay.latest()''')
                             if not isinstance(record, dict):
                                 raise RuntimeError('完走記録を読み戻せませんでした。')
+                            if entrants:
+                                selected = await page.evaluate('''() => window.__dfOfficialSelectedOrder || []''')
+                                expected = {x['registrationId']:x['runner']['name'] for x in entrants}
+                                if len(selected) != len(entrants) or any(
+                                        expected.get(x.get('registrationId')) != x.get('name')
+                                        for x in selected):
+                                    raise ValueError('登録馬がレースエンジンへ渡されていません')
+                                names = [h.get('name') for h in record.get('field',[])]
+                                for registered in selected:
+                                    if registered['name'] not in names:
+                                        raise ValueError('登録馬が完走記録に存在しません: '+registered['name'])
+                                record['registrations']=[x['registrationId'] for x in selected]
                             return record
                         if probe['startReady'] and not probe['ready']:
                             await page.evaluate('''() => window.__df47Start3D()''')
@@ -196,6 +234,7 @@ def validate_record(record: dict, card: dict) -> None:
 
 def metadata_for(record: dict, card: dict, slot: int) -> dict:
     return {
+        'registrations': record.get('registrations', []),
         'slot': slot,
         'intervalMinutes': 15,
         'file': f'races/{slot}.json.gz',
@@ -311,11 +350,35 @@ async def main() -> None:
         print('Remaining records:', publish_record(None,None,scheduled_slot(now_ms),now_ms), flush=True)
         return
     print('Recording slots (scheduled, missing):', slots, flush=True)
+    try:
+        registered = registered_horses.load()
+        print('Official VS registered horses loaded:',len(registered),flush=True)
+    except Exception as error:
+        # Never disable the working 15-minute COM race due to registration DB outage.
+        print('WARNING: registration database unavailable, COM-only race continues:',
+              repr(error),flush=True)
+        registered = []
     for i,slot in enumerate(slots):
         card = cycle_card(slot, catalog)
         print('G1 slot:', datetime.fromtimestamp(slot*SLOT_MS/1000,timezone.utc).isoformat(), card['name'], flush=True)
         try:
-            record = json.loads(args.record_file.read_text(encoding='utf-8')) if args.record_file else await record_in_browser(card)
+            existing = json.loads((ROOT/'race_playlist.json').read_text(encoding='utf-8'))['records']
+            entrants = registered_horses.choose(registered,card,slot,existing)
+            print('Registered entrants for',card['name'],':',len(entrants),flush=True)
+            if args.record_file:
+                record = json.loads(args.record_file.read_text(encoding='utf-8'))
+            else:
+                try:
+                    record = await record_in_browser(card,entrants)
+                except Exception:
+                    if not entrants:
+                        raise
+                    # A new registered horse must never stop the established
+                    # COM-only 15-minute event. Keep the original race running.
+                    import traceback
+                    traceback.print_exc()
+                    print('WARNING: registered roster failed; retrying established COM field.',flush=True)
+                    record = await record_in_browser(card,[])
             print('Recording finished:',record.get('durationMs'),'ms',len(record.get('results',[])),'horses', flush=True)
             print('Remaining records:',publish_record(record,card,slot,now_ms), flush=True)
         except Exception:
