@@ -239,6 +239,30 @@
     }
     throw Error('観戦対象が切り替わりました。');
   }
+  // Spectator-only navigation. The race engine and automatic recorder stay unchanged.
+  function installResultHomeLink(w){
+    const doc=w.document,results=doc.getElementById('postRacePanel');
+    if(!results)throw Error('着順掲示板が見つかりません。');
+    // Remove obsolete VS selection buttons instead of merely hiding them.
+    for(const id of ['dfV30VsReturn','dfV30VsReturnResult'])doc.getElementById(id)?.remove();
+    // Do not show a duplicate homepage link above the finishing order.
+    results.querySelectorAll('.vs-home-return-wrap').forEach(node=>node.remove());
+    if(doc.getElementById('vsOfficialResultHome'))return;
+    const style=doc.createElement('style');
+    style.textContent=`#vsOfficialResultHome{display:flex;align-items:center;justify-content:center;
+      box-sizing:border-box;width:100%;min-height:56px;margin:16px auto 8px;padding:12px 16px;
+      border:2px solid #d9b67a;border-radius:12px;background:linear-gradient(#24465c,#142d3e);
+      color:#ffedbf!important;font-size:clamp(15px,3.5vw,18px);font-weight:900;
+      text-align:center;text-decoration:none;cursor:pointer}
+      #vsOfficialResultHome:focus-visible{outline:3px solid #f4d58f;outline-offset:3px}`;
+    doc.head.append(style);
+    const link=doc.createElement('a');
+    link.id='vsOfficialResultHome';
+    link.textContent='ホームページに戻る';
+    link.href=new URL('./',location.href).href;
+    link.target='_top';
+    results.append(link);
+  }
   async function startWatch(record,meta,mode){
     const serial=++state.watchSerial,frame=$('vs-watchroom-frame');
     frame.hidden=true;$('vs-watchroom-loading').hidden=false;
@@ -249,6 +273,7 @@
       const w=await loadFrame(html,serial);if(serial!==state.watchSerial)return;
       await waitEngine(w,serial);if(serial!==state.watchSerial)return;
       w.DFOfficialViewerBridge.prepare(record);
+      installResultHomeLink(w);
       // A live viewer uses the public race clock. An archive viewer starts its own 30s newspaper.
       const started=mode==='live'?slotStartMs(meta):Date.now();
       const beginVideo=()=>{
