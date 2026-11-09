@@ -48,6 +48,16 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
   #vs-entry-submit{margin:12px 0;width:100%}
   #vs-entry-preview{color:#f2db9c!important;font-weight:700}
   #vs-entry-message{white-space:pre-line}
+  /* Next scheduled G1 and privacy-safe entry counts. Existing race viewing is unchanged. */
+  .vs-next-info{margin-top:15px;padding:13px 12px;border-top:1px solid #b8955170;background:#061a18a8;border-radius:8px}
+  .vs-next-kicker{color:#cbb277;font-size:11px;letter-spacing:.08em}
+  .vs-next-name{font-size:19px;font-weight:800;color:#ffe5a0;margin:7px 0 4px}
+  .vs-next-detail{color:#d4ddd0;font-size:12px;line-height:1.7;margin:3px 0}
+  .vs-next-counter{color:#f6dba0;font-weight:700;font-size:13px;margin-top:8px}
+  .vs-entry-summary{padding:11px 12px;margin:12px 0;border:1px solid #9e814a88;border-radius:8px;background:#061a1899}
+  .vs-entry-summary strong{display:block;color:#f6e2ae;font-size:17px}
+  .vs-entry-summary p{font-size:12px;line-height:1.6;margin:5px 0;color:#d3ddd1}
+  #vs-entry-myhorse{color:#ffe0a1}
   </style>
 </head>
 <body>
@@ -94,11 +104,24 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
           <p id="live-race-info" aria-live="polite">15分ごとの開催枠を確認中です。</p>
           <button type="button" class="vs-watch-btn" id="live-watch-button" disabled>▶ 観戦する</button>
           <p class="race-footnote" id="live-race-next"></p>
+          <div class="vs-next-info" aria-label="次回のGⅠ開催予定">
+            <div class="vs-next-kicker">NEXT GⅠ / 次回開催予定（日本時間）</div>
+            <div class="vs-next-name" id="vs-next-race-name">次回GⅠを確認中…</div>
+            <p class="vs-next-detail" id="vs-next-race-detail">番組表を読み込んでいます。</p>
+            <div class="vs-next-counter" id="vs-next-race-countdown">次回開催まで ――</div>
+          </div>
         </section>
         <section class="panel">
           <div class="num">02 / ENTRY</div>
           <h2>出走馬登録</h2>
           <span class="status" id="vs-entry-state">登録馬受付</span>
+          <div class="vs-entry-summary" aria-label="登録頭数と次回の出走状況">
+            <strong id="vs-entry-total">登録総数：集計中</strong>
+            <p id="vs-entry-updated">登録頭数はGitHub Actionsの最終集計時点の数字です。</p>
+            <p id="vs-entry-next-candidates">次回GⅠの登録馬候補：確認中／最大18頭</p>
+            <p id="vs-entry-myhorse">自分の登録馬：ログイン後に確認できます。</p>
+            <p id="vs-entry-my-status">出走状況：未確認</p>
+          </div>
           <p>ゲームの「対戦馬一覧」から「この馬のJSONを書き出す」を押し、そのファイルを選んでください。登録は1アカウントにつき1頭です。</p>
           <div class="vs-entry-auth" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
             <button class="vs-watch-btn" id="vs-entry-google" type="button">Googleでログイン</button>

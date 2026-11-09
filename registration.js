@@ -11,6 +11,159 @@
   const cfg=window.VS_FIREBASE_CONFIG;
   let auth=null,db=null, sdk=null,chosen=null,busy=false,ready=false;
   const say=s=>{message.textContent=s;};
+
+  // Public racing calendar and privacy-safe registration counts.
+  // The Firestore "vs_entries" collection is intentionally NOT listable from
+  // browsers; its aggregate is published by the existing server recording job.
+  const SLOT_MS=15*60*1000;
+  const nextRaceName=$('vs-next-race-name');
+  const nextRaceDetail=$('vs-next-race-detail');
+  const nextRaceCountdown=$('vs-next-race-countdown');
+  const totalLabel=$('vs-entry-total');
+  const totalUpdated=$('vs-entry-updated');
+  const nextCandidates=$('vs-entry-next-candidates');
+  const ownHorseLabel=$('vs-entry-myhorse');
+  const ownStatusLabel=$('vs-entry-my-status');
+  let publicCatalog=null,publicManifest=null,ownRegistration=null,ownRegistrationId=null;
+  let publicError='',refreshingPublic=false;
+  const jpDate=ms=>new Intl.DateTimeFormat('ja-JP',{
+    timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',weekday:'short',
+    hour:'2-digit',minute:'2-digit',hour12:false
+  }).format(new Date(ms));
+  const jpClock=ms=>new Intl.DateTimeFormat('ja-JP',{
+    timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false
+  }).format(new Date(ms));
+  const jpDay=ms=>new Intl.DateTimeFormat('sv-SE',{
+    timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(new Date(ms));
+  const nextSlot=()=>Math.floor(Date.now()/SLOT_MS)+1;
+  const slotCard=slot=>{
+    if(!publicCatalog?.races?.length)return null;
+    const anchor=Math.floor(Date.parse(publicCatalog.cycleStartsAt)/SLOT_MS);
+    const i=((slot-anchor)%publicCatalog.races.length+publicCatalog.races.length)%publicCatalog.races.length;
+    return publicCatalog.races[i];
+  };
+  const timeRemaining=ms=>{
+    const total=Math.max(0,Math.ceil(ms/1000));
+    const pad=n=>String(n).padStart(2,'0');
+    return pad(Math.floor(total/60))+':'+pad(total%60);
+  };
+  const nextRecorded=slot=>publicManifest?.records?.find(row=>row?.intervalMinutes===15&&row.slot===slot)||null;
+  function showOwnRaceStatus(card,slot,finalized){
+    if(!ownHorseLabel||!ownStatusLabel)return;
+    if(!auth?.currentUser){
+      ownHorseLabel.textContent='自分の登録馬：ログイン後に確認できます。';
+      ownStatusLabel.textContent='出走状況：未ログイン';
+      return;
+    }
+    if(!ownRegistration){
+      ownHorseLabel.textContent='自分の登録馬：未登録、または確認中';
+      ownStatusLabel.textContent='出走状況：登録馬の確認待ち';
+      return;
+    }
+    ownHorseLabel.textContent='自分の登録馬：'+String(ownRegistration.horseName||'名称不明');
+    if(!card || !publicManifest?.records){
+      ownStatusLabel.textContent='出走状況：レース一覧を確認中';
+      return;
+    }
+    if(!ownRegistrationId){
+      ownStatusLabel.textContent='出走状況：本人の出走記録を確認中';
+      return;
+    }
+    const record=finalized||nextRecorded(slot);
+    if(record){
+      ownStatusLabel.textContent=record.registrations?.includes(ownRegistrationId)
+        ?'次回の'+card.name+'：出走が記録されています（確定）'
+        :'次回の'+card.name+'：出走記録に含まれていません';
+      return;
+    }
+    const day=jpDay(slot*SLOT_MS);
+    const raced=publicManifest.records.some(row=>row?.name===card.name &&
+      Number.isInteger(row.slot) &&
+      jpDay(row.slot*(row.intervalMinutes===15?SLOT_MS:600000))===day &&
+      Array.isArray(row.registrations)&&row.registrations.includes(ownRegistrationId));
+    ownStatusLabel.textContent=raced
+      ?'次回の'+card.name+'：本日同じGⅠに出走済みのため対象外'
+      :'次回の'+card.name+'：出走抽選の対象（出走未確定）';
+  }
+  function renderPublicStatus(){
+    const slot=nextSlot(),slotMs=slot*SLOT_MS;
+    const card=slotCard(slot);
+    if(nextRaceName)nextRaceName.textContent=card?.name||'番組表を確認中';
+    if(nextRaceDetail)nextRaceDetail.textContent=card
+      ?jpDate(slotMs)+' 発走予定 ／ '+card.venue+'・芝'+card.distance+'m'
+      :'開催番組表を読み込んでいます。';
+    if(nextRaceCountdown)nextRaceCountdown.textContent=card
+      ?'次回開催まで '+timeRemaining(slotMs-Date.now())
+      :'次回開催まで ――';
+    const summary=publicManifest?.registrationSummary;
+    const valid=summary?.version===1 && Number.isInteger(summary.registeredCount)&&
+      summary.registeredCount>=0 && summary.registeredCount<=150 &&
+      Number.isSafeInteger(summary.asOfMs) && summary.asOfMs>0;
+    if(totalLabel){
+      totalLabel.textContent=valid?'登録総数：'+summary.registeredCount+'頭（最終集計値）':'登録総数：集計待ち';
+    }
+    if(totalUpdated){
+      const age=valid?Date.now()-summary.asOfMs:0;
+      totalUpdated.textContent=valid
+        ?'最終集計：'+jpDate(summary.asOfMs)+(age>45*60000?' ／ 更新が遅れています':'')+' ※登録直後は次の集計で反映'
+        :(publicError?'登録数を取得できません。最新公開データを確認してください。':'GitHub Actionsの次の集計後に表示されます。');
+    }
+    const record=nextRecorded(slot);
+    const finalCount=record && Array.isArray(record.registrations) ? record.registrations.length:null;
+    if(nextCandidates){
+      if(finalCount!==null){
+        nextCandidates.textContent='次回GⅠの登録馬出走確定：'+finalCount+'頭／最大18頭';
+      }else if(valid && summary.nextSlot===slot && !summary.nextFinal &&
+          Number.isInteger(summary.nextCandidateCount) && summary.nextCandidateCount>=0){
+        nextCandidates.textContent='次回GⅠの出走候補：'+summary.nextCandidateCount+'頭／最大18頭（抽選前）';
+      }else{
+        nextCandidates.textContent='次回GⅠの出走候補：未集計／最大18頭（出走未確定）';
+      }
+    }
+    showOwnRaceStatus(card,slot,record);
+  }
+  async function refreshPublicStatus(){
+    if(refreshingPublic)return;
+    refreshingPublic=true;
+    try{
+      const [catalogResponse,manifestResponse]=await Promise.all([
+        fetch('./race_catalog.json?ts='+Date.now(),{cache:'no-store'}),
+        fetch('./race_playlist.json?ts='+Date.now(),{cache:'no-store'})
+      ]);
+      if(!catalogResponse.ok||!manifestResponse.ok)throw Error('公開データを取得できません');
+      const [catalog,manifest]=await Promise.all([catalogResponse.json(),manifestResponse.json()]);
+      if(catalog.version!==1||catalog.intervalMinutes!==15||
+         !Array.isArray(catalog.races)||!catalog.races.length||
+         !Number.isFinite(Date.parse(catalog.cycleStartsAt))||
+         manifest.version!==2||!Array.isArray(manifest.records))
+        throw Error('公開データの形式が不正です');
+      publicCatalog=catalog;publicManifest=manifest;publicError='';
+    }catch(err){publicError=String(err.message||err);}
+    finally{refreshingPublic=false;renderPublicStatus();}
+  }
+  async function hashRegisteredHorse(uid,horseId){
+    // Must exactly match registered_horses.py: sha256(uid + '|' + horseId)[:24].
+    if(!globalThis.crypto?.subtle)return null;
+    const bytes=new TextEncoder().encode(uid+'|'+horseId);
+    const digest=await crypto.subtle.digest('SHA-256',bytes);
+    return [...new Uint8Array(digest)].map(n=>n.toString(16).padStart(2,'0')).join('').slice(0,24);
+  }
+  async function updateOwnFromDocument(user,docData){
+    if(auth?.currentUser?.uid!==user.uid)return;
+    ownRegistration=docData;ownRegistrationId=null;renderPublicStatus();
+    if(docData?.horseId){
+      try{
+        const id=await hashRegisteredHorse(user.uid,docData.horseId);
+        if(auth.currentUser?.uid===user.uid){ownRegistrationId=id;renderPublicStatus();}
+      }catch(err){console.warn('出走照合IDを計算できません',err);}
+    }
+  }
+  renderPublicStatus();
+  refreshPublicStatus();
+  setInterval(renderPublicStatus,1000);
+  setInterval(refreshPublicStatus,30000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshPublicStatus();});
   const num=(raw,def,lo,hi)=>{
     if(raw===null||raw===undefined||raw==='')return def;
     const n=Number(raw);
@@ -70,13 +223,18 @@
       appSdk.initializeApp(cfg,'vs-arena-registration');
     auth=authSdk.getAuth(app);db=fsSdk.getFirestore(app);ready=true;
     authSdk.onAuthStateChanged(auth,async user=>{
-      updateSubmit();
+      ownRegistration=null;ownRegistrationId=null;updateSubmit();renderPublicStatus();
       if(!user){loginStatus.textContent='未ログイン';say('Googleまたはゲストでログインして馬を登録してください。');return;}
       loginStatus.textContent=(user.isAnonymous?'ゲスト':'ログイン中')+'：登録可能';
       try{
         const snap=await fsSdk.getDoc(fsSdk.doc(db,'vs_entries',user.uid));
-        if(snap.exists())say('現在の登録馬：'+String(snap.data().horseName||'不明')+'。別の馬で上書き登録できます。');
-        else say('登録受付中。ゲームの対戦馬JSONを選んでください。');
+        if(auth.currentUser?.uid!==user.uid)return;
+        if(snap.exists()){
+          say('現在の登録馬：'+String(snap.data().horseName||'不明')+'。別の馬で上書き登録できます。');
+          await updateOwnFromDocument(user,snap.data());
+        }else{
+          say('登録受付中。ゲームの対戦馬JSONを選んでください。');
+        }
       }catch(err){say('登録状態を確認できません：'+String(err.code||err.message||err));}
     });
     say('ログイン後、対戦馬JSONを選んで登録できます。');
@@ -116,8 +274,9 @@
       const result=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
       if(!result.exists()||result.data().horseId!==chosen.horseId)
         throw Error('登録情報を読み戻せませんでした。');
-      say('登録完了：'+chosen.name+'。次回以降のGⅠで出走抽選の対象になります。');
+      say('登録完了：'+chosen.name+'。次回以降のGⅠで出走抽選の対象になります。登録総数は次の集計で反映されます。');
       preview.textContent='※ 1レース1組・最大18頭。同じ馬が同じGⅠに出走できるのは日本時間で1日1回まで。';
+      await updateOwnFromDocument(user,result.data());
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
     finally{busy=false;updateSubmit();}
   });
