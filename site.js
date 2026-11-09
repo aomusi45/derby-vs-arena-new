@@ -112,11 +112,12 @@
   }
   function showAvailability(){
     const now=Date.now(),wanted=slotAt(now),end=(wanted+1)*SLOT_MS;
-    const card=idForSlot(wanted),meta=state.meta,record=state.record;
-    const waiting=!!record && state.slot!==wanted;
+    const card=idForSlot(wanted),meta=state.meta;
+    const record=meta && isRetained(meta,now) ? state.record : null;
+    const waiting=!!record && slotStartMs(meta)<wanted*SLOT_MS;
     $('live-race-next').textContent='開催枠（日本時間）：'+clock(wanted*SLOT_MS)+'～'+clock(end)+' ／ 次の切替まで '+countdown(end-now);
     const btn=$('live-watch-button');btn.disabled=!record;
-    $('vs-header-status').textContent=record?'VS ARENA · 開催中':'VS ARENA · 準備中';
+    $('vs-header-status').textContent=record?(waiting?'VS ARENA · 前回の記録':'VS ARENA · 開催中'):'VS ARENA · 準備中';
     if(!meta||!record){
       $('live-race-status').textContent='開催準備中';
       $('live-race-name').textContent=card?.name||'GⅠレース一覧を取得中';
@@ -127,7 +128,7 @@
     $('live-race-status').textContent=waiting?'前回のレース・再生可能':over?'レース終了・再生可能':'開催中';
     $('live-race-name').textContent=meta.name;
     $('live-race-info').textContent=waiting
-      ?'次の'+(card?.name||'GⅠ')+'の記録公開と結果・賞金反映を確認中です。準備がそろうと自動で切り替わります。'
+      ?clock(slotStartMs(meta))+'の公開済みレースを観戦できます。'+(card?.name||'次のGⅠ')+'の記録は準備中です。公開後に自動で切り替わります。'
       :meta.venue+' 芝'+meta.distance+'m ／ '+(over?'保存したレースを再生できます':now<slotStartMs(meta)+PAPER_MS?'競馬新聞を表示中':'保存済みレースを放映中');
   }
   async function loadRecord(meta){
@@ -138,42 +139,53 @@
     return record;
   }
   async function selectCurrentSlot(){
-    const slot=slotAt(Date.now());
-    const meta=state.records.find(r=>r.slot===slot&&r.intervalMinutes===15)||null;
-    if(state.slot===slot && state.meta?.file===meta?.file && state.record){
+    const now=Date.now();
+    // Show the latest actual recording, not only the slot matching the clock.
+    // On a fresh page load, GitHub's delayed schedule must not disable watching.
+    const candidates=state.records.filter(r=>slotStartMs(r)<=now && isRetained(r,now))
+      .sort((a,b)=>slotStartMs(b)-slotStartMs(a));
+    if(state.meta && !isRetained(state.meta,now)){
+      state.slot=null;state.meta=null;state.record=null;
+    }
+    const newest=candidates[0]||null;
+    if(state.meta?.file===newest?.file && state.record){showAvailability();return;}
+    if(!newest || (state.record && state.meta && slotStartMs(newest)<slotStartMs(state.meta))){
       showAvailability();return;
     }
-    // Never replace the visible race with an unrecorded/unfinished one.
-    if(!meta){showAvailability();return;}
-    // Avoid parallel file downloads while GitHub Pages is deploying a new race.
-    if(state.loadingSlot===slot)return;
-    if(state.lastRecordFile===meta.file && Date.now()-state.lastRecordAttempt<10000)return;
-    state.loadingSlot=slot;state.lastRecordAttempt=Date.now();state.lastRecordFile=meta.file;
+    if(state.loadingSlot===newest.file)return;
+    if(state.lastRecordFile===newest.file && now-state.lastRecordAttempt<10000)return;
+    state.loadingSlot=newest.file;state.lastRecordAttempt=now;state.lastRecordFile=newest.file;
     const serial=++state.slotSerial;
+    let lastError=null;
     try{
-      const record=await loadRecord(meta);
-      if(serial!==state.slotSerial || slotAt(Date.now())!==slot)return;
-      const now=Date.now();
-      // Previous result/prize data must already be published and counted before
-      // swapping the homepage's current race. Never interrupt an active viewer.
-      if(state.meta && state.record && state.slot!==slot && isRetained(state.meta,now)){
-        const previous=state.records.find(r=>r.file===state.meta.file);
-        if(!previous||!isComplete(previous,now)){showAvailability();return;}
+      // If a new manifest has arrived before its recording file, keep the
+      // previous recording accessible even on a newly opened device.
+      for(const meta of candidates.slice(0,5)){
+        if(state.meta?.file===meta.file && state.record){showAvailability();return;}
+        if(state.record && state.meta && slotStartMs(meta)<slotStartMs(state.meta))break;
+        let record;
+        try{record=await loadRecord(meta);}
+        catch(e){lastError=e;continue;}
+        if(serial!==state.slotSerial || !isRetained(meta,Date.now()))return;
+        if(state.meta && state.record && state.meta.file!==meta.file && isRetained(state.meta,Date.now())){
+          const previous=state.records.find(r=>r.file===state.meta.file);
+          if(!previous||!isComplete(previous,Date.now())){showAvailability();return;}
+        }
+        updateLists(); // Results and prize totals before a switch; never interrupt viewers.
+        state.slot=slotAt(slotStartMs(meta));state.meta=meta;state.record=record;state.error='';
+        showAvailability();
+        if(state.watchMode==='live'&&!state.liveAutoStarted){
+          state.liveAutoStarted=true;
+          startWatch(record,meta,'live');
+        }
+        return;
       }
-      updateLists(); // Render confirmed results and daily prize totals first.
-      state.slot=slot;state.meta=meta;state.record=record;state.error='';
-      showAvailability();
-      // Preserve direct ?watch=live entry without restarting an already playing race.
-      if(state.watchMode==='live'&&!state.liveAutoStarted){
-        state.liveAutoStarted=true;
-        startWatch(record,meta,'live');
+      if(serial===state.slotSerial && lastError){
+        state.error='レース記録を読み込めません：'+String(lastError.message||lastError);
+        showAvailability();
       }
-    }catch(e){
-      if(serial!==state.slotSerial)return;
-      state.error='レース記録を読み込めません：'+String(e.message||e);
-      showAvailability();
     }finally{
-      if(state.loadingSlot===slot)state.loadingSlot=null;
+      if(state.loadingSlot===newest.file)state.loadingSlot=null;
     }
   }
   function displayWatchError(message){
