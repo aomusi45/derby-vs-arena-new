@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/vs-race-cycle.yml'
+      - 'tools/scheduled_vs.py'
   workflow_dispatch:
   schedule:
     # 7 minutes before each 15-minute boundary, UTC minutes = JST minutes.
