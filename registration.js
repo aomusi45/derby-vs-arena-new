@@ -25,7 +25,7 @@
   const ownHorseLabel=$('vs-entry-myhorse');
   const ownStatusLabel=$('vs-entry-my-status');
   let publicCatalog=null,publicManifest=null,ownRegistration=null,ownRegistrationId=null;
-  let publicError='',refreshingPublic=false;
+  let publicError='',refreshingPublic=false,lastRegistrationName='';
   const jpDate=ms=>new Intl.DateTimeFormat('ja-JP',{
     timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',weekday:'short',
     hour:'2-digit',minute:'2-digit',hour12:false
@@ -57,8 +57,8 @@
       return;
     }
     if(!ownRegistration){
-      ownHorseLabel.textContent='自分の登録馬：未登録、または確認中';
-      ownStatusLabel.textContent='出走状況：登録馬の確認待ち';
+      ownHorseLabel.textContent='自分の登録馬：未登録';
+      ownStatusLabel.textContent=lastRegistrationName?'出走状況：前回の登録は終了。再登録できます':'出走状況：登録受付中';
       return;
     }
     ownHorseLabel.textContent='自分の登録馬：'+String(ownRegistration.horseName||'名称不明');
@@ -142,19 +142,24 @@
     }catch(err){publicError=String(err.message||err);}
     finally{refreshingPublic=false;renderPublicStatus();}
   }
-  async function hashRegisteredHorse(uid,horseId){
-    // Must exactly match registered_horses.py: sha256(uid + '|' + horseId)[:24].
+  async function hashRegisteredHorse(uid,horseId,serverTime){
+    // Match registered_horses.py: each Firestore submission has a unique receipt ID.
     if(!globalThis.crypto?.subtle)return null;
-    const bytes=new TextEncoder().encode(uid+'|'+horseId);
+    if(!serverTime || !Number.isFinite(serverTime.seconds) || !Number.isFinite(serverTime.nanoseconds))return null;
+    const micros=serverTime.seconds*1000000+Math.floor(serverTime.nanoseconds/1000);
+    if(!Number.isSafeInteger(micros))return null;
+    const bytes=new TextEncoder().encode(uid+'|'+horseId+'|'+String(micros));
     const digest=await crypto.subtle.digest('SHA-256',bytes);
     return [...new Uint8Array(digest)].map(n=>n.toString(16).padStart(2,'0')).join('').slice(0,24);
   }
   async function updateOwnFromDocument(user,docData){
     if(auth?.currentUser?.uid!==user.uid)return;
-    ownRegistration=docData;ownRegistrationId=null;renderPublicStatus();
+    ownRegistration=docData;ownRegistrationId=null;
+    if(docData?.horseName)lastRegistrationName=String(docData.horseName);
+    renderPublicStatus();
     if(docData?.horseId){
       try{
-        const id=await hashRegisteredHorse(user.uid,docData.horseId);
+        const id=await hashRegisteredHorse(user.uid,docData.horseId,docData.updatedAt);
         if(auth.currentUser?.uid===user.uid){ownRegistrationId=id;renderPublicStatus();}
       }catch(err){console.warn('出走照合IDを計算できません',err);}
     }
@@ -221,7 +226,9 @@
     sdk={...authSdk,...fsSdk};
     const app=appSdk.getApps().find(a=>a.options.projectId===cfg.projectId) ||
       appSdk.initializeApp(cfg,'vs-arena-registration');
-    auth=authSdk.getAuth(app);db=fsSdk.getFirestore(app);ready=true;
+    auth=authSdk.getAuth(app);
+    await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
+    db=fsSdk.getFirestore(app);ready=true;
     authSdk.onAuthStateChanged(auth,async user=>{
       ownRegistration=null;ownRegistrationId=null;updateSubmit();renderPublicStatus();
       if(!user){loginStatus.textContent='未ログイン';say('Googleまたはゲストでログインして馬を登録してください。');return;}
@@ -230,7 +237,7 @@
         const snap=await fsSdk.getDoc(fsSdk.doc(db,'vs_entries',user.uid));
         if(auth.currentUser?.uid!==user.uid)return;
         if(snap.exists()){
-          say('現在の登録馬：'+String(snap.data().horseName||'不明')+'。別の馬で上書き登録できます。');
+          say('現在の登録馬：'+String(snap.data().horseName||'不明')+'。1回出走後に登録解除されます。別の馬で上書き登録できます。');
           await updateOwnFromDocument(user,snap.data());
         }else{
           say('登録受付中。ゲームの対戦馬JSONを選んでください。');
@@ -238,6 +245,24 @@
       }catch(err){say('登録状態を確認できません：'+String(err.code||err.message||err));}
     });
     say('ログイン後、対戦馬JSONを選んで登録できます。');
+    setInterval(refreshOwnRegistration,30000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshOwnRegistration();});
+  }
+  async function refreshOwnRegistration(){
+    const user=auth?.currentUser;
+    if(!user||busy||!ready)return;
+    try{
+      const snap=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
+      if(auth?.currentUser?.uid!==user.uid)return;
+      if(snap.exists()){
+        if(!ownRegistration || ownRegistration.updatedAt?.toMillis?.()!==snap.data().updatedAt?.toMillis?.())
+          await updateOwnFromDocument(user,snap.data());
+      }else if(ownRegistration){
+        const racedName=String(ownRegistration.horseName||'登録馬');
+        ownRegistration=null;ownRegistrationId=null;renderPublicStatus();
+        say(racedName+'の登録は出走完了により解除されました。再登録できます。');
+      }
+    }catch(err){console.warn('登録状態の更新に失敗',err);}
   }
   google.addEventListener('click',async()=>{
     if(!ready||busy)return;
@@ -274,8 +299,8 @@
       const result=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
       if(!result.exists()||result.data().horseId!==chosen.horseId)
         throw Error('登録情報を読み戻せませんでした。');
-      say('登録完了：'+chosen.name+'。次回以降のGⅠで出走抽選の対象になります。登録総数は次の集計で反映されます。');
-      preview.textContent='※ 1レース1組・最大18頭。同じ馬が同じGⅠに出走できるのは日本時間で1日1回まで。';
+      say('登録完了：'+chosen.name+'。1回出走すると登録が解除されます。再出走するにはもう一度登録してください。');
+      preview.textContent='※ 1登録1出走・最大18頭。同じ馬が同じGⅠに出走できるのは日本時間で1日1回まで。';
       await updateOwnFromDocument(user,result.data());
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
     finally{busy=false;updateSubmit();}
