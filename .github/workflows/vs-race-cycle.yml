@@ -14,6 +14,7 @@ on:
       - 'registration.js'
       - 'firebase-config.js'
       - 'tools/registered_horses.py'
+      - 'tools/consume_vs_entries.py'
   workflow_dispatch:
   schedule:
     # 7 minutes before each 15-minute boundary, UTC minutes = JST minutes.
@@ -55,6 +56,16 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: python tools/scheduled_vs.py
       - name: Commit only recorded races and 24h manifest
+        run: python tools/push_recorded_races.py
+      # Only successful, already-pushed replay results may consume an entry.
+      - name: Consume registrations that already raced
+        continue-on-error: true
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: python tools/consume_vs_entries.py
+      - name: Publish refreshed entry count
+        continue-on-error: true
         run: python tools/push_recorded_races.py
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
