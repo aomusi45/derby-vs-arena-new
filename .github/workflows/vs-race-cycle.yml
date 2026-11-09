@@ -1,0 +1,64 @@
+name: Official VS G1 race cycle
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 7 minutes before each 10-minute boundary, UTC minutes = JST minutes.
+    # GitHub can delay or skip scheduled runs; this is not a hard real-time service.
+    - cron: '3,13,23,33,43,53 * * * *'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: official-vs-races-and-pages
+  cancel-in-progress: false
+
+jobs:
+  record-and-publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Check out existing game and website
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install headless browser
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          command -v google-chrome || command -v chromium
+      - name: Run original DBF VS race and record all horse motion
+        run: python tools/scheduled_vs.py
+      - name: Commit only recorded races and 24h manifest
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A race_playlist.json races/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Official VS scheduled G1 record and 24h retention'
+            git push origin HEAD:main
+          fi
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Stage site files only
+        run: |
+          mkdir -p public_site/races
+          cp index.html site.js race_catalog.json race_playlist.json public_site/
+          cp vs_replay_engine_part1.txt vs_replay_engine_part2.txt public_site/
+          cp -a races/. public_site/races/
+      - name: Upload official VS site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: './public_site'
+      - name: Deploy site and recorded race
+        id: deploy
+        uses: actions/deploy-pages@v4
