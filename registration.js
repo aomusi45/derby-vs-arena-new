@@ -8,11 +8,15 @@
   const preview=$('vs-entry-preview'),loginStatus=$('vs-entry-login-status');
   const google=$('vs-entry-google'),guest=$('vs-entry-guest');
   const ownerInput=$('vs-entry-ownername');
-  if(!file||!submit||!message||!preview||!loginStatus||!google||!guest||!ownerInput)return;
+  const passwordPanel=$('vs-entry-password-panel');
+  const passwordInput=$('vs-entry-password');
+  const unlockButton=$('vs-entry-unlock');
+  if(!file||!submit||!message||!preview||!loginStatus||!google||!guest||!ownerInput||!passwordPanel||!passwordInput||!unlockButton)return;
   const cleanOwner=value=>typeof value==='string' ? value.trim().replace(/[\u0000-\u001f\u007f]/g,'') : '';
   const validOwner=value=>value.length>=1 && [...value].length<=24 && !/[\u0000-\u001f\u007f]/.test(value);
   const cfg=window.VS_FIREBASE_CONFIG;
   let auth=null,db=null, sdk=null,chosen=null,busy=false,ready=false;
+  let lockedText=null,selectionSerial=0,unlocking=false;
   const say=s=>{message.textContent=s;};
 
   // Public racing calendar and privacy-safe registration counts.
@@ -182,7 +186,7 @@
     if(!snapshot || snapshot.format!=='derby-fantasy-battle-horse' || snapshot.schema!==1 ||
         !snapshot.horse || !snapshot.raceStats || typeof snapshot.snapshotId!=='string' ||
         !snapshot.snapshotId || snapshot.snapshotId.length>180)
-      throw Error('ゲームで書き出した「対戦馬JSON」を選んでください。');
+      throw Error('ゲームで書き出したVS登録馬ファイルを選んでください。');
     const name=String(snapshot.name||'').trim();
     if(!name||name.length>60)throw Error('馬名が正しくありません。');
     const horseId=String(snapshot.sourceHorseId||snapshot.snapshotId);
@@ -253,11 +257,11 @@
           if(snap.data().ownerName && !ownerInput.value)ownerInput.value=cleanOwner(snap.data().ownerName);
           await updateOwnFromDocument(user,snap.data());
         }else{
-          say('登録受付中。ゲームの対戦馬JSONを選んでください。');
+          say('登録受付中。ゲームのVS登録馬ファイルを選んでください。');
         }
       }catch(err){say('登録状態を確認できません：'+String(err.code||err.message||err));}
     });
-    say('ログイン後、対戦馬JSONを選んで登録できます。');
+    say('ログイン後、VS登録馬ファイルを選んで登録できます。');
     setInterval(refreshOwnRegistration,30000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshOwnRegistration();});
   }
@@ -287,23 +291,105 @@
     try{await sdk.signInAnonymously(auth);}
     catch(err){say('ゲストログインに失敗：'+String(err.code||err.message||err));}
   });
+  // DERBY_003 and later: exact locked VS format written by the game.
+  // Password and decrypted source JSON are never sent to Firestore.
+  const LOCK_FORMAT='derby-fantasy-vs-locked';
+  const LOCK_VERSION=1;
+  const LOCK_ITERATIONS=250000;
+  function readBase64(value){
+    if(typeof value!=='string'||value.length>2000000||!value.length||
+       !/^[A-Za-z0-9+/]*={0,2}$/.test(value)||value.length%4!==0)
+      throw Error('暗号化ファイルのデータ形式が不正です。');
+    try{return Uint8Array.from(atob(value),ch=>ch.charCodeAt(0));}
+    catch(_){throw Error('暗号化ファイルのデータ形式が不正です。');}
+  }
+  async function decryptLockedVs(text,password){
+    if(!globalThis.crypto?.subtle)throw Error('このブラウザでは復号できません。HTTPSで開いてください。');
+    let outer;
+    try{outer=JSON.parse(text);}catch(_){throw Error('暗号化ファイルのJSON形式が不正です。');}
+    if(!outer||outer.format!==LOCK_FORMAT||outer.version!==LOCK_VERSION||
+       outer.kdf!=='PBKDF2-SHA256'||outer.iterations!==LOCK_ITERATIONS||
+       outer.cipher!=='AES-256-GCM')
+      throw Error('対応していない暗号化ファイルです。');
+    const salt=readBase64(outer.salt),iv=readBase64(outer.iv),data=readBase64(outer.data);
+    if(salt.length!==16||iv.length!==12||data.length<17)
+      throw Error('暗号化ファイルが破損しています。');
+    try{
+      const master=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),
+        'PBKDF2',false,['deriveKey']);
+      const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:LOCK_ITERATIONS,hash:'SHA-256'},
+        master,{name:'AES-GCM',length:256},false,['decrypt']);
+      const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,data);
+      return new TextDecoder('utf-8',{fatal:true}).decode(plain);
+    }catch(_){throw Error('パスワードが違うか、ファイルが改変されています。');}
+  }
+  function applyParsedHorse(data,serial){
+    if(serial!==selectionSerial)return;
+    chosen=normalize(data);
+    if(chosen.jsonOwner)ownerInput.value=chosen.jsonOwner;
+    else if(!ownerInput.value && auth?.currentUser?.displayName){
+      const publicName=cleanOwner(auth.currentUser.displayName);
+      if(validOwner(publicName))ownerInput.value=publicName;
+    }
+    preview.textContent='登録予定：'+chosen.name+' ／ '+chosen.runner.age+'歳 ／ 装備反映後の7能力';
+    say(auth?.currentUser?'「この馬を公式VSに登録する」を押してください。':'ログインしてから登録してください。');
+    updateSubmit();
+  }
   file.addEventListener('change',async()=>{
-    chosen=null;preview.textContent='';updateSubmit();
+    const serial=++selectionSerial;
+    chosen=null;lockedText=null;
+    passwordInput.value='';passwordPanel.hidden=true;
+    preview.textContent='';updateSubmit();
     const f=file.files?.[0];if(!f)return;
-    if(f.size>1048576||!/\.json$/i.test(f.name)){
-      say('1MB以下のJSONファイルを選んでください。');return;
+    if(f.size>1048576||f.size===0||!(/\.(json|dbfvs)$/i.test(f.name))){
+      say('1MB以下の .dbfvs または .json ファイルを選んでください。');return;
     }
     try{
-      chosen=normalize(JSON.parse(await f.text()));
-      if(chosen.jsonOwner)ownerInput.value=chosen.jsonOwner;
-      else if(!ownerInput.value && auth?.currentUser?.displayName){
-        const publicName=cleanOwner(auth.currentUser.displayName);
-        if(validOwner(publicName))ownerInput.value=publicName;
+      const raw=await f.text();
+      if(serial!==selectionSerial)return;
+      const parsed=JSON.parse(raw);
+      if(/\.dbfvs$/i.test(f.name)||parsed?.format===LOCK_FORMAT){
+        if(parsed?.format!==LOCK_FORMAT)throw Error('暗号化ファイルの形式が正しくありません。');
+        // Fail early on incompatible/corrupt envelopes; password isn't needed yet.
+        if(parsed.version!==LOCK_VERSION||parsed.kdf!=='PBKDF2-SHA256'||
+           parsed.iterations!==LOCK_ITERATIONS||parsed.cipher!=='AES-256-GCM')
+          throw Error('対応していない暗号化ファイルです。');
+        lockedText=raw;
+        passwordPanel.hidden=false;
+        preview.textContent='暗号化VS馬ファイル：'+f.name+'（まだ登録されていません）';
+        say('書き出し時に設定したパスワードを入力して「復号して読み込む」を押してください。');
+        passwordInput.focus();
+      }else{
+        applyParsedHorse(parsed,serial);
       }
-      preview.textContent='登録予定：'+chosen.name+' ／ '+chosen.runner.age+'歳 ／ 装備反映後の7能力';
-      say(auth?.currentUser?'「この馬を公式VSに登録する」を押してください。':'ログインしてから登録してください。');
-    }catch(err){say('読み込めません：'+String(err.message||err));}
+    }catch(err){if(serial===selectionSerial)say('読み込めません：'+String(err.message||err));}
     updateSubmit();
+  });
+  async function unlockSelected(){
+    if(unlocking||!lockedText||!file.files?.[0])return;
+    let password=passwordInput.value;
+    if(password.length<10){say('書き出し時のパスワードを10文字以上で入力してください。');return;}
+    const serial=selectionSerial;
+    const payload=lockedText;
+    unlocking=true;unlockButton.disabled=true;
+    say('暗号化データをこの端末内で復号しています…');
+    try{
+      const plain=await decryptLockedVs(payload,password);
+      const data=JSON.parse(plain);
+      if(serial!==selectionSerial)return;
+      applyParsedHorse(data,serial);
+      lockedText=null;
+      passwordPanel.hidden=true;
+    }catch(err){
+      if(serial===selectionSerial){chosen=null;preview.textContent='復号できませんでした。パスワードを確認してください。';say('読み込めません：'+String(err.message||err));}
+    }finally{
+      password='';passwordInput.value='';unlocking=false;unlockButton.disabled=false;
+      updateSubmit();
+    }
+  }
+  unlockButton.addEventListener('click',unlockSelected);
+  passwordInput.addEventListener('keydown',event=>{
+    if(event.key==='Enter'){event.preventDefault();unlockSelected();}
   });
   submit.addEventListener('click',async()=>{
     if(!ready||!chosen||!auth.currentUser||busy)return;
