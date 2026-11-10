@@ -13,6 +13,7 @@
   const prize=amount=>new Intl.NumberFormat('ja-JP').format(amount)+'円';
   const startMs=m=>m.slot*(m.intervalMinutes===15?SLOT_MS:600000);
   const completedMs=m=>startMs(m)+PAPER_MS+m.durationMs;
+  const releaseMs=m=>startMs(m)+(m.intervalMinutes===15?SLOT_MS:600000);
   const normalOwner=name=>typeof name==='string' && [...name].length<=24 &&
     !/[\u0000-\u001f\u007f]/.test(name) ? name.trim():'';
   function rows(){
@@ -21,7 +22,7 @@
     for(const meta of manifest.records){
       if(!meta || !Number.isSafeInteger(meta.slot) || !Number.isFinite(meta.durationMs) || !Array.isArray(meta.results))continue;
       const completed=completedMs(meta);
-      if(now<completed || now>=completed+DAY_MS || dateKey(completed)!==today)continue;
+      if(now<completed || now<releaseMs(meta) || now>=completed+DAY_MS || dateKey(completed)!==today)continue;
       for(const row of meta.results){
         if(!row || typeof row.name!=='string' || !Number.isSafeInteger(row.prizeYen) || row.prizeYen<=0)continue;
         const owner=normalOwner(row.ownerName),key=owner?'player\u0000'+owner+'\u0000'+row.name:'horse\u0000'+row.name;
