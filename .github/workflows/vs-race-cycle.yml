@@ -12,6 +12,7 @@ on:
       - 'site.js'
       - 'index.html'
       - 'registration.js'
+      - 'owner-ranking.js'
       - 'firebase-config.js'
       - 'tools/registered_horses.py'
       - 'tools/consume_vs_entries.py'
@@ -72,7 +73,7 @@ jobs:
       - name: Stage site files only
         run: |
           mkdir -p public_site/races
-          cp index.html site.js registration.js firebase-config.js race_catalog.json race_playlist.json public_site/
+          cp index.html site.js owner-ranking.js registration.js firebase-config.js race_catalog.json race_playlist.json public_site/
           cp vs_replay_engine_part1.txt vs_replay_engine_part2.txt public_site/
           cp -a races/. public_site/races/
       - name: Upload official VS site
