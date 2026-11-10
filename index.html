@@ -44,6 +44,10 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
 #vs-ranking-description{color:#b5c7bf;font-size:12px;margin:6px 0 14px}
 @media(max-width:520px){.vs-ranking-grid{font-size:12px}.vs-ranking-grid th,.vs-ranking-grid td{padding:9px 4px}}
   #vs-entry-file{display:block;width:100%;padding:10px 0;color:#f1e1b6;font-size:13px}
+  .vs-entry-password-panel[hidden]{display:none!important}
+  .vs-entry-password-panel{margin-top:12px;padding:12px;border:1px solid #b89551;border-radius:8px;background:#061a18a8}
+  #vs-entry-password{display:block;width:100%;min-height:44px;margin:7px 0 12px;padding:9px 11px;border:1px solid #b89551;border-radius:7px;background:#102523;color:#ffe6ae;font-size:16px}
+  #vs-entry-unlock{width:100%}
   .vs-entry-label{display:block;margin-top:13px;color:#ffe6ae;font-size:13px}
   #vs-entry-submit{margin:12px 0;width:100%}
   #vs-entry-preview{color:#f2db9c!important;font-weight:700}
@@ -91,7 +95,7 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
         <div>
           <div class="guide-label">RACE CONCIERGE</div>
           <h2>秘書からのご案内</h2>
-          <p>ようこそ、公式VSレース会場へ♡<br>ゲームの対戦馬JSONを登録して、公式VSレースに参加できます。</p>
+          <p>ようこそ、公式VSレース会場へ♡<br>ゲームの暗号化されたVS登録馬（.dbfvs）または従来のJSONを登録して、公式VSレースに参加できます。</p>
         </div>
       </section>
 
@@ -122,19 +126,26 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
             <p id="vs-entry-myhorse">自分の登録馬：ログイン後に確認できます。</p>
             <p id="vs-entry-my-status">出走状況：未確認</p>
           </div>
-          <p>ゲームの「対戦馬一覧」から「この馬のJSONを書き出す」を押し、そのファイルを選んでください。登録は1アカウントにつき1頭です。</p>
+          <p>ゲームの「対戦馬一覧」から書き出した暗号化ファイル（.dbfvs）を選んでください。従来の対戦馬JSONも読み込めます。登録は1アカウントにつき1頭です。</p>
           <div class="vs-entry-auth" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
             <button class="vs-watch-btn" id="vs-entry-google" type="button">Googleでログイン</button>
             <button class="vs-watch-btn" id="vs-entry-guest" type="button">ゲストでログイン</button>
           </div>
           <p class="small" id="vs-entry-login-status" aria-live="polite">未ログイン</p>
-          <label for="vs-entry-file" class="vs-entry-label">対戦馬JSONを選ぶ</label>
-          <input id="vs-entry-file" type="file" accept=".json,application/json">
+          <label for="vs-entry-file" class="vs-entry-label">VS登録馬ファイルを選ぶ（.dbfvs / .json）</label>
+          <input id="vs-entry-file" type="file" accept=".dbfvs,.json,application/json,application/octet-stream">
+          <div id="vs-entry-password-panel" class="vs-entry-password-panel" hidden>
+            <label for="vs-entry-password" class="vs-entry-label">暗号化ファイルのパスワード</label>
+            <input id="vs-entry-password" type="password" autocomplete="off" spellcheck="false"
+                   placeholder="書き出し時に設定したパスワード（10文字以上）">
+            <button class="vs-watch-btn" id="vs-entry-unlock" type="button">パスワードで復号して読み込む</button>
+            <p class="small">パスワードはこの端末のブラウザ内での復号だけに使用し、Firebaseには送信・保存しません。復号した馬の能力など出走に必要な情報は従来どおりFirebaseへ登録されます。</p>
+          </div>
           <label for="vs-entry-ownername" class="vs-entry-label">オーナー名（賞金ランキングに公開）</label>
           <input id="vs-entry-ownername" type="text" maxlength="24" autocomplete="nickname"
                  placeholder="例：山田牧場（24文字以内）"
                  style="width:100%;box-sizing:border-box;min-height:42px;padding:9px 11px;border-radius:7px;border:1px solid #b89551;background:#102523;color:#ffe6ae">
-          <p class="small">対戦馬JSONにオーナー名が含まれる場合は自動入力します。ランキングに表示する公開名です。</p>
+          <p class="small">馬データにオーナー名が含まれる場合は自動入力します。ランキングに表示する公開名です。</p>
           <p id="vs-entry-preview" aria-live="polite"></p>
           <button class="vs-watch-btn" id="vs-entry-submit" type="button" disabled>この馬を公式VSに登録する</button>
           <p id="vs-entry-message" role="status" aria-live="polite">登録受付サービスの接続状況を確認しています。</p>
