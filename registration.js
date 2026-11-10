@@ -8,15 +8,15 @@
   const preview=$('vs-entry-preview'),loginStatus=$('vs-entry-login-status');
   const google=$('vs-entry-google'),guest=$('vs-entry-guest');
   const ownerInput=$('vs-entry-ownername');
-  const passwordPanel=$('vs-entry-password-panel');
-  const passwordInput=$('vs-entry-password');
-  const unlockButton=$('vs-entry-unlock');
-  if(!file||!submit||!message||!preview||!loginStatus||!google||!guest||!ownerInput||!passwordPanel||!passwordInput||!unlockButton)return;
+  if(!file||!submit||!message||!preview||!loginStatus||!google||!guest||!ownerInput)return;
   const cleanOwner=value=>typeof value==='string' ? value.trim().replace(/[\u0000-\u001f\u007f]/g,'') : '';
   const validOwner=value=>value.length>=1 && [...value].length<=24 && !/[\u0000-\u001f\u007f]/.test(value);
   const cfg=window.VS_FIREBASE_CONFIG;
   let auth=null,db=null, sdk=null,chosen=null,busy=false,ready=false;
-  let lockedText=null,selectionSerial=0,unlocking=false;
+  let selectionSerial=0;
+  // Enter your deployed Worker URL here. This URL is public; never put the private key here.
+  const SECURE_REGISTER_URL='https://derby-vs-registration.aomusi45.workers.dev';
+  const workerReady=()=>/^https:\/\/[^\s/]+\/?.*$/i.test(SECURE_REGISTER_URL) && !SECURE_REGISTER_URL.includes('SET_YOUR_');
   const say=s=>{message.textContent=s;};
 
   // Public racing calendar and privacy-safe registration counts.
@@ -228,7 +228,8 @@
     const jsonOwner=ownerCandidates.map(cleanOwner).find(validOwner)||'';
     return {horseId,name,runner,jsonOwner};
   }
-  const updateSubmit=()=>{submit.disabled=busy||!ready||!chosen||!auth?.currentUser||!validOwner(cleanOwner(ownerInput.value));};
+  const updateSubmit=()=>{submit.disabled=busy||!ready||!chosen||!auth?.currentUser||
+    (chosen.sealed?!workerReady():!validOwner(cleanOwner(ownerInput.value)));};
   ownerInput.addEventListener('input',updateSubmit);
   async function init(){
     if(!cfg||cfg.projectId!=='derby-vs-arena'||!cfg.apiKey){
@@ -291,37 +292,17 @@
     try{await sdk.signInAnonymously(auth);}
     catch(err){say('ゲストログインに失敗：'+String(err.code||err.message||err));}
   });
-  // DERBY_003 and later: exact locked VS format written by the game.
-  // Password and decrypted source JSON are never sent to Firestore.
-  const LOCK_FORMAT='derby-fantasy-vs-locked';
-  const LOCK_VERSION=1;
-  const LOCK_ITERATIONS=250000;
-  function readBase64(value){
-    if(typeof value!=='string'||value.length>2000000||!value.length||
-       !/^[A-Za-z0-9+/]*={0,2}$/.test(value)||value.length%4!==0)
-      throw Error('暗号化ファイルのデータ形式が不正です。');
-    try{return Uint8Array.from(atob(value),ch=>ch.charCodeAt(0));}
-    catch(_){throw Error('暗号化ファイルのデータ形式が不正です。');}
-  }
-  async function decryptLockedVs(text,password){
-    if(!globalThis.crypto?.subtle)throw Error('このブラウザでは復号できません。HTTPSで開いてください。');
-    let outer;
-    try{outer=JSON.parse(text);}catch(_){throw Error('暗号化ファイルのJSON形式が不正です。');}
-    if(!outer||outer.format!==LOCK_FORMAT||outer.version!==LOCK_VERSION||
-       outer.kdf!=='PBKDF2-SHA256'||outer.iterations!==LOCK_ITERATIONS||
-       outer.cipher!=='AES-256-GCM')
-      throw Error('対応していない暗号化ファイルです。');
-    const salt=readBase64(outer.salt),iv=readBase64(outer.iv),data=readBase64(outer.data);
-    if(salt.length!==16||iv.length!==12||data.length<17)
-      throw Error('暗号化ファイルが破損しています。');
-    try{
-      const master=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),
-        'PBKDF2',false,['deriveKey']);
-      const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:LOCK_ITERATIONS,hash:'SHA-256'},
-        master,{name:'AES-GCM',length:256},false,['decrypt']);
-      const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,data);
-      return new TextDecoder('utf-8',{fatal:true}).decode(plain);
-    }catch(_){throw Error('パスワードが違うか、ファイルが改変されています。');}
+  // New encrypted VS files: the browser cannot decrypt them, by design.
+  // Only the private-key Worker can decrypt and persist the normalized roster.
+  const SEALED_FORMAT='derby-fantasy-vs-sealed';
+  const SEALED_KEY_ID='dbf-vs-20261110-k1';
+  function validSealed(raw){
+    return raw && raw.format===SEALED_FORMAT && raw.version===2 &&
+      raw.keyId===SEALED_KEY_ID && raw.keyWrap==='RSA-OAEP-SHA256' &&
+      raw.cipher==='AES-256-GCM' &&
+      typeof raw.wrappedKey==='string' && raw.wrappedKey.length<1024 &&
+      typeof raw.iv==='string' && raw.iv.length<80 &&
+      typeof raw.data==='string' && raw.data.length<1600000;
   }
   function applyParsedHorse(data,serial){
     if(serial!==selectionSerial)return;
@@ -337,77 +318,64 @@
   }
   file.addEventListener('change',async()=>{
     const serial=++selectionSerial;
-    chosen=null;lockedText=null;
-    passwordInput.value='';passwordPanel.hidden=true;
-    preview.textContent='';updateSubmit();
+    chosen=null; preview.textContent=''; updateSubmit();
     const f=file.files?.[0];if(!f)return;
     if(f.size>1048576||f.size===0||!(/\.(json|dbfvs)$/i.test(f.name))){
-      say('1MB以下の .dbfvs または .json ファイルを選んでください。');return;
+      say('1MB以下の .dbfvs または .json を選択してください。');return;
     }
     try{
       const raw=await f.text();
       if(serial!==selectionSerial)return;
       const parsed=JSON.parse(raw);
-      if(/\.dbfvs$/i.test(f.name)||parsed?.format===LOCK_FORMAT){
-        if(parsed?.format!==LOCK_FORMAT)throw Error('暗号化ファイルの形式が正しくありません。');
-        // Fail early on incompatible/corrupt envelopes; password isn't needed yet.
-        if(parsed.version!==LOCK_VERSION||parsed.kdf!=='PBKDF2-SHA256'||
-           parsed.iterations!==LOCK_ITERATIONS||parsed.cipher!=='AES-256-GCM')
-          throw Error('対応していない暗号化ファイルです。');
-        lockedText=raw;
-        passwordPanel.hidden=false;
-        preview.textContent='暗号化VS馬ファイル：'+f.name+'（まだ登録されていません）';
-        say('書き出し時に設定したパスワードを入力して「復号して読み込む」を押してください。');
-        passwordInput.focus();
+      if(/\.dbfvs$/i.test(f.name)){
+        if(!validSealed(parsed))throw Error('旧式または非対応の .dbfvs です。新しいDBFゲームから書き出し直してください。');
+        chosen={sealed:true,envelope:parsed};
+        preview.textContent='自動暗号化VS馬：'+f.name+'（馬名・能力は登録サーバーで確認）';
+        say(workerReady()?'パスワード不要です。「この馬を公式VSに登録する」を押してください。':
+          '管理者による暗号化登録サーバーの設定がまだ終わっていません。');
       }else{
+        if(parsed?.format===SEALED_FORMAT || parsed?.format==='derby-fantasy-vs-locked')
+          throw Error('暗号化馬は .dbfvs ファイルを選択してください。');
         applyParsedHorse(parsed,serial);
       }
     }catch(err){if(serial===selectionSerial)say('読み込めません：'+String(err.message||err));}
     updateSubmit();
   });
-  async function unlockSelected(){
-    if(unlocking||!lockedText||!file.files?.[0])return;
-    let password=passwordInput.value;
-    if(password.length<10){say('書き出し時のパスワードを10文字以上で入力してください。');return;}
-    const serial=selectionSerial;
-    const payload=lockedText;
-    unlocking=true;unlockButton.disabled=true;
-    say('暗号化データをこの端末内で復号しています…');
-    try{
-      const plain=await decryptLockedVs(payload,password);
-      const data=JSON.parse(plain);
-      if(serial!==selectionSerial)return;
-      applyParsedHorse(data,serial);
-      lockedText=null;
-      passwordPanel.hidden=true;
-    }catch(err){
-      if(serial===selectionSerial){chosen=null;preview.textContent='復号できませんでした。パスワードを確認してください。';say('読み込めません：'+String(err.message||err));}
-    }finally{
-      password='';passwordInput.value='';unlocking=false;unlockButton.disabled=false;
-      updateSubmit();
-    }
-  }
-  unlockButton.addEventListener('click',unlockSelected);
-  passwordInput.addEventListener('keydown',event=>{
-    if(event.key==='Enter'){event.preventDefault();unlockSelected();}
-  });
   submit.addEventListener('click',async()=>{
     if(!ready||!chosen||!auth.currentUser||busy)return;
     const ownerName=cleanOwner(ownerInput.value);
-    if(!validOwner(ownerName)){say('公開するオーナー名を1〜24文字で入力してください。');return;}
-    busy=true;updateSubmit();say('Firebaseに登録情報を保存中…');
+    if(ownerName&&!validOwner(ownerName)){say('公開するオーナー名は1〜24文字にしてください。');return;}
+    if(!chosen.sealed&&!validOwner(ownerName)){say('公開するオーナー名を1〜24文字で入力してください。');return;}
+    busy=true;updateSubmit();say('公式VS登録処理中…');
     try{
       const user=auth.currentUser;
-      const payload={ownerUid:user.uid,ownerName,horseId:chosen.horseId,horseName:chosen.name,
-        roster:chosen.runner,updatedAt:sdk.serverTimestamp()};
-      await sdk.setDoc(sdk.doc(db,'vs_entries',user.uid),payload);
-      // Server-confirmed write, then read to verify the saved horse.
-      const result=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
-      if(!result.exists()||result.data().horseId!==chosen.horseId)
+      let horseName,horseId,publicOwner;
+      if(chosen.sealed){
+        if(!workerReady())throw Error('暗号化登録サーバーURLの設定が必要です。');
+        const token=await sdk.getIdToken(user);
+        // Passwords, private keys, and plaintext abilities are NOT on the site.
+        const response=await fetch(SECURE_REGISTER_URL.replace(/\/+$/,'')+'/register',{
+          method:'POST',mode:'cors',cache:'no-store',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body:JSON.stringify({envelope:chosen.envelope,ownerName})
+        });
+        let result;
+        try{result=await response.json();}catch(_){throw Error('登録サーバーからの応答が不正です。');}
+        if(!response.ok||!result.ok)throw Error(result.error||'暗号化登録に失敗しました。');
+        horseName=result.horseName;horseId=result.horseId;publicOwner=result.ownerName;
+      }else{
+        const payload={ownerUid:user.uid,ownerName,horseId:chosen.horseId,horseName:chosen.name,
+          roster:chosen.runner,updatedAt:sdk.serverTimestamp()};
+        await sdk.setDoc(sdk.doc(db,'vs_entries',user.uid),payload);
+        horseName=chosen.name;horseId=chosen.horseId;publicOwner=ownerName;
+      }
+      // Verify what Firestore actually committed, never claim success early.
+      const stored=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
+      if(!stored.exists()||stored.data().horseId!==horseId)
         throw Error('登録情報を読み戻せませんでした。');
-      say('登録完了：'+chosen.name+'（オーナー：'+ownerName+'）。1回出走すると登録が解除されます。再出走するにはもう一度登録してください。');
+      say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。1回出走すると登録解除されます。再出走には再登録してください。');
       preview.textContent='※ 1登録1出走・最大18頭。同じ馬が同じGⅠに出走できるのは日本時間で1日1回まで。';
-      await updateOwnFromDocument(user,result.data());
+      await updateOwnFromDocument(user,stored.data());
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
     finally{busy=false;updateSubmit();}
   });
