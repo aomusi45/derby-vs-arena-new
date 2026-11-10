@@ -3,154 +3,6 @@
   "records": [
     {
       "registrations": [
-        "8e90c9838d3e2bde234ed851",
-        "2354809477d1c473a33d4862",
-        "592470260ced5ea722084bd2",
-        "afb08b11986ad3a73cd54fde"
-      ],
-      "slot": 1993607,
-      "intervalMinutes": 15,
-      "file": "races/1993607.json.gz",
-      "raceId": "dfvs-mw9jpvm2-shif7u9e",
-      "name": "有馬記念",
-      "venue": "中山",
-      "distance": 2500,
-      "month": 12,
-      "durationMs": 162400,
-      "firstPrizeYen": 500000000,
-      "results": [
-        {
-          "place": 1,
-          "no": 6,
-          "name": "エルコンドルパスタ",
-          "timeSeconds": 142.6971738385468,
-          "margin": "―",
-          "prizeYen": 500000000
-        },
-        {
-          "place": 2,
-          "no": 5,
-          "name": "リバティアイラン",
-          "timeSeconds": 145.41178479357123,
-          "margin": "大差",
-          "prizeYen": 200000000
-        },
-        {
-          "place": 3,
-          "no": 3,
-          "name": "ジェンティルドンニ",
-          "timeSeconds": 145.9693720409464,
-          "margin": "4 1/4馬身",
-          "prizeYen": 125000000
-        },
-        {
-          "place": 4,
-          "no": 12,
-          "name": "コントレイン",
-          "timeSeconds": 146.68434443958483,
-          "margin": "5 1/2馬身",
-          "prizeYen": 75000000
-        },
-        {
-          "place": 5,
-          "no": 9,
-          "name": "マカヒキリ",
-          "timeSeconds": 147.09106794142915,
-          "margin": "3 1/4馬身",
-          "prizeYen": 50000000
-        },
-        {
-          "place": 6,
-          "no": 15,
-          "name": "グラスパンダー",
-          "timeSeconds": 147.1436394140491,
-          "margin": "クビ",
-          "prizeYen": 0
-        },
-        {
-          "place": 7,
-          "no": 13,
-          "name": "シンボリクリスマス",
-          "timeSeconds": 147.2598849746488,
-          "margin": "1馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 8,
-          "no": 14,
-          "name": "エアグルービー",
-          "timeSeconds": 147.2719688954649,
-          "margin": "ハナ",
-          "prizeYen": 0
-        },
-        {
-          "place": 9,
-          "no": 1,
-          "name": "リスグラシュガー",
-          "timeSeconds": 147.43131195573062,
-          "margin": "1 1/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 10,
-          "no": 10,
-          "name": "ブエナビスター",
-          "timeSeconds": 147.4337825452195,
-          "margin": "ハナ",
-          "prizeYen": 0
-        },
-        {
-          "place": 11,
-          "no": 8,
-          "name": "エリンコートラ",
-          "timeSeconds": 147.51526503712844,
-          "margin": "3/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 12,
-          "no": 16,
-          "name": "ロジユニヴァースト",
-          "timeSeconds": 148.24497552111367,
-          "margin": "5 1/2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 13,
-          "no": 2,
-          "name": "サンプルホース",
-          "timeSeconds": 152.19877615805362,
-          "margin": "大差",
-          "prizeYen": 0
-        },
-        {
-          "place": 14,
-          "no": 7,
-          "name": "サンプルホース",
-          "timeSeconds": 153.55847313951128,
-          "margin": "8 1/2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 15,
-          "no": 4,
-          "name": "サンプルホース",
-          "timeSeconds": 155.3442173230783,
-          "margin": "大差",
-          "prizeYen": 0
-        },
-        {
-          "place": 16,
-          "no": 11,
-          "name": "サンプルホース",
-          "timeSeconds": 162.39208061393512,
-          "margin": "大差",
-          "prizeYen": 0
-        }
-      ]
-    },
-    {
-      "registrations": [
         "592470260ced5ea722084bd2",
         "2354809477d1c473a33d4862",
         "8e90c9838d3e2bde234ed851",
@@ -15413,9 +15265,9 @@
   "registrationSummary": {
     "version": 1,
     "registeredCount": 0,
-    "asOfMs": 1794332375530,
-    "nextSlot": 1993703,
+    "asOfMs": 1794333017559,
+    "nextSlot": 1993704,
     "nextCandidateCount": 0,
-    "nextFinal": true
+    "nextFinal": false
   }
 }
