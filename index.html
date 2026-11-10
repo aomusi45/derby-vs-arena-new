@@ -49,6 +49,25 @@
   .vs-entry-summary p{font-size:12px;line-height:1.6;margin:5px 0;color:#d3ddd1}
   #vs-entry-myhorse{color:#ffe0a1}
 </style>
+<style id="vs-archive-only-style">
+  /* V24: Completed-race archive replay only. No live viewing button. */
+  .vs-result-item .vs-archive-play,.vs-archive-action{display:inline-block;min-height:40px;margin-top:8px;
+    border:1px solid #ebce87;border-radius:8px;padding:8px 16px;
+    background:linear-gradient(180deg,#f8dfa3,#c49643);color:#152920;
+    font:inherit;font-size:13px;font-weight:900;cursor:pointer}
+  #vs-archive-room[hidden],#vs-archive-loading[hidden],#vs-archive-frame[hidden]{display:none!important}
+  #vs-archive-room{margin:18px 0 38px;border:1px solid #b89551;border-radius:12px;
+    padding:16px;background:#0b2520}
+  #vs-archive-top{display:flex;align-items:center;justify-content:space-between;
+    gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  #vs-archive-title{color:#ffe6a4;font-size:18px;margin:0}
+  #vs-archive-state{font-size:13px;line-height:1.8;color:#d8e1cf;margin:0 0 12px}
+  #vs-archive-frame{display:block;width:100%;height:max(680px,85vh);
+    border:1px solid #b89551;border-radius:8px;background:#091915}
+  #vs-archive-loading{padding:16px;line-height:1.8;color:#f5d88c;white-space:pre-line}
+  body.vs-archive-view .hero,body.vs-archive-view main,body.vs-archive-view .footer{display:none!important}
+  @media(max-width:720px){#vs-archive-frame{height:calc(100dvh - 175px);min-height:480px}}
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -146,6 +165,15 @@
     </main>
 
 
+    <section id="vs-archive-room" hidden aria-label="終了した公式VSレースの再生画面">
+      <div id="vs-archive-top">
+        <h2 id="vs-archive-title">公式VSレース 再生</h2>
+        <button type="button" class="vs-archive-action" id="vs-archive-back">レース結果へ戻る</button>
+      </div>
+      <p id="vs-archive-state" role="status" aria-live="polite">保存したレース記録を準備しています。</p>
+      <div id="vs-archive-loading" role="status">レース記録を読み込んでいます。</div>
+      <iframe id="vs-archive-frame" hidden title="終了した公式VSレースの再生映像" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
+    </section>
     <footer class="footer">
       DERBY FANTASY © VS ARENA
       <div class="small">※ レース結果は次のレースが開催中になってから公開します。</div>
@@ -153,6 +181,7 @@
   </div>
 
 <script src="site.js" defer></script>
+<script src="archive-replay.js" defer></script>
 <script src="owner-ranking.js" defer></script>
 <script src="firebase-config.js" defer></script>
 <script src="registration.js" defer></script>
