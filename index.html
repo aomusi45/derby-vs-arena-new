@@ -191,18 +191,40 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
   }
   #dbf-return-to-game:focus-visible{outline:3px solid #fff6bd;outline-offset:2px}
 </style>
-<a id="dbf-return-to-game" hidden
-   href="intent://return#Intent;scheme=dbfreturn;package=com.derbyfantasy.game;end"
-   aria-label="ダービーファンタジーのゲームに戻る">← ゲームに戻る</a>
+<button id="dbf-return-to-game" type="button" hidden aria-label="&#12466;&#12540;&#12512;&#12395;&#25147;&#12427;">&#8592; &#12466;&#12540;&#12512;&#12395;&#25147;&#12427;</button>
 <script id="dbf-arena-return-script">
 (function(){
   'use strict';
-  var params=new URLSearchParams(window.location.search);
-  // The marker is only for visibility, not an authentication or security claim.
-  if(params.get('from')!=='dbfapp'||!/Android/i.test(navigator.userAgent))return;
-  var button=document.getElementById('dbf-return-to-game');
-  if(button)button.hidden=false;
+  var params = new URLSearchParams(window.location.search);
+  // This flag controls button visibility only. It is not authentication.
+  if (params.get('from') !== 'dbfapp' || !/Android/i.test(navigator.userAgent)) return;
+  var button = document.getElementById('dbf-return-to-game');
+  if (!button) return;
+  button.hidden = false;
+  var busy = false;
+  function fallback() {
+    busy = false;
+    // Legacy browsers may have opened the arena in a separate JS window.
+    try { if (window.opener && !window.opener.closed) { window.close(); return; } } catch (_) {}
+    // For browsers that navigated from the game in the same view, use history.
+    if (window.history.length > 1) { window.history.back(); return; }
+    button.textContent = '端末の戻るキーでゲームへ';
+    button.setAttribute('aria-label', '端末の戻るキーでゲームに戻ってください');
+  }
+  button.addEventListener('click', function(event) {
+    event.preventDefault();
+    if (busy) return;
+    busy = true;
+    var native = window.flutter_inappwebview;
+    if (native && typeof native.callHandler === 'function') {
+      Promise.resolve().then(function(){ return native.callHandler('DBFReturnToGame'); }).then(
+        function(ok){ if (ok !== true) fallback(); },
+        fallback
+      );
+    } else fallback();
+  });
 })();
+
 </script>
 
 </body>
