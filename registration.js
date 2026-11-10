@@ -7,13 +7,14 @@
   const file=$('vs-entry-file'),submit=$('vs-entry-submit'),message=$('vs-entry-message');
   const preview=$('vs-entry-preview'),loginStatus=$('vs-entry-login-status');
   const google=$('vs-entry-google'),guest=$('vs-entry-guest');
-  const ownerInput=$('vs-entry-ownername');
+  const ownerInput=$('vs-entry-ownername'),ownerHint=$('vs-entry-owner-status');
   if(!file||!submit||!message||!preview||!loginStatus||!google||!guest||!ownerInput)return;
   const cleanOwner=value=>typeof value==='string' ? value.trim().replace(/[\u0000-\u001f\u007f]/g,'') : '';
   const validOwner=value=>value.length>=1 && [...value].length<=24 && !/[\u0000-\u001f\u007f]/.test(value);
   const cfg=window.VS_FIREBASE_CONFIG;
   let auth=null,db=null, sdk=null,chosen=null,busy=false,ready=false;
   let selectionSerial=0;
+  let reservedOwnerName='',profileLoaded=false;
   // Enter your deployed Worker URL here. This URL is public; never put the private key here.
   const SECURE_REGISTER_URL='https://derby-vs-registration.aomusi45.workers.dev';
   const workerReady=()=>/^https:\/\/[^\s/]+\/?.*$/i.test(SECURE_REGISTER_URL) && !SECURE_REGISTER_URL.includes('SET_YOUR_');
@@ -163,7 +164,7 @@
     if(auth?.currentUser?.uid!==user.uid)return;
     ownRegistration=docData;ownRegistrationId=null;
     if(docData?.horseName)lastRegistrationName=String(docData.horseName);
-    if(docData?.ownerName && !ownerInput.value)ownerInput.value=cleanOwner(docData.ownerName);
+    if(docData?.ownerName && !reservedOwnerName && !ownerInput.value)ownerInput.value=cleanOwner(docData.ownerName);
     updateSubmit();renderPublicStatus();
     if(docData?.horseId){
       try{
@@ -226,10 +227,11 @@
       snapshot.horse?.owner,snapshot.horse?.owner?.name,
       snapshot.profile?.ownerName,snapshot.farm?.ownerName];
     const jsonOwner=ownerCandidates.map(cleanOwner).find(validOwner)||'';
-    return {horseId,name,runner,jsonOwner};
+    return {horseId,name,runner,jsonOwner,originalSnapshot:snapshot};
   }
-  const updateSubmit=()=>{submit.disabled=busy||!ready||!chosen||!auth?.currentUser||
-    (chosen.sealed?!workerReady():!validOwner(cleanOwner(ownerInput.value)));};
+  const updateSubmit=()=>{submit.disabled=busy||!ready||!profileLoaded||!workerReady()||
+    !chosen||!auth?.currentUser||
+    (!chosen.sealed&&!validOwner(cleanOwner(ownerInput.value)));};
   ownerInput.addEventListener('input',updateSubmit);
   async function init(){
     if(!cfg||cfg.projectId!=='derby-vs-arena'||!cfg.apiKey){
@@ -247,20 +249,46 @@
     await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
     db=fsSdk.getFirestore(app);ready=true;
     authSdk.onAuthStateChanged(auth,async user=>{
-      ownRegistration=null;ownRegistrationId=null;updateSubmit();renderPublicStatus();
-      if(!user){loginStatus.textContent='未ログイン';say('Googleまたはゲストでログインして馬を登録してください。');return;}
+      ownRegistration=null;ownRegistrationId=null;
+      reservedOwnerName='';profileLoaded=false;
+      ownerInput.readOnly=false;
+      if(ownerHint)ownerHint.textContent='ログインするとオーナー名の取得状況を確認します。';
+      updateSubmit();renderPublicStatus();
+      if(!user){
+        loginStatus.textContent='未ログイン';
+        say('Googleまたはゲストでログインして馬を登録してください。');
+        return;
+      }
       loginStatus.textContent=(user.isAnonymous?'ゲスト':'ログイン中')+'：登録可能';
       try{
-        const snap=await fsSdk.getDoc(fsSdk.doc(db,'vs_entries',user.uid));
+        // Unlike vs_entries, this profile survives after a horse has raced.
+        const profile=await fsSdk.getDocFromServer(fsSdk.doc(db,'vs_owner_profiles',user.uid));
+        if(auth?.currentUser?.uid!==user.uid)return;
+        if(profile.exists()){
+          reservedOwnerName=cleanOwner(profile.data().ownerName);
+          if(!validOwner(reservedOwnerName))throw Error('保存済みのオーナー名が不正です');
+          ownerInput.value=reservedOwnerName;
+          ownerInput.readOnly=true;
+          if(ownerHint)ownerHint.textContent='取得済みの専用オーナー名です。出走後も保持され、変更できません。';
+        }else{
+          ownerInput.readOnly=false;
+          if(ownerHint)ownerHint.textContent='最初の登録でオーナー名を取得します。ほかのユーザーと同じ名前は使えません。';
+        }
+        profileLoaded=true;updateSubmit();
+        const snap=await fsSdk.getDocFromServer(fsSdk.doc(db,'vs_entries',user.uid));
         if(auth.currentUser?.uid!==user.uid)return;
         if(snap.exists()){
-          say('現在の登録馬：'+String(snap.data().horseName||'不明')+'。1回出走後に登録解除されます。別の馬で上書き登録できます。');
-          if(snap.data().ownerName && !ownerInput.value)ownerInput.value=cleanOwner(snap.data().ownerName);
+          say('現在の登録馬：'+String(snap.data().horseName||'不明')+'。1回出走後に登録解除されます。');
+          if(snap.data().ownerName && !reservedOwnerName && !ownerInput.value)
+            ownerInput.value=cleanOwner(snap.data().ownerName);
           await updateOwnFromDocument(user,snap.data());
         }else{
           say('登録受付中。ゲームのVS登録馬ファイルを選んでください。');
         }
-      }catch(err){say('登録状態を確認できません：'+String(err.code||err.message||err));}
+      }catch(err){
+        profileLoaded=false;updateSubmit();
+        say('オーナー名・登録状態を確認できません：'+String(err.code||err.message||err));
+      }
     });
     say('ログイン後、VS登録馬ファイルを選んで登録できます。');
     setInterval(refreshOwnRegistration,30000);
@@ -307,7 +335,8 @@
   function applyParsedHorse(data,serial){
     if(serial!==selectionSerial)return;
     chosen=normalize(data);
-    if(chosen.jsonOwner)ownerInput.value=chosen.jsonOwner;
+    if(reservedOwnerName)ownerInput.value=reservedOwnerName;
+    else if(chosen.jsonOwner)ownerInput.value=chosen.jsonOwner;
     else if(!ownerInput.value && auth?.currentUser?.displayName){
       const publicName=cleanOwner(auth.currentUser.displayName);
       if(validOwner(publicName))ownerInput.value=publicName;
@@ -350,30 +379,31 @@
     try{
       const user=auth.currentUser;
       let horseName,horseId,publicOwner;
-      if(chosen.sealed){
-        if(!workerReady())throw Error('暗号化登録サーバーURLの設定が必要です。');
-        const token=await sdk.getIdToken(user);
-        // Passwords, private keys, and plaintext abilities are NOT on the site.
-        const response=await fetch(SECURE_REGISTER_URL.replace(/\/+$/,'')+'/register',{
-          method:'POST',mode:'cors',cache:'no-store',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-          body:JSON.stringify({envelope:chosen.envelope,ownerName})
-        });
-        let result;
-        try{result=await response.json();}catch(_){throw Error('登録サーバーからの応答が不正です。');}
-        if(!response.ok||!result.ok)throw Error(result.error||'暗号化登録に失敗しました。');
-        horseName=result.horseName;horseId=result.horseId;publicOwner=result.ownerName;
-      }else{
-        const payload={ownerUid:user.uid,ownerName,horseId:chosen.horseId,horseName:chosen.name,
-          roster:chosen.runner,updatedAt:sdk.serverTimestamp()};
-        await sdk.setDoc(sdk.doc(db,'vs_entries',user.uid),payload);
-        horseName=chosen.name;horseId=chosen.horseId;publicOwner=ownerName;
-      }
+      if(!workerReady())throw Error('公式登録サーバーの設定が必要です。');
+      const token=await sdk.getIdToken(user);
+      // All registration paths now use the server's atomic owner-name claim.
+      // Never send a password or private key to the server.
+      const response=await fetch(SECURE_REGISTER_URL.replace(/\/+$/,'')+
+        (chosen.sealed?'/register':'/register-json'),{
+        method:'POST',mode:'cors',cache:'no-store',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body:JSON.stringify(chosen.sealed?
+          {envelope:chosen.envelope,ownerName}:
+          {snapshot:chosen.originalSnapshot,ownerName})
+      });
+      let result;
+      try{result=await response.json();}
+      catch(_){throw Error('登録サーバーからの応答が不正です。');}
+      if(!response.ok||!result.ok)throw Error(result.error||'登録に失敗しました。');
+      horseName=result.horseName;horseId=result.horseId;publicOwner=result.ownerName;
       // Verify what Firestore actually committed, never claim success early.
       const stored=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
       if(!stored.exists()||stored.data().horseId!==horseId)
         throw Error('登録情報を読み戻せませんでした。');
-      say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。1回出走すると登録解除されます。再出走には再登録してください。');
+      reservedOwnerName=publicOwner;
+      profileLoaded=true;ownerInput.value=publicOwner;ownerInput.readOnly=true;
+      if(ownerHint)ownerHint.textContent='専用オーナー名として取得済み。出走後も保存されます。';
+      say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。このオーナー名は本人専用です。1回出走すると馬の登録だけ解除されます。');
       preview.textContent='※ 1登録1出走・最大18頭。同じ馬が同じGⅠに出走できるのは日本時間で1日1回まで。';
       await updateOwnFromDocument(user,stored.data());
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
