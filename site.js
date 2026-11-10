@@ -79,33 +79,8 @@
     for(const meta of released){
       const box=document.createElement('div');box.className='vs-result-item';
       const heading=document.createElement('div');heading.className='vs-result-title';
-      heading.textContent=clock(slotStartMs(meta))+'　'+meta.name;
-      const winner=meta.results[0];
-      const summary=document.createElement('div');summary.className='vs-result-info';
-      summary.textContent='1着 '+winner.name+' ／ '+yen(winner.prizeYen);
-      const details=document.createElement('details');details.className='vs-result-details';
-      const toggle=document.createElement('summary');toggle.textContent='全着順・タイム・着差を見る';
-      const table=document.createElement('table');table.className='vs-result-grid';
-      const thead=document.createElement('thead');const headRow=document.createElement('tr');
-      for(const label of ['着順','馬名','タイム','着差']){
-        const cell=document.createElement('th');cell.textContent=label;headRow.append(cell);
-      }
-      thead.append(headRow);table.append(thead);
-      const tbody=document.createElement('tbody');
-      for(const row of meta.results){
-        const tr=document.createElement('tr');
-        const secs=Number(row.timeSeconds);
-        const hundredths=Math.round(secs*100);
-        const time=Number.isFinite(secs)&&secs>0
-          ? Math.floor(hundredths/6000)+':'+String(Math.floor(hundredths/100)%60).padStart(2,'0')+'.'+String(hundredths%100).padStart(2,'0')
-          : '―';
-        for(const value of [row.place+'着',row.name,time,typeof row.margin==='string'?row.margin:'―']){
-          const td=document.createElement('td');td.textContent=value;tr.append(td);
-        }
-        tbody.append(tr);
-      }
-      table.append(tbody);details.append(toggle,table);
-      box.append(heading,summary,details);results.append(box);
+      heading.textContent=meta.name;
+      box.append(heading);results.append(box);
     }
     const total=new Map();
     for(const meta of released){
