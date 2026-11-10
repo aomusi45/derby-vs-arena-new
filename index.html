@@ -177,5 +177,33 @@ body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{disp
 <script src="owner-ranking.js" defer></script>
 <script src="firebase-config.js" defer></script>
 <script src="registration.js" defer></script>
+<!-- DBF arena return-to-game button. Place immediately before </body>. -->
+<style id="dbf-arena-return-style">
+  #dbf-return-to-game[hidden]{display:none!important}
+  #dbf-return-to-game{
+    position:fixed;left:max(12px,env(safe-area-inset-left));
+    top:calc(10px + env(safe-area-inset-top));z-index:2147483000;
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 15px;border-radius:999px;
+    border:1px solid #f1d289;background:#12332d;color:#fff1bd;
+    box-shadow:0 3px 20px #0009;font:800 14px/1.2 system-ui,sans-serif;
+    text-decoration:none;touch-action:manipulation;
+  }
+  #dbf-return-to-game:focus-visible{outline:3px solid #fff6bd;outline-offset:2px}
+</style>
+<a id="dbf-return-to-game" hidden
+   href="intent://return#Intent;scheme=dbfreturn;package=com.derbyfantasy.game;end"
+   aria-label="ダービーファンタジーのゲームに戻る">← ゲームに戻る</a>
+<script id="dbf-arena-return-script">
+(function(){
+  'use strict';
+  var params=new URLSearchParams(window.location.search);
+  // The marker is only for visibility, not an authentication or security claim.
+  if(params.get('from')!=='dbfapp'||!/Android/i.test(navigator.userAgent))return;
+  var button=document.getElementById('dbf-return-to-game');
+  if(button)button.hidden=false;
+})();
+</script>
+
 </body>
 </html>
