@@ -5,151 +5,6 @@
       "registrations": [],
       "horseTokens": [],
       "registrationSnapshotMs": 0,
-      "slot": 1993679,
-      "intervalMinutes": 15,
-      "file": "races/1993679.json.gz",
-      "raceId": "dfvs-mwamb25a-4431qb7b",
-      "name": "有馬記念",
-      "venue": "中山",
-      "distance": 2500,
-      "month": 12,
-      "durationMs": 145325,
-      "firstPrizeYen": 500000000,
-      "results": [
-        {
-          "place": 1,
-          "no": 4,
-          "name": "エルコンドルパスタ",
-          "timeSeconds": 139.22501713236227,
-          "margin": "―",
-          "prizeYen": 500000000
-        },
-        {
-          "place": 2,
-          "no": 1,
-          "name": "リバティアイラン",
-          "timeSeconds": 140.1113167739135,
-          "margin": "7 1/2馬身",
-          "prizeYen": 200000000
-        },
-        {
-          "place": 3,
-          "no": 2,
-          "name": "コントレイン",
-          "timeSeconds": 140.83477907100277,
-          "margin": "6馬身",
-          "prizeYen": 125000000
-        },
-        {
-          "place": 4,
-          "no": 15,
-          "name": "クロワデュノワール",
-          "timeSeconds": 141.25594167410551,
-          "margin": "3 1/2馬身",
-          "prizeYen": 75000000
-        },
-        {
-          "place": 5,
-          "no": 16,
-          "name": "ジェンティルドンニ",
-          "timeSeconds": 141.5620665029476,
-          "margin": "2 1/2馬身",
-          "prizeYen": 50000000
-        },
-        {
-          "place": 6,
-          "no": 7,
-          "name": "メジロマックイーヌ",
-          "timeSeconds": 141.93348637840853,
-          "margin": "3馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 7,
-          "no": 9,
-          "name": "ダイワスカーレッタ",
-          "timeSeconds": 141.93676908818256,
-          "margin": "ハナ",
-          "prizeYen": 0
-        },
-        {
-          "place": 8,
-          "no": 3,
-          "name": "クロノジェネシア",
-          "timeSeconds": 142.01538204111694,
-          "margin": "1/2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 9,
-          "no": 5,
-          "name": "リスグラシュガー",
-          "timeSeconds": 142.15257804424297,
-          "margin": "1馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 10,
-          "no": 10,
-          "name": "グラスパンダー",
-          "timeSeconds": 142.68935879085947,
-          "margin": "4 1/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 11,
-          "no": 14,
-          "name": "ブエナビスター",
-          "timeSeconds": 143.29044075466817,
-          "margin": "4 3/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 12,
-          "no": 6,
-          "name": "エアグルービー",
-          "timeSeconds": 143.32755043768321,
-          "margin": "クビ",
-          "prizeYen": 0
-        },
-        {
-          "place": 13,
-          "no": 12,
-          "name": "ドウデュースト",
-          "timeSeconds": 143.636333130956,
-          "margin": "2 1/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 14,
-          "no": 11,
-          "name": "シンボリクリスマス",
-          "timeSeconds": 144.15117975670145,
-          "margin": "3 3/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 15,
-          "no": 8,
-          "name": "ローブデコルテラ",
-          "timeSeconds": 144.96401578971518,
-          "margin": "6馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 16,
-          "no": 13,
-          "name": "ウメノファイター",
-          "timeSeconds": 145.3036848058541,
-          "margin": "2 1/2馬身",
-          "prizeYen": 0
-        }
-      ]
-    },
-    {
-      "registrations": [],
-      "horseTokens": [],
-      "registrationSnapshotMs": 0,
       "slot": 1993680,
       "intervalMinutes": 15,
       "file": "races/1993680.json.gz",
@@ -15390,15 +15245,10 @@
   "registrationSummary": {
     "version": 1,
     "registeredCount": 0,
-    "asOfMs": 1794397168476,
-    "nextSlot": 1993775,
-    "nextCandidateCount": 1,
-    "nextFinal": true,
-    "nextEntries": [
-      {
-        "horseName": "アリーナテスト",
-        "ownerName": "サンプルオーナー"
-      }
-    ]
+    "asOfMs": 1794397941298,
+    "nextSlot": 1993776,
+    "nextCandidateCount": 0,
+    "nextFinal": false,
+    "nextEntries": []
   }
 }
