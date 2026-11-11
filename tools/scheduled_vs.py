@@ -331,7 +331,7 @@ def has_expired(row: dict, at_ms: int) -> bool:
 def public_registration_summary(entries: list[dict], catalog: dict,
                                 records: list[dict], as_of_ms: int,
                                 published_at_ms: int | None = None) -> dict:
-    """Only publish aggregate counts. Never publish personal IDs or horse stats.
+    """Publish a minimal public entrant roster, without IDs or horse stats.
 
     A recorded upcoming slot already has its final selected entrants; an
     unrecorded slot has only candidates. Both are labelled explicitly.
@@ -343,8 +343,24 @@ def public_registration_summary(entries: list[dict], catalog: dict,
     if published is not None:
         candidate_count = len(published.get('registrations', []))
         final = True
+        # Published result rows contain public horse / owner names, but no IDs.
+        next_entries = [
+            {'horseName': row['name'], 'ownerName': row.get('ownerName', '')}
+            for row in published.get('results', [])
+            if isinstance(row, dict) and isinstance(row.get('name'), str)
+            and row.get('ownerName') and not row.get('isCom')
+        ]
+        # If the result does not contain every registered owner's name,
+        # preserve the count but do not claim this is a complete roster.
+        if len(next_entries) != candidate_count:
+            next_entries = []
     else:
-        candidate_count = len(registered_horses.choose(entries, card, next_slot, records))
+        chosen = registered_horses.choose(entries, card, next_slot, records)
+        candidate_count = len(chosen)
+        next_entries = [
+            {'horseName': row['runner']['name'], 'ownerName': row.get('ownerName', '')}
+            for row in chosen
+        ]
         final = False
     return {
         'version': 1,
@@ -353,6 +369,7 @@ def public_registration_summary(entries: list[dict], catalog: dict,
         'nextSlot': next_slot,
         'nextCandidateCount': candidate_count,
         'nextFinal': final,
+        'nextEntries': next_entries,
     }
 
 

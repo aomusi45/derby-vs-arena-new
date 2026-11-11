@@ -92,11 +92,12 @@ def snapshot_generated() -> dict[int, tuple[dict, bytes]]:
 
 
 def entry_summary_from(raw: dict) -> dict | None:
-    """Validate a public aggregate; never accept user details in the manifest."""
+    """Validate counts and intentionally public horse/owner names, never IDs."""
     entry = raw.get('registrationSummary')
-    if not isinstance(entry, dict) or set(entry) != {
-            'version', 'registeredCount', 'asOfMs', 'nextSlot',
-            'nextCandidateCount', 'nextFinal'}:
+    base_fields = {'version', 'registeredCount', 'asOfMs', 'nextSlot',
+                   'nextCandidateCount', 'nextFinal'}
+    if (not isinstance(entry, dict) or not base_fields.issubset(entry) or
+            set(entry) - base_fields - {'nextEntries'}):
         return None
     if (entry['version'] != 1 or type(entry['registeredCount']) is not int or
             not 0 <= entry['registeredCount'] <= 150 or
@@ -105,6 +106,14 @@ def entry_summary_from(raw: dict) -> dict | None:
             type(entry['nextCandidateCount']) is not int or
             not 0 <= entry['nextCandidateCount'] <= 18 or
             type(entry['nextFinal']) is not bool):
+        return None
+    roster = entry.get('nextEntries', [])
+    if (not isinstance(roster, list) or len(roster) > 18 or
+            any(not isinstance(row, dict) or set(row) != {'horseName','ownerName'} or
+                not isinstance(row['horseName'], str) or not 1 <= len(row['horseName']) <= 60 or
+                not isinstance(row['ownerName'], str) or len(row['ownerName']) > 24 or
+                any(ord(c)<32 or ord(c)==127 for c in row['horseName']+row['ownerName'])
+                for row in roster)):
         return None
     return entry
 
