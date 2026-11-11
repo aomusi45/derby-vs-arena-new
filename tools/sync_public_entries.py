@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Mirror only public horse/owner names from active registrations in Firestore.
+"""Mirror public horse/owner names and server-verified career counts from Firestore.
 
 Uses existing GitHub Actions service account, never publishes UIDs, abilities,
-private horse IDs or keys. Runs before race recording and after consumption.
+private horse IDs or keys. Counts come from the permanent official usage ledger.
+Runs before race recording and after consumption.
 No race or registration semantics are changed.
 """
 from __future__ import annotations
 import json
 import os
 import time
+from urllib.error import HTTPError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 import registered_horses
@@ -41,10 +43,34 @@ def simple_field(doc, key, kind='stringValue'):
     return doc.get('fields',{}).get(key,{}).get(kind)
 
 
-def active_names(documents, target_slot=None):
+def lifetime_count(token, horse_key, cache):
+    if horse_key in cache:
+        return cache[horse_key]
+    if not isinstance(horse_key,str) or len(horse_key)!=64 or any(c not in '0123456789abcdef' for c in horse_key):
+        raise ValueError('出走回数照合用の馬識別子が不正です')
+    url=API+BASE+'/vs_horse_usage/'+horse_key
+    try:
+        data=request_json(url,token)
+    except HTTPError as exc:
+        if exc.code == 404:
+            cache[horse_key]=0
+            return 0
+        raise
+    field=data.get('fields',{}).get('count',{}).get('integerValue')
+    if field is None:
+        raise ValueError('公式出走回数が不正です')
+    count=int(field)
+    if count<0 or count>20:
+        raise ValueError('公式出走回数が範囲外です')
+    cache[horse_key]=count
+    return count
+
+
+def active_names(documents, target_slot=None, token=None):
     result={}
     if target_slot is None:
         target_slot=int(time.time()*1000)//SLOT_MS+1
+    cache={}
     for doc in documents:
         row=registered_horses._decode_document(doc)
         submitted_ms=registered_horses.timestamp_us(row['updatedAt'])//1000
@@ -55,8 +81,14 @@ def active_names(documents, target_slot=None):
             raise ValueError('公開オーナー名が不正です')
         if owner in result:
             raise RuntimeError('重複したオーナー名が見つかりました。公開一覧を更新しません')
-        result[owner]={'ownerName':owner,'horseName':row['runner']['name'],
-                       'updatedAt':row['updatedAt']}
+        entry={'ownerName':owner,'horseName':row['runner']['name'],
+               'updatedAt':row['updatedAt']}
+        horse_key=doc.get('fields',{}).get('horseKey',{}).get('stringValue')
+        if horse_key:
+            if not token:
+                raise ValueError('出走回数照合にはサーバーの認証が必要です')
+            entry['appearanceCount']=lifetime_count(token,horse_key,cache)
+        result[owner]=entry
     return result
 
 
@@ -64,14 +96,20 @@ def build_writes(active, public):
     writes=[]
     for owner,entry in active.items():
         existing=public.get(owner)
-        if existing and all(simple_field(existing,k)==entry[k] for k in ('ownerName','horseName')) and \
-           simple_field(existing,'updatedAt','timestampValue')==entry['updatedAt']:
+        same=bool(existing and all(simple_field(existing,k)==entry[k] for k in ('ownerName','horseName')) and
+           simple_field(existing,'updatedAt','timestampValue')==entry['updatedAt'])
+        if 'appearanceCount' in entry:
+            same=same and simple_field(existing,'appearanceCount','integerValue')==str(entry['appearanceCount'])
+        if same:
             continue
         name=f'{BASE}/vs_public_entries/{owner}'
-        write={'update':{'name':name,'fields':{
+        fields={
             'ownerName':{'stringValue':entry['ownerName']},
             'horseName':{'stringValue':entry['horseName']},
-            'updatedAt':{'timestampValue':entry['updatedAt']}}},
+            'updatedAt':{'timestampValue':entry['updatedAt']}}
+        if 'appearanceCount' in entry:
+            fields['appearanceCount']={'integerValue':str(entry['appearanceCount'])}
+        write={'update':{'name':name,'fields':fields},
             'currentDocument':{'updateTime':existing['updateTime']} if existing else {'exists':False}}
         writes.append(write)
     for owner,doc in public.items():
@@ -88,7 +126,7 @@ def main():
     if os.getenv('FIREBASE_PROJECT_ID',PROJECT)!=PROJECT:
         raise ValueError('FirebaseプロジェクトIDが違います')
     token=registered_horses._access_token(secret)
-    active=active_names(list_docs(token,'vs_entries'))
+    active=active_names(list_docs(token,'vs_entries'),token=token)
     public_docs=list_docs(token,'vs_public_entries')
     public={}
     for doc in public_docs:
