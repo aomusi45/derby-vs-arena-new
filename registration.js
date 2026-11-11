@@ -370,6 +370,24 @@
       const user=auth.currentUser;
       let horseName,horseId,publicOwner;
       if(!workerReady())throw Error('公式登録サーバーの設定が必要です。');
+      // A guest session persists across uploads. The Worker currently saves to
+      // vs_entries/{uid}; another horse on the same account REPLACES that entry.
+      // Require explicit consent instead of silently erasing the previous horse.
+      // The server must independently enforce one owner per race atomically.
+      const existingSnap=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
+      const replaceExisting=existingSnap.exists();
+      if(existingSnap.exists()){
+        const existing=existingSnap.data();
+        const savedOwner=cleanOwner(existing.ownerName);
+        if(savedOwner && ownerName && savedOwner!==ownerName)
+          throw Error('このログインは「'+savedOwner+'」専用です。別オーナーとして登録するには別のアカウントでログインしてください。');
+        const oldHorse=String(existing.horseName||'登録済み馬');
+        const newHorse=chosen.sealed?'選択した馬':chosen.name;
+        if(!window.confirm('現在「'+oldHorse+'」が登録されています。\n同じログインのため「'+newHorse+'」を登録すると、先の馬は上書きされます。\nこのオーナーの登録馬を変更しますか？')){
+          say('登録を取り消しました。先に登録した馬はそのまま残ります。');
+          return;
+        }
+      }
       const token=await sdk.getIdToken(user);
       // All registration paths now use the server's atomic owner-name claim.
       // Never send a password or private key to the server.
@@ -378,8 +396,8 @@
         method:'POST',mode:'cors',cache:'no-store',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
         body:JSON.stringify(chosen.sealed?
-          {envelope:chosen.envelope,ownerName}:
-          {snapshot:chosen.originalSnapshot,ownerName})
+          {envelope:chosen.envelope,ownerName,replaceExisting}:
+          {snapshot:chosen.originalSnapshot,ownerName,replaceExisting})
       });
       let result;
       try{result=await response.json();}
