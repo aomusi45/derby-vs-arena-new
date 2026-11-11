@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import gzip
+import hashlib
 import json
 import os
 import re
@@ -200,6 +201,9 @@ async def record_in_browser(card: dict, entrants: list[dict] | None = None) -> d
                                 stamp_record_owners(record, entrants)
                                 record['registrations']=[x['registrationId'] for x in selected]
                                 record['horseTokens']=[x['horseToken'] for x in entrants]
+                                by_id={x['registrationId']:x for x in entrants}
+                                record['horseKeys']=[by_id[x['registrationId']]['horseKey'] for x in selected]
+                                record['rankingIds']=[hashlib.sha256(('dbf-ranking-v1|'+by_id[x['registrationId']]['horseKey']).encode()).hexdigest()[:32] for x in selected]
                             return record
                         if probe['startReady'] and not probe['ready']:
                             await page.evaluate('''() => window.__df47Start3D()''')
@@ -298,9 +302,30 @@ def validate_record(record: dict, card: dict) -> None:
 
 
 def metadata_for(record: dict, card: dict, slot: int) -> dict:
+    ids=record.get('registrations',[])
+    aliases=record.get('rankingIds',[])
+    if len(ids)!=len(aliases):
+        if ids: raise ValueError('出走馬とランキングIDの対応が不足しています')
+    ranking_by_receipt=dict(zip(ids,aliases))
+    source_field=record.get('field',[])
+    def ranking_id(row):
+        no=row.get('no')
+        if type(no) is int and 1 <= no <= len(source_field):
+            h=source_field[no-1]
+            if h.get('registrationId') in ranking_by_receipt:
+                return 'p_'+ranking_by_receipt[h['registrationId']]
+        # COM horses have a permanent public game name as their stable identity.
+        # Do not combine a player and a COM even if they share a name.
+        if row.get('ownerName'):
+            # Fallback for older recorders which omit registrationId from the
+            # saved field; keep players and COM in distinct namespaces.
+            src='legacy-player|'+row['ownerName']+'|'+row['name']
+            return 'p_'+hashlib.sha256(src.encode()).hexdigest()[:32]
+        return 'c_'+hashlib.sha256(('com|'+row['name']).encode()).hexdigest()[:32]
     return {
         'registrations': record.get('registrations', []),
         'horseTokens': record.get('horseTokens', []),
+        'horseKeys': record.get('horseKeys', []),
         'registrationSnapshotMs': record.get('registrationSnapshotMs', 0),
         'slot': slot,
         'intervalMinutes': 15,
@@ -314,6 +339,7 @@ def metadata_for(record: dict, card: dict, slot: int) -> dict:
             'place': row['place'], 'no': row['no'], 'name': row['name'],
             'timeSeconds': row['timeSeconds'], 'margin': row.get('margin', '―'),
             'prizeYen': price_for(row['place'], card),
+            'rankingId': ranking_id(row),
             **({'ownerName': row['ownerName']} if row.get('ownerName') else {})
         } for row in record['results']]
     }
@@ -331,7 +357,7 @@ def has_expired(row: dict, at_ms: int) -> bool:
 def public_registration_summary(entries: list[dict], catalog: dict,
                                 records: list[dict], as_of_ms: int,
                                 published_at_ms: int | None = None) -> dict:
-    """Publish a minimal public entrant roster, without IDs or horse stats.
+    """Only publish aggregate counts. Never publish personal IDs or horse stats.
 
     A recorded upcoming slot already has its final selected entrants; an
     unrecorded slot has only candidates. Both are labelled explicitly.
@@ -343,24 +369,8 @@ def public_registration_summary(entries: list[dict], catalog: dict,
     if published is not None:
         candidate_count = len(published.get('registrations', []))
         final = True
-        # Published result rows contain public horse / owner names, but no IDs.
-        next_entries = [
-            {'horseName': row['name'], 'ownerName': row.get('ownerName', '')}
-            for row in published.get('results', [])
-            if isinstance(row, dict) and isinstance(row.get('name'), str)
-            and row.get('ownerName') and not row.get('isCom')
-        ]
-        # If the result does not contain every registered owner's name,
-        # preserve the count but do not claim this is a complete roster.
-        if len(next_entries) != candidate_count:
-            next_entries = []
     else:
-        chosen = registered_horses.choose(entries, card, next_slot, records)
-        candidate_count = len(chosen)
-        next_entries = [
-            {'horseName': row['runner']['name'], 'ownerName': row.get('ownerName', '')}
-            for row in chosen
-        ]
+        candidate_count = len(registered_horses.choose(entries, card, next_slot, records, {}))
         final = False
     return {
         'version': 1,
@@ -369,7 +379,6 @@ def public_registration_summary(entries: list[dict], catalog: dict,
         'nextSlot': next_slot,
         'nextCandidateCount': candidate_count,
         'nextFinal': final,
-        'nextEntries': next_entries,
     }
 
 
@@ -477,9 +486,15 @@ async def main() -> None:
     if os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON', '').strip():
         try:
             registered = registered_horses.load()
+            from horse_appearance_ledger import load_counts
+            usage_counts = load_counts()
+            for entry in registered:
+                entry['appearances'] = usage_counts.get(entry['horseKey'], 0)
             registered_at_ms = int(time.time() * 1000)
             print('Official VS registered horses loaded:',len(registered),flush=True)
         except Exception as error:
+            # Never run registered horses without a trustworthy lifetime usage count.
+            registered = None
             # Never stop the established race because the registration DB is down.
             print('WARNING: registration database unavailable, COM-only race continues:',
                   repr(error),flush=True)
@@ -496,7 +511,9 @@ async def main() -> None:
         print('G1 slot:', datetime.fromtimestamp(slot*SLOT_MS/1000,timezone.utc).isoformat(), card['name'], flush=True)
         try:
             existing = json.loads((ROOT/'race_playlist.json').read_text(encoding='utf-8'))['records']
-            entrants = registered_horses.choose(registered or [],card,slot,existing)
+            import horse_appearance_ledger
+            usage=horse_appearance_ledger.load_usage() if registered else {}
+            entrants = registered_horses.choose(registered or [],card,slot,existing,usage)
             print('Registered entrants for',card['name'],':',len(entrants),flush=True)
             if args.record_file:
                 record = json.loads(args.record_file.read_text(encoding='utf-8'))

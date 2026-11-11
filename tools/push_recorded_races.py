@@ -92,12 +92,11 @@ def snapshot_generated() -> dict[int, tuple[dict, bytes]]:
 
 
 def entry_summary_from(raw: dict) -> dict | None:
-    """Validate counts and intentionally public horse/owner names, never IDs."""
+    """Validate a public aggregate; never accept user details in the manifest."""
     entry = raw.get('registrationSummary')
-    base_fields = {'version', 'registeredCount', 'asOfMs', 'nextSlot',
-                   'nextCandidateCount', 'nextFinal'}
-    if (not isinstance(entry, dict) or not base_fields.issubset(entry) or
-            set(entry) - base_fields - {'nextEntries'}):
+    if not isinstance(entry, dict) or set(entry) != {
+            'version', 'registeredCount', 'asOfMs', 'nextSlot',
+            'nextCandidateCount', 'nextFinal'}:
         return None
     if (entry['version'] != 1 or type(entry['registeredCount']) is not int or
             not 0 <= entry['registeredCount'] <= 150 or
@@ -106,14 +105,6 @@ def entry_summary_from(raw: dict) -> dict | None:
             type(entry['nextCandidateCount']) is not int or
             not 0 <= entry['nextCandidateCount'] <= 18 or
             type(entry['nextFinal']) is not bool):
-        return None
-    roster = entry.get('nextEntries', [])
-    if (not isinstance(roster, list) or len(roster) > 18 or
-            any(not isinstance(row, dict) or set(row) != {'horseName','ownerName'} or
-                not isinstance(row['horseName'], str) or not 1 <= len(row['horseName']) <= 60 or
-                not isinstance(row['ownerName'], str) or len(row['ownerName']) > 24 or
-                any(ord(c)<32 or ord(c)==127 for c in row['horseName']+row['ownerName'])
-                for row in roster)):
         return None
     return entry
 
@@ -159,9 +150,20 @@ def integrate(generated: dict[int, tuple[dict, bytes]], now_ms: int,
     return added, len(records)
 
 
+def board_snapshot() -> bytes | None:
+    path=ROOT/'weekly_awards.json'
+    if not path.is_file():return None
+    body=path.read_bytes()
+    board=json.loads(body)
+    if board.get('version')!=1 or not isinstance(board.get('top10'),list) or not isinstance(board.get('awards'),list):
+        raise ValueError('週間賞金ランキングの公開データが不正です')
+    return body
+
+
 def main() -> None:
     # Take the only snapshot before any hard reset of the temporary CI checkout.
     generated = snapshot_generated()
+    generated_board = board_snapshot()
     # Capture the aggregate BEFORE reset --hard clears runner-generated files.
     summary_raw = json.loads((ROOT / 'race_playlist.json').read_text(encoding='utf-8'))
     generated_summary = entry_summary_from(summary_raw)
@@ -176,7 +178,9 @@ def main() -> None:
         git('reset', '--hard', 'origin/main')
         git('clean', '-fd', '--', 'races/')
         added, count = integrate(generated, int(time.time() * 1000), generated_summary)
-        git('add', '-A', '--', 'race_playlist.json', 'races/')
+        if generated_board is not None:
+            (ROOT/'weekly_awards.json').write_bytes(generated_board)
+        git('add', '-A', '--', 'race_playlist.json', 'races/', 'weekly_awards.json')
         if git('diff', '--cached', '--quiet', check=False).returncode == 0:
             print(f'Published data already current ({count} records, {added} new).', flush=True)
             return

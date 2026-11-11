@@ -25,6 +25,7 @@ def consumption_plan(documents: list[dict], records: list[dict]) -> list[dict]:
     legacy_receipts = {}
     used_horse_cutoffs = {}
     published_slots = set()
+    current_week = registered_horses.jst_week_index(int(datetime.now(timezone.utc).timestamp()*1000))
     for record in records:
         if record.get('intervalMinutes') != 15 or not isinstance(record.get('slot'), int):
             continue
@@ -54,7 +55,8 @@ def consumption_plan(documents: list[dict], records: list[dict]) -> list[dict]:
             # COM-only. Never count this as a completed horse appearance.
             assigned_slot = (updated_us // 1000) // 900_000 + 1
             completed_slot = assigned_slot in published_slots
-            if not (matched or legacy or cloned or completed_slot):
+            expired_week = row['weekIndex'] < current_week
+            if not (matched or legacy or cloned or completed_slot or expired_week):
                 continue
             version = doc.get('updateTime')
             name = doc.get('name')

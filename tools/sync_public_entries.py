@@ -74,7 +74,7 @@ def active_names(documents, target_slot=None, token=None):
     for doc in documents:
         row=registered_horses._decode_document(doc)
         submitted_ms=registered_horses.timestamp_us(row['updatedAt'])//1000
-        if submitted_ms//SLOT_MS+1!=target_slot:
+        if row.get('legacyWithoutWeek') or submitted_ms//SLOT_MS+1!=target_slot or row['weekIndex'] != registered_horses.jst_week_index(target_slot*SLOT_MS):
             continue
         owner=row['ownerName']
         if not owner or '/' in owner:

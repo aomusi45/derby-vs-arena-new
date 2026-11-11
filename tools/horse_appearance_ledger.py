@@ -36,19 +36,28 @@ def appearances(records):
             if not isinstance(key,str) or len(key)!=64 or any(c not in '0123456789abcdef' for c in key):
                 raise ValueError('レースの馬識別情報が不正です')
             if (slot,key) not in seen:
-                seen.add((slot,key));yield slot,key
+                seen.add((slot,key));yield slot,key,record.get('name')
 
 
-def count_commit(token,slot,key):
+def count_commit(token,slot,key,race_name):
+    if not isinstance(race_name,str) or not race_name or len(race_name)>100:
+        raise ValueError("レース名が不正です")
+    race_code=hashlib.sha256(race_name.encode()).hexdigest()[:24]
     event_id=hashlib.sha256(f'{slot}|{key}'.encode()).hexdigest()
     receipt=f'{BASE}/vs_appearance_receipts/{event_id}'
+    g1_receipt=f'{BASE}/vs_g1_backfill_receipts/{event_id}'
     usage=f'{BASE}/vs_horse_usage/{key}'
     writes=[
         {'update':{'name':receipt,'fields':{
             'horseKey':{'stringValue':key},'slot':{'integerValue':str(slot)}}},
          'currentDocument':{'exists':False}},
+        {'update':{'name':g1_receipt,'fields':{
+            'horseKey':{'stringValue':key},'slot':{'integerValue':str(slot)},
+            'raceCode':{'stringValue':race_code}}},
+         'currentDocument':{'exists':False}},
         {'transform':{'document':usage,'fieldTransforms':[
-            {'fieldPath':'count','increment':{'integerValue':'1'}}]}}
+            {'fieldPath':'count','increment':{'integerValue':'1'}},
+            {'fieldPath':'g1Counts.'+race_code,'increment':{'integerValue':'1'}}]}}
     ]
     req=Request(REST+f'projects/{PROJECT}/databases/(default)/documents:commit',
         data=json.dumps({'writes':writes}).encode(),method='POST',
@@ -56,7 +65,7 @@ def count_commit(token,slot,key):
     try:
         with urlopen(req,timeout=30) as resp:
             result=json.load(resp)
-        if len(result.get('writeResults',[]))!=2:
+        if len(result.get('writeResults',[]))!=3:
             raise RuntimeError('Firestore出走回数保存の応答が不完全です')
         return True
     except HTTPError as exc:
@@ -68,11 +77,43 @@ def count_commit(token,slot,key):
             f=existing.get('fields',{})
             if (f.get('horseKey',{}).get('stringValue')==key and
                 f.get('slot',{}).get('integerValue')==str(slot)):
+                # Previous deployed appearance receipts recorded only career
+                # starts. Add the named-G1 count once, without recounting starts.
+                backfill_writes=[
+                    {'update':{'name':g1_receipt,'fields':{
+                        'horseKey':{'stringValue':key},'slot':{'integerValue':str(slot)},
+                        'raceCode':{'stringValue':race_code}}},
+                     'currentDocument':{'exists':False}},
+                    {'transform':{'document':usage,'fieldTransforms':[
+                        {'fieldPath':'g1Counts.'+race_code,'increment':{'integerValue':'1'}}]}}
+                ]
+                try:
+                    req=Request(REST+f'projects/{PROJECT}/databases/(default)/documents:commit',
+                        data=json.dumps({'writes':backfill_writes}).encode(),method='POST',
+                        headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
+                    with urlopen(req,timeout=30) as done:json.load(done)
+                except HTTPError as migration_error:
+                    if migration_error.code not in (409,412):raise
+                    # Verify the exact migration receipt; a conflict must not
+                    # silently suppress an unrecorded G1 appearance.
+                    check=Request(REST+quote(g1_receipt,safe='/()'),
+                                  headers={'Authorization':'Bearer '+token})
+                    with urlopen(check,timeout=20) as done:
+                        migrated=json.load(done).get('fields',{})
+                    if (migrated.get('horseKey',{}).get('stringValue')!=key or
+                        migrated.get('slot',{}).get('integerValue')!=str(slot) or
+                        migrated.get('raceCode',{}).get('stringValue')!=race_code):
+                        raise
                 return False
         raise
 
 
 def load_counts():
+    """Backward-compatible count-only interface."""
+    return {k:v["count"] for k,v in load_usage().items()}
+
+
+def load_usage():
     secret=os.environ['FIREBASE_SERVICE_ACCOUNT_JSON'].strip()
     if not secret:raise ValueError('出走回数DBの認証設定がありません')
     token=registered_horses._access_token(secret)
@@ -89,7 +130,16 @@ def load_counts():
             value=doc.get('fields',{}).get('count',{}).get('integerValue')
             count=int(value)
             if count<0:raise ValueError('出走回数が不正です')
-            counts[key]=count
+            raw_g1=doc.get('fields',{}).get('g1Counts',{}).get('mapValue',{}).get('fields',{})
+            g1={}
+            for code,val in raw_g1.items():
+                if (len(code)!=24 or any(ch not in '0123456789abcdef' for ch in code)
+                      or not isinstance(val,dict)):
+                    raise ValueError('GⅠ別出走履歴が不正です')
+                n=int(val.get('integerValue',-1))
+                if n<0: raise ValueError('GⅠ別出走回数が不正です')
+                g1[code]=n
+            counts[key]={'count':count,'g1Counts':g1}
         next_page=raw.get('nextPageToken','')
         if not next_page:break
     return counts
@@ -102,8 +152,8 @@ def main():
     if manifest.get('version')!=2:raise ValueError('開催記録の形式が不正です')
     token=registered_horses._access_token(secret)
     added=0;existing=0
-    for slot,key in appearances(manifest.get('records',[])):
-        if count_commit(token,slot,key):added+=1
+    for slot,key,race_name in appearances(manifest.get('records',[])):
+        if count_commit(token,slot,key,race_name):added+=1
         else:existing+=1
     print(f'Completed-horse appearances: added={added}, already-counted={existing}',flush=True)
 

@@ -17,8 +17,15 @@ from urllib.request import Request, urlopen
 JST = timezone(timedelta(hours=9))
 STATS = ('speed','sta','kick','early','sustain','grit','stability')
 PROJECT_ID = 'derby-vs-arena'
-MAX_ENTRIES = 150  # 2 schedules x 96 slots/day x 150 docs ~28.8k reads/day
+MAX_ENTRIES = 150  # Max 120 weekly horses, plus temporarily pending entries
 UID_RE = re.compile(r'[A-Za-z0-9_-]{1,128}\Z')
+WEEK_MS = 604_800_000
+WEEK_EPOCH_MS = 313_200_000  # Monday 00:00 JST, 1970-01-05
+
+
+def jst_week_index(ms: int) -> int:
+    return (ms - WEEK_EPOCH_MS) // WEEK_MS
+
 
 
 def _num(value, minimum: float, maximum: float):
@@ -102,11 +109,21 @@ def normalize(row: dict) -> dict:
     runner['going'] = {k:going[k] for k in ('良','稍重','重','不良')}
     runner['isCom'] = False
     submitted_at = row.get('updatedAt', '')
+    registered_week = jst_week_index(timestamp_us(submitted_at)//1000)
+    legacy_without_week = row.get('weekIndex') is None
+    week_index = row.get('weekIndex', registered_week)
+    if type(week_index) is not int or week_index != registered_week:
+        raise ValueError('登録週が公式日本時間の週間枠と一致しません')
+    # Same uid + source horse ID as the official Cloudflare registration Worker.
+    horse_key = hashlib.sha256((owner+'|'+horse_id).encode()).hexdigest()
+    if row.get('horseKey') != horse_key:
+        raise ValueError('公式登録の馬識別キーが一致しません')
     ident = registration_id(owner, horse_id, submitted_at)
     return {'registrationId': ident, 'horseToken': horse_token(horse_id, runner),
-            'horseId': horse_id, 'legacyId': legacy_registration_id(owner, horse_id),
+            'horseId': horse_id, 'horseKey': horse_key, 'legacyId': legacy_registration_id(owner, horse_id),
             'runner': runner, 'updatedAt': submitted_at, 'ownerUid': owner,
-            'ownerName': owner_name}
+            'ownerName': owner_name, 'weekIndex': week_index,
+            'legacyWithoutWeek': legacy_without_week}
 
 
 def _firestore_value(value: dict):
@@ -192,16 +209,14 @@ def load() -> list[dict]:
 
 def unique_horse_count(entries: list[dict]) -> int:
     """Same exported horse uploaded from new guest accounts counts just once."""
-    return len({e['horseToken'] for e in entries})
+    return len({e['horseToken'] for e in entries if not e.get('legacyWithoutWeek')})
 
 
-def choose(entries: list[dict], card: dict, slot: int, published: list[dict]) -> list[dict]:
-    """One ticket -> one race; unique horse per heat; same G1 only once/day/owner."""
+def choose(entries: list[dict], card: dict, slot: int, published: list[dict], usage: dict | None = None) -> list[dict]:
+    """One entry/slot; lifetime <=20; G1 <=2, using permanent Firestore receipts."""
     slot_start_ms = slot * 900_000
-    today = datetime.fromtimestamp(slot_start_ms / 1000, JST).date()
     used_receipts = set()
     used_horse_before = {}
-    daily_horse_tokens = set()
     for meta in published:
         if not isinstance(meta.get('slot'), int):
             continue
@@ -213,21 +228,32 @@ def choose(entries: list[dict], card: dict, slot: int, published: list[dict]) ->
         if isinstance(snapshot_ms, int) and snapshot_ms > 0:
             for token in meta.get('horseTokens', []):
                 used_horse_before[token] = max(snapshot_ms, used_horse_before.get(token, 0))
-        if (meta.get('name') == card['name'] and
-                datetime.fromtimestamp(meta['slot'] * interval * 60, JST).date() == today):
-            daily_horse_tokens.update(meta.get('horseTokens', []))
-            # Older production records used the stable horse token as registrationId.
-            daily_horse_tokens.update(recorded_ids)
     eligible_by_horse = {}
     # If a guest logged in again and uploaded the SAME JSON, prefer the latest
     # registration without reducing a distinct player's differently trained horse.
     for row in sorted(entries, key=lambda item: timestamp_us(item['updatedAt']), reverse=True):
+        # V1 pending entries are consumed by the cleanup job, not admitted
+        # to the new once-per-week event without a permanent enrollment.
+        if row.get('legacyWithoutWeek'):
+            continue
         ident = row['registrationId']
-        if (ident in used_receipts or row['horseToken'] in daily_horse_tokens or
-                row['legacyId'] in daily_horse_tokens or
+        state = (usage or {}).get(row['horseKey'])
+        # No ledger access = fail closed for real entries. A passing empty map
+        # explicitly says there are no past completed appearances.
+        if usage is None or not isinstance(state,dict):
+            if usage is None: continue
+            state={'count':0,'g1Counts':{}}
+        g1_code = hashlib.sha256(card['name'].encode()).hexdigest()[:24]
+        if state['count']>=20 or state.get('g1Counts',{}).get(g1_code,0)>=2:
+            continue
+        if (ident in used_receipts or
                 timestamp_us(row['updatedAt']) <= used_horse_before.get(row['horseToken'], -1) * 1000):
             continue
         try:
+            # The Monday 00:00 race cannot take entries from the prior week.
+            # Registered horses expire at Sunday 23:59 JST even at 0 starts.
+            if row['weekIndex'] != jst_week_index(slot_start_ms):
+                continue
             # Registration during slot N belongs to the NEXT slot N+1 only.
             # Previously this tested only the upper bound, letting stale horses
             # race again in all subsequent slots when consumption was delayed.
