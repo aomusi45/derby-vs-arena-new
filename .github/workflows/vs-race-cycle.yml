@@ -16,6 +16,7 @@ on:
       - 'firebase-config.js'
       - 'tools/registered_horses.py'
       - 'tools/consume_vs_entries.py'
+      - 'tools/horse_appearance_ledger.py'
   workflow_dispatch:
   schedule:
     # 7 minutes before each 15-minute boundary, UTC minutes = JST minutes.
@@ -51,6 +52,17 @@ jobs:
         run: |
           python -m pip install 'playwright==1.56.0' 'google-auth[requests]>=2.35,<3'
           command -v google-chrome || command -v chromium
+      - name: Reconcile already published appearances before the next race
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: python tools/horse_appearance_ledger.py
+      - name: Synchronize privacy-safe public registration names
+        continue-on-error: true
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: python tools/sync_public_entries.py
       - name: Run original DBF VS race and record all horse motion
         env:
           FIREBASE_PROJECT_ID: derby-vs-arena
@@ -58,6 +70,11 @@ jobs:
         run: python tools/scheduled_vs.py
       - name: Commit only recorded races and 24h manifest
         run: python tools/push_recorded_races.py
+      - name: Count actual completed appearances in permanent Firestore ledger
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: python tools/horse_appearance_ledger.py
       # Only successful, already-pushed replay results may consume an entry.
       - name: Consume registrations that already raced
         continue-on-error: true
@@ -65,6 +82,12 @@ jobs:
           FIREBASE_PROJECT_ID: derby-vs-arena
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: python tools/consume_vs_entries.py
+      - name: Remove consumed entries from public roster
+        continue-on-error: true
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: python tools/sync_public_entries.py
       - name: Publish refreshed entry count
         continue-on-error: true
         run: python tools/push_recorded_races.py
