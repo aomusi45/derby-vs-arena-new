@@ -1,5 +1,5 @@
 /* Firebase VS horse registration. UI code is isolated from the race viewer.
-   Login may be Google or anonymous; one account has one replaceable horse.
+   Login may be Google or anonymous; one account has one immutable active horse.
    The website NEVER receives or stores service-account credentials. */
 (()=>{
   'use strict';
@@ -219,7 +219,9 @@
     const jsonOwner=ownerCandidates.map(cleanOwner).find(validOwner)||'';
     return {horseId,name,runner,jsonOwner,originalSnapshot:snapshot};
   }
-  const updateSubmit=()=>{submit.disabled=busy||!ready||!profileLoaded||!workerReady()||
+  const updateSubmit=()=>{
+    submit.textContent=ownRegistration ? '登録済み（変更不可）' : 'この馬を公式VSに登録する';
+    submit.disabled=busy||!ready||!profileLoaded||!workerReady()||!!ownRegistration||
     !chosen||!auth?.currentUser||
     (!chosen.sealed&&!validOwner(cleanOwner(ownerInput.value)));};
   ownerInput.addEventListener('input',updateSubmit);
@@ -332,7 +334,8 @@
       if(validOwner(publicName))ownerInput.value=publicName;
     }
     preview.textContent='登録予定：'+chosen.name+' ／ '+chosen.runner.age+'歳 ／ 装備反映後の7能力';
-    say(auth?.currentUser?'「この馬を公式VSに登録する」を押してください。':'ログインしてから登録してください。');
+    say(ownRegistration ? '登録済みの馬は変更できません。出走完了まで登録は固定です。' :
+      (auth?.currentUser?'「この馬を公式VSに登録する」を押してください。':'ログインしてから登録してください。'));
     updateSubmit();
   }
   file.addEventListener('change',async()=>{
@@ -361,7 +364,7 @@
     updateSubmit();
   });
   submit.addEventListener('click',async()=>{
-    if(!ready||!chosen||!auth.currentUser||busy)return;
+    if(!ready||!chosen||!auth.currentUser||busy||ownRegistration)return;
     const ownerName=cleanOwner(ownerInput.value);
     if(ownerName&&!validOwner(ownerName)){say('公開するオーナー名は1〜24文字にしてください。');return;}
     if(!chosen.sealed&&!validOwner(ownerName)){say('公開するオーナー名を1〜24文字で入力してください。');return;}
@@ -370,23 +373,12 @@
       const user=auth.currentUser;
       let horseName,horseId,publicOwner;
       if(!workerReady())throw Error('公式登録サーバーの設定が必要です。');
-      // A guest session persists across uploads. The Worker currently saves to
-      // vs_entries/{uid}; another horse on the same account REPLACES that entry.
-      // Require explicit consent instead of silently erasing the previous horse.
-      // The server must independently enforce one owner per race atomically.
+      if(ownRegistration)throw Error('登録済みの馬は出走まで変更できません。');
+      // Registration is immutable until a published, completed race consumes it.
       const existingSnap=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
-      const replaceExisting=existingSnap.exists();
       if(existingSnap.exists()){
-        const existing=existingSnap.data();
-        const savedOwner=cleanOwner(existing.ownerName);
-        if(savedOwner && ownerName && savedOwner!==ownerName)
-          throw Error('このログインは「'+savedOwner+'」専用です。別オーナーとして登録するには別のアカウントでログインしてください。');
-        const oldHorse=String(existing.horseName||'登録済み馬');
-        const newHorse=chosen.sealed?'選択した馬':chosen.name;
-        if(!window.confirm('現在「'+oldHorse+'」が登録されています。\n同じログインのため「'+newHorse+'」を登録すると、先の馬は上書きされます。\nこのオーナーの登録馬を変更しますか？')){
-          say('登録を取り消しました。先に登録した馬はそのまま残ります。');
-          return;
-        }
+        const oldHorse=String(existingSnap.data().horseName||'登録済み馬');
+        throw Error('「'+oldHorse+'」は登録済みです。出走まで差し替え・再登録できません。');
       }
       const token=await sdk.getIdToken(user);
       // All registration paths now use the server's atomic owner-name claim.
@@ -396,13 +388,16 @@
         method:'POST',mode:'cors',cache:'no-store',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
         body:JSON.stringify(chosen.sealed?
-          {envelope:chosen.envelope,ownerName,replaceExisting}:
-          {snapshot:chosen.originalSnapshot,ownerName,replaceExisting})
+          {envelope:chosen.envelope,ownerName}:
+          {snapshot:chosen.originalSnapshot,ownerName})
       });
       let result;
       try{result=await response.json();}
       catch(_){throw Error('登録サーバーからの応答が不正です。');}
-      if(!response.ok||!result.ok)throw Error(result.error||'登録に失敗しました。');
+      if(!response.ok||!result.ok){
+        const errorTag=typeof result.code==='string' ? ' ['+result.code+']' : '';
+        throw Error((result.error||'登録に失敗しました。')+errorTag);
+      }
       horseName=result.horseName;horseId=result.horseId;publicOwner=result.ownerName;
       // Verify what Firestore actually committed, never claim success early.
       const stored=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
@@ -412,7 +407,7 @@
       profileLoaded=true;ownerInput.value=publicOwner;ownerInput.readOnly=true;
       if(ownerHint)ownerHint.textContent='専用オーナー名として取得済み。出走後も保存されます。';
       say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。このオーナー名は本人専用です。1回出走すると馬の登録だけ解除されます。');
-      preview.textContent='※ 1登録1出走・最大18頭。同じ馬が同じGⅠに出走できるのは日本時間で1日1回まで。';
+      preview.textContent='※ 1登録1出走・登録後の変更不可・同じ馬の通算出走上限20回。';
       localConfirmed={slot:nextSlot(),uid:user.uid,horseName:String(stored.data().horseName||horseName),
         ownerName:String(stored.data().ownerName||publicOwner)};
       await updateOwnFromDocument(user,stored.data());
