@@ -80,10 +80,7 @@
       const box=document.createElement('div');box.className='vs-result-item';
       const heading=document.createElement('div');heading.className='vs-result-title';
       heading.textContent=meta.name;
-      const play=document.createElement('button');play.type='button';
-      play.className='vs-archive-play';play.textContent='▶ 再生';
-      play.addEventListener('click',()=>window.DBFArchiveReplay.open(meta));
-      box.append(heading,play);results.append(box);
+      box.append(heading);results.append(box);
     }
     const total=new Map();
     for(const meta of released){
