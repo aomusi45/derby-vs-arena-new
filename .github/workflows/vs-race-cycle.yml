@@ -58,7 +58,6 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: python tools/horse_appearance_ledger.py
       - name: Synchronize privacy-safe public registration names
-        continue-on-error: true
         env:
           FIREBASE_PROJECT_ID: derby-vs-arena
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
@@ -77,13 +76,11 @@ jobs:
         run: python tools/horse_appearance_ledger.py
       # Only successful, already-pushed replay results may consume an entry.
       - name: Consume registrations that already raced
-        continue-on-error: true
         env:
           FIREBASE_PROJECT_ID: derby-vs-arena
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: python tools/consume_vs_entries.py
       - name: Remove consumed entries from public roster
-        continue-on-error: true
         env:
           FIREBASE_PROJECT_ID: derby-vs-arena
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
