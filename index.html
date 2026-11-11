@@ -117,6 +117,7 @@
             <button class="vs-action-btn" id="vs-entry-guest" type="button">ゲストでログイン</button>
           </div>
           <p class="small" id="vs-entry-login-status" aria-live="polite">未ログイン</p>
+          <div id="vs-entry-form" hidden>
           <label for="vs-entry-file" class="vs-entry-label">VS登録馬ファイルを選ぶ（.dbfvs / .json）</label>
           <input id="vs-entry-file" type="file" accept=".dbfvs,.json,application/json,application/octet-stream">
           <p class="small">暗号化データの復号は公式登録サーバーでのみ実施します。公開ホームページとゲームには秘密鍵を置きません。以前のパスワード式 .dbfvs は新しいゲームから書き出し直してください。</p>
@@ -128,6 +129,8 @@
           <p class="small">最初に登録した名前は本人専用となり、以後変更できません。同じ名前は別のプレイヤーが使用できません。全角・半角と空白は統一されます。ゲスト登録ではブラウザのデータ削除で名前を取り戻せなくなる場合があるため、Googleログインを推奨します。</p>
           <p id="vs-entry-preview" aria-live="polite"></p>
           <button class="vs-action-btn" id="vs-entry-submit" type="button" disabled>この馬を公式VSに登録する</button>
+          </div>
+          <p id="vs-entry-persisted" aria-live="polite"></p>
           <p id="vs-entry-message" role="status" aria-live="polite">登録受付サービスの接続状況を確認しています。</p>
         </section>
         <section class="panel">
@@ -357,7 +360,7 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 <script src="site.js" defer></script>
 <script src="owner-ranking.js" defer></script>
 <script src="firebase-config.js" defer></script>
-<script src="registration.js?v=20261111-lock-diagnose-2" defer></script>
+<script src="registration.js?v=20261111-window-lock-1" defer></script>
 <!-- DBF arena return-to-game button. Place immediately before </body>. -->
 <style id="dbf-arena-return-style">
   #dbf-return-to-game[hidden]{display:none!important}

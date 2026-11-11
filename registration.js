@@ -24,6 +24,9 @@
   // The Firestore "vs_entries" collection is intentionally NOT listable from
   // browsers; its aggregate is published by the existing server recording job.
   const SLOT_MS=15*60*1000;
+  const REGISTRATION_OPEN_MS=8*60*1000; // Close seven minutes before the next heat.
+  const acceptingNow=()=>Date.now()%SLOT_MS<REGISTRATION_OPEN_MS;
+  const registrationForm=$('vs-entry-form'),persisted=$('vs-entry-persisted');
   const nextRaceName=$('vs-next-race-name');
   const nextRaceDetail=$('vs-next-race-detail');
   const nextRaceCountdown=$('vs-next-race-countdown');
@@ -87,6 +90,10 @@
     // Recording starts at :08/:23/:38/:53, seven minutes before each race.
     // Applications arriving after the server snapshot cannot enter this heat.
     const closingMs=slotMs-7*60*1000;
+    if(registrationForm)registrationForm.hidden=!card||!acceptingNow()||!!ownRegistration;
+    if(persisted)persisted.textContent=ownRegistration
+      ?'登録済み：'+String(ownRegistration.horseName||'不明')+' ／ オーナー：'+String(ownRegistration.ownerName||'不明')+'（差し替え不可）'
+      :(!card?'受付状況を確認中':(!acceptingNow()?'現在は出走登録の受付時間外です。':''));
     if(entryDeadline)entryDeadline.textContent=!card?'受付終了まで ――':
       Date.now()>=closingMs?'このレースの受付時間は終了しました':
       '受付終了まで '+timeRemaining(closingMs-Date.now());
@@ -154,6 +161,7 @@
     if(auth?.currentUser?.uid!==user.uid)return;
     ownRegistration=docData;ownRegistrationId=null;
     if(docData?.horseName)lastRegistrationName=String(docData.horseName);
+    localConfirmed=docData?{slot:nextSlot(),uid:user.uid,horseName:String(docData.horseName||''),ownerName:String(docData.ownerName||'')}:null;
     if(docData?.ownerName && !reservedOwnerName && !ownerInput.value)ownerInput.value=cleanOwner(docData.ownerName);
     updateSubmit();renderPublicStatus();
     if(docData?.horseId){
@@ -165,7 +173,7 @@
   }
   renderPublicStatus();
   refreshPublicStatus();
-  setInterval(renderPublicStatus,1000);
+  setInterval(()=>{renderPublicStatus();updateSubmit();},1000);
   setInterval(refreshPublicStatus,30000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshPublicStatus();});
   const num=(raw,def,lo,hi)=>{
@@ -221,7 +229,7 @@
   }
   const updateSubmit=()=>{
     submit.textContent=ownRegistration ? '登録済み（変更不可）' : 'この馬を公式VSに登録する';
-    submit.disabled=busy||!ready||!profileLoaded||!workerReady()||!!ownRegistration||
+    submit.disabled=busy||!ready||!profileLoaded||!workerReady()||!!ownRegistration||!acceptingNow()||
     !chosen||!auth?.currentUser||
     (!chosen.sealed&&!validOwner(cleanOwner(ownerInput.value)));};
   ownerInput.addEventListener('input',updateSubmit);
@@ -275,7 +283,7 @@
             ownerInput.value=cleanOwner(snap.data().ownerName);
           await updateOwnFromDocument(user,snap.data());
         }else{
-          say('登録受付中。ゲームのVS登録馬ファイルを選んでください。');
+          say(acceptingNow()?'登録受付中。ゲームのVS登録馬ファイルを選んでください。':'現在は受付時間外です。次の受付開始までお待ちください。');
         }
       }catch(err){
         profileLoaded=false;updateSubmit();
@@ -365,6 +373,7 @@
   });
   submit.addEventListener('click',async()=>{
     if(!ready||!chosen||!auth.currentUser||busy||ownRegistration)return;
+    if(!acceptingNow()){say('受付時間外のため登録できません。');renderPublicStatus();return;}
     const ownerName=cleanOwner(ownerInput.value);
     if(ownerName&&!validOwner(ownerName)){say('公開するオーナー名は1〜24文字にしてください。');return;}
     if(!chosen.sealed&&!validOwner(ownerName)){say('公開するオーナー名を1〜24文字で入力してください。');return;}
@@ -374,6 +383,7 @@
       let horseName,horseId,publicOwner;
       if(!workerReady())throw Error('公式登録サーバーの設定が必要です。');
       if(ownRegistration)throw Error('登録済みの馬は出走まで変更できません。');
+      if(!acceptingNow())throw Error('受付時間外のため登録できません。');
       // Registration is immutable until a published, completed race consumes it.
       const existingSnap=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
       if(existingSnap.exists()){
