@@ -15219,15 +15219,186 @@
           "prizeYen": 0
         }
       ]
+    },
+    {
+      "registrations": [
+        "db8b05c2ee4b4316b49431de"
+      ],
+      "horseTokens": [
+        "76485d493a89b2262213c999"
+      ],
+      "registrationSnapshotMs": 1794397157416,
+      "slot": 1993775,
+      "intervalMinutes": 15,
+      "file": "races/1993775.json.gz",
+      "raceId": "dfvs-mwc1qmej-bupxd3qx",
+      "name": "ヴィクトリアマイル",
+      "venue": "東京",
+      "distance": 1600,
+      "month": 5,
+      "durationMs": 94500,
+      "firstPrizeYen": 150000000,
+      "results": [
+        {
+          "place": 1,
+          "no": 14,
+          "name": "ウオッカナ",
+          "timeSeconds": 88.23844379741533,
+          "margin": "―",
+          "prizeYen": 150000000
+        },
+        {
+          "place": 2,
+          "no": 17,
+          "name": "グランアレグリラ",
+          "timeSeconds": 88.51514696225779,
+          "margin": "2 1/2馬身",
+          "prizeYen": 60000000
+        },
+        {
+          "place": 3,
+          "no": 12,
+          "name": "ダイワスカーレッタ",
+          "timeSeconds": 89.73718809044956,
+          "margin": "大差",
+          "prizeYen": 37500000
+        },
+        {
+          "place": 4,
+          "no": 4,
+          "name": "ソングライオン",
+          "timeSeconds": 90.28582986718331,
+          "margin": "4 1/2馬身",
+          "prizeYen": 22500000
+        },
+        {
+          "place": 5,
+          "no": 7,
+          "name": "アリーナテスト",
+          "timeSeconds": 90.54669801823908,
+          "margin": "2馬身",
+          "prizeYen": 15000000,
+          "ownerName": "サンプルオーナー"
+        },
+        {
+          "place": 6,
+          "no": 5,
+          "name": "ラッキーライラッキ",
+          "timeSeconds": 90.70692096991334,
+          "margin": "1 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 7,
+          "no": 1,
+          "name": "ダブルハートバンド",
+          "timeSeconds": 91.05871114900172,
+          "margin": "2 3/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 8,
+          "no": 9,
+          "name": "リスグラシュガー",
+          "timeSeconds": 91.09173049382599,
+          "margin": "クビ",
+          "prizeYen": 0
+        },
+        {
+          "place": 9,
+          "no": 10,
+          "name": "ブエナビスター",
+          "timeSeconds": 91.22322296223808,
+          "margin": "1馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 10,
+          "no": 3,
+          "name": "ストレイトガールズ",
+          "timeSeconds": 91.48103372572965,
+          "margin": "2馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 11,
+          "no": 2,
+          "name": "メジロドーベリー",
+          "timeSeconds": 91.5560862900279,
+          "margin": "1/2馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 12,
+          "no": 18,
+          "name": "レーヌミノリン",
+          "timeSeconds": 91.70941227661902,
+          "margin": "1 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 13,
+          "no": 8,
+          "name": "アスコリピチェーネ",
+          "timeSeconds": 92.00977055442178,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 14,
+          "no": 15,
+          "name": "クロノジェネシア",
+          "timeSeconds": 92.31024706390951,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 15,
+          "no": 16,
+          "name": "シスタートウショー",
+          "timeSeconds": 92.56086958939143,
+          "margin": "2馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 16,
+          "no": 6,
+          "name": "レジネッタラ",
+          "timeSeconds": 93.14536840891672,
+          "margin": "4 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 17,
+          "no": 11,
+          "name": "レッツゴードンキー",
+          "timeSeconds": 93.1691278092385,
+          "margin": "アタマ",
+          "prizeYen": 0
+        },
+        {
+          "place": 18,
+          "no": 13,
+          "name": "ベガス",
+          "timeSeconds": 94.48559087694852,
+          "margin": "9馬身",
+          "prizeYen": 0
+        }
+      ]
     }
   ],
   "registrationSummary": {
     "version": 1,
-    "registeredCount": 0,
-    "asOfMs": 1794396783573,
+    "registeredCount": 1,
+    "asOfMs": 1794397157416,
     "nextSlot": 1993775,
-    "nextCandidateCount": 0,
-    "nextFinal": false,
-    "nextEntries": []
+    "nextCandidateCount": 1,
+    "nextFinal": true,
+    "nextEntries": [
+      {
+        "horseName": "アリーナテスト",
+        "ownerName": "サンプルオーナー"
+      }
+    ]
   }
 }
