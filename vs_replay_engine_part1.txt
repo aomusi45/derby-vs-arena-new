@@ -8802,6 +8802,7 @@ const dfV52Director={
   this.initialized=false;this.transition=null;this.cornerShotActive=false;
   this.oneTakeStarted=false;this.oneTakeStartEye=null;this.oneTakeStartAim=null;
   this.oneTakeStartFov=0;this.oneTakeOrigin=null;this.oneTakeFocus=null;this.oneTakeGoalLocked=false;this.oneTakeZoomReference=0;
+  this.finishCloseupStarted=false;
   this.narrationCatchUp=0;
   if(this.shownRails){for(const r of this.shownRails)r.visible=true;this.shownRails=null;}
  },
@@ -8990,6 +8991,73 @@ const dfV52Director={
    const distance=Math.min(group.kind==='broadcast'?55:95,Math.max(corner?39:group.kind==='detail'?24.5:(group.kind==='broadcast'?30:(chosen.length===1?35:37)),high*(corner?1.01:group.kind==='broadcast'?.73:group.kind==='detail'?1.01:1.03)));
   return {eye:computeEye(distance),aim,fov};
  },
+ // Arena finish only: once the leader reaches the last 30m, switch to a
+ // low stationary camera a little PAST the goal, looking back up the straight.
+ // Pan the lens toward the leading 10 lengths; NEVER move the fixed eye, the
+ // horses, the race clock, finish order, the recorder, or the replay frames.
+ updateFinishCloseup(order,aspect,portrait){
+  const leader=order[0];
+  const finish=trackAt(TOTAL),forward=headingAt(TOTAL);
+  const side=dfV128FixedWorldCameraSide();
+  // Older TV finish camera stood at least 23 world units from the centreline
+  // and 6.5 units high. This is nearer and lower, but stays beyond the rail.
+  const lateral=Math.max(18,(dfV47World?.width??30)*.5+3.5);
+  const fixedEye=finish.clone().addScaledVector(forward,6.0)
+    .addScaledVector(side,lateral);
+  fixedEye.y+=4.85;
+  const firstFrame=!this.finishCloseupStarted;
+  this.finishCloseupStarted=true;
+  this.oneTakeGoalLocked=false;
+  this.transition=null;
+  this.eye.copy(fixedEye);
+  // The field's actual progress, not its expected finishing order, drives
+  // the view. 2.4m per length => about 24m behind the present leader.
+  // Stop panning past the line after the leader crosses it: the remaining
+  // horses should still be visible running INTO the fixed finish camera.
+  const atFront=Math.max(0,Math.min(TOTAL,leader.dist));
+  const atRear=Math.max(0,atFront-24);
+  const atMiddle=Math.max(0,atFront-12);
+  const desiredAim=trackAt(atMiddle);
+  desiredAim.y+=2.4;
+  const dt=Math.min(.05,Math.max(.001,renderDeltaSeconds));
+  if(firstFrame)this.aim.copy(desiredAim);
+  else this.aim.lerp(desiredAim,1-Math.exp(-dt*5.8));
+  // Fit the leading horse and roughly ten lengths behind, even if the
+  // field is strung out. No 18-horse zoom-out and no result-based targeting.
+  const frontPoint=trackAt(atFront);frontPoint.y+=2.25;
+  const rearPoint=trackAt(atRear);rearPoint.y+=2.25;
+  const points=[frontPoint,rearPoint];
+  for(const h of order){
+   if(h.dist<atRear-1||h.dist>atFront+3)continue;
+   const p=h.root.position.clone();p.y+=2.25;
+   points.push(p);
+  }
+  const viewing=this.aim.clone().sub(fixedEye).normalize();
+  const right=new THREE.Vector3().crossVectors(viewing,new THREE.Vector3(0,1,0)).normalize();
+  const up=new THREE.Vector3().crossVectors(right,viewing).normalize();
+  let neededHalfTan=0;
+  for(const p of points){
+   const relative=p.clone().sub(fixedEye);
+   const depth=Math.max(.1,relative.dot(viewing));
+   const horizontal=(Math.abs(relative.dot(right))+2.85)/(depth*Math.max(.35,aspect)*.85);
+   const vertical=(Math.abs(relative.dot(up))+2.55)/(depth*.79);
+   neededHalfTan=Math.max(neededHalfTan,horizontal,vertical);
+  }
+  const neededFov=2*Math.atan(neededHalfTan)*180/Math.PI;
+  const wantedFov=clamp(neededFov*1.035,portrait?44:35,portrait?85:65);
+  camera.fov=firstFrame?wantedFov:
+    camera.fov+(wantedFov-camera.fov)*(1-Math.exp(-dt*6.2));
+  camera.updateProjectionMatrix();
+  camera.position.copy(fixedEye);
+  viewTarget.copy(this.aim);
+  camera.lookAt(viewTarget);camera.updateMatrixWorld();
+  this.key='finish-closeup';this.anchorNo=leader.no;this.focusNos=order.filter(h=>h.dist>=atRear-1&&h.dist<=atFront+3).map(h=>h.no);
+  this.railVisibility(false);
+  lastCameraShot='finish-closeup';
+  $('camname').textContent='CAM　ゴール前・近接固定';
+  mats.sun.position.set(viewTarget.x-42,viewTarget.y+78,viewTarget.z+24);
+  mats.sun.target.position.copy(viewTarget);
+ },
  // The first hundred metres are ONE continuous mobile shot starting precisely
  // at the end of the pre-start gate closeup. No automatic focus changes, no
  // bird's-eye crane, no shot key transition and no "missing horse" teleport.
@@ -9062,6 +9130,12 @@ const dfV52Director={
   const leader=order[0];
   const progress=Math.max(0,leader.dist);
   const remaining=Math.max(0,TOTAL-progress);
+  // At exactly 30m remaining, make a deliberate cut to the closer fixed
+  // goal camera. Keep that physical position throughout the runout.
+  if(remaining<=30||this.finishCloseupStarted){
+   this.updateFinishCloseup(order,aspect,portrait);
+   return;
+  }
   // Mark the shot as locked only after the camera itself reaches the goal.
   // The final position is checked after the smooth move below.
   if(this.oneTakeGoalLocked||race==='finished'){
