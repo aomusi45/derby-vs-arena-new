@@ -228,7 +228,11 @@ def choose(entries: list[dict], card: dict, slot: int, published: list[dict]) ->
                 timestamp_us(row['updatedAt']) <= used_horse_before.get(row['horseToken'], -1) * 1000):
             continue
         try:
-            if timestamp_us(row['updatedAt']) > slot_start_ms * 1000:
+            # Registration during slot N belongs to the NEXT slot N+1 only.
+            # Previously this tested only the upper bound, letting stale horses
+            # race again in all subsequent slots when consumption was delayed.
+            submitted_us = timestamp_us(row['updatedAt'])
+            if not ((slot_start_ms - 900_000) * 1000 <= submitted_us < slot_start_ms * 1000):
                 continue
         except (ValueError, TypeError, AttributeError):
             continue
