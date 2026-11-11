@@ -70,6 +70,9 @@
     return pad(Math.floor(total/60))+':'+pad(total%60);
   };
   const nextRecorded=slot=>publicManifest?.records?.find(row=>row?.intervalMinutes===15&&row.slot===slot)||null;
+  const validAppearances=count=>Number.isSafeInteger(count)&&count>=0&&count<=20;
+  const horseWithCount=row=>String(row.horseName||'不明')+'（'+
+    (validAppearances(row.appearanceCount)?row.appearanceCount+'/20回':'出走回数確認中')+'）';
   function renderEntryRoster(rows){
     if(!entryRoster)return;
     entryRoster.replaceChildren();
@@ -79,7 +82,7 @@
     entryRoster.append(head);
     for(const row of rows){
       const item=document.createElement('div');item.className='vs-entry-row';
-      for(const value of [row.horseName,row.ownerName||'未設定']){
+      for(const value of [horseWithCount(row),row.ownerName||'未設定']){
         const cell=document.createElement('span');cell.textContent=value;item.append(cell);
       }
       entryRoster.append(item);
@@ -121,13 +124,20 @@
     const publishedRows=shared===null?rows:shared;
     // The public roster comes from the server. Only this user's verified
     // registration may be shown early; never replace another owner's record.
-    let displayed=publishedRows?publishedRows.map(row=>({horseName:row.horseName,ownerName:row.ownerName})):[];
+    let displayed=publishedRows?publishedRows.map(row=>({horseName:row.horseName,ownerName:row.ownerName,appearanceCount:row.appearanceCount})):[];
     const local=localConfirmed?.slot===slot&&localConfirmed?.uid===auth?.currentUser?.uid
       ?localConfirmed:null;
     if(local){
       const existing=displayed.findIndex(row=>row.ownerName===local.ownerName);
-      const ownRow={horseName:local.horseName,ownerName:local.ownerName};
-      if(existing>=0)displayed[existing]=ownRow;
+      const ownRow={horseName:local.horseName,ownerName:local.ownerName,
+        appearanceCount:local.appearanceCount};
+      if(existing>=0){
+        // Do not discard a server-published count during the own-device overlay.
+        if(!validAppearances(ownRow.appearanceCount)&&
+           validAppearances(displayed[existing].appearanceCount))
+          ownRow.appearanceCount=displayed[existing].appearanceCount;
+        displayed[existing]=ownRow;
+      }
       else if(displayed.length<18)displayed.push(ownRow);
     }
     if(totalLabel){
@@ -168,7 +178,9 @@
       const d=doc.data();
       if(typeof d.ownerName==='string'&&typeof d.horseName==='string'&&
           d.ownerName===doc.id&&d.ownerName.length<=96&&d.horseName.length<=60)
-        rows.push({ownerName:d.ownerName,horseName:d.horseName,slot:assignedSlot(d.updatedAt)});
+        rows.push({ownerName:d.ownerName,horseName:d.horseName,
+          appearanceCount:validAppearances(d.appearanceCount)?d.appearanceCount:null,
+          slot:assignedSlot(d.updatedAt)});
     });
     rows.sort((a,b)=>a.ownerName.localeCompare(b.ownerName,'ja'));
     sharedEntries=rows;sharedEntriesError='';renderPublicStatus();
@@ -197,13 +209,29 @@
     const digest=await crypto.subtle.digest('SHA-256',bytes);
     return [...new Uint8Array(digest)].map(n=>n.toString(16).padStart(2,'0')).join('').slice(0,24);
   }
-  async function updateOwnFromDocument(user,docData){
+  async function updateOwnFromDocument(user,docData,confirmedCount=null){
     if(auth?.currentUser?.uid!==user.uid)return;
     ownRegistration=docData;ownRegistrationId=null;
     if(docData?.horseName)lastRegistrationName=String(docData.horseName);
-    localConfirmed=docData?{slot:assignedSlot(docData.updatedAt),uid:user.uid,horseName:String(docData.horseName||''),ownerName:String(docData.ownerName||'')}:null;
+    localConfirmed=docData?{slot:assignedSlot(docData.updatedAt),uid:user.uid,
+      horseName:String(docData.horseName||''),ownerName:String(docData.ownerName||''),
+      appearanceCount:validAppearances(confirmedCount)?confirmedCount:null}:null;
     if(docData?.ownerName && !reservedOwnerName && !ownerInput.value)ownerInput.value=cleanOwner(docData.ownerName);
     updateSubmit();renderPublicStatus();
+    // Server-side lifetime ledger is the source of truth for the owner as well.
+    // Missing ledger document means this horse has completed zero official races.
+    if(docData?.horseKey && !validAppearances(confirmedCount) &&
+       /^[a-f0-9]{64}$/.test(docData.horseKey)){
+      try{
+        const countSnap=await sdk.getDocFromServer(sdk.doc(db,'vs_horse_usage',docData.horseKey));
+        const count=countSnap.exists()?Number(countSnap.data().count):0;
+        if(auth?.currentUser?.uid===user.uid && localConfirmed?.uid===user.uid &&
+           localConfirmed?.horseName===docData.horseName && validAppearances(count)){
+          localConfirmed.appearanceCount=count;
+          renderPublicStatus();
+        }
+      }catch(err){console.warn('出走回数を取得できません',err);}
+    }
     if(docData?.horseId){
       try{
         const id=await hashRegisteredHorse(user.uid,docData.horseId,docData.updatedAt);
@@ -464,8 +492,9 @@
       say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。このオーナー名は本人専用です。1回出走すると馬の登録だけ解除されます。');
       preview.textContent='※ 1登録1出走・登録後の変更不可・同じ馬の通算出走上限20回。';
       localConfirmed={slot:nextSlot(),uid:user.uid,horseName:String(stored.data().horseName||horseName),
-        ownerName:String(stored.data().ownerName||publicOwner)};
-      await updateOwnFromDocument(user,stored.data());
+        ownerName:String(stored.data().ownerName||publicOwner),
+        appearanceCount:validAppearances(result.appearances)?result.appearances:null};
+      await updateOwnFromDocument(user,stored.data(),result.appearances);
       await refreshSharedEntries();
       renderPublicStatus();
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
