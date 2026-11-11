@@ -2,156 +2,6 @@
   "version": 2,
   "records": [
     {
-      "registrations": [
-        "74e46b3b129f0724eafab9a7"
-      ],
-      "horseTokens": [
-        "4826f79cfdf3e570f86c43c2"
-      ],
-      "registrationSnapshotMs": 1794278367823,
-      "slot": 1993643,
-      "intervalMinutes": 15,
-      "file": "races/1993643.json.gz",
-      "raceId": "dfvs-mwa31gvu-jtvt79t1",
-      "name": "有馬記念",
-      "venue": "中山",
-      "distance": 2500,
-      "month": 12,
-      "durationMs": 145100,
-      "firstPrizeYen": 500000000,
-      "results": [
-        {
-          "place": 1,
-          "no": 11,
-          "name": "キングカメハメハハ",
-          "timeSeconds": 139.8961888594409,
-          "margin": "―",
-          "prizeYen": 500000000
-        },
-        {
-          "place": 2,
-          "no": 15,
-          "name": "エルコンドルパスタ",
-          "timeSeconds": 140.64419149909833,
-          "margin": "6馬身",
-          "prizeYen": 200000000
-        },
-        {
-          "place": 3,
-          "no": 4,
-          "name": "ジェンティルドンニ",
-          "timeSeconds": 140.9893286931713,
-          "margin": "2 3/4馬身",
-          "prizeYen": 125000000
-        },
-        {
-          "place": 4,
-          "no": 3,
-          "name": "リバティアイラン",
-          "timeSeconds": 141.00314076497529,
-          "margin": "ハナ",
-          "prizeYen": 75000000
-        },
-        {
-          "place": 5,
-          "no": 7,
-          "name": "グラスパンダー",
-          "timeSeconds": 141.03384093851082,
-          "margin": "クビ",
-          "prizeYen": 50000000
-        },
-        {
-          "place": 6,
-          "no": 6,
-          "name": "コントレイン",
-          "timeSeconds": 141.65467134330785,
-          "margin": "5馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 7,
-          "no": 8,
-          "name": "アーモンドアイ",
-          "timeSeconds": 141.84469579609728,
-          "margin": "1 1/2馬身",
-          "prizeYen": 0,
-          "ownerName": "オーナー"
-        },
-        {
-          "place": 8,
-          "no": 5,
-          "name": "ダイワスカーレッタ",
-          "timeSeconds": 142.40400361424298,
-          "margin": "4 1/2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 9,
-          "no": 16,
-          "name": "エアグルービー",
-          "timeSeconds": 142.6383156191332,
-          "margin": "1 3/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 10,
-          "no": 13,
-          "name": "ドウデュースト",
-          "timeSeconds": 142.6711123574545,
-          "margin": "クビ",
-          "prizeYen": 0
-        },
-        {
-          "place": 11,
-          "no": 2,
-          "name": "シーザリオン",
-          "timeSeconds": 143.32395951160447,
-          "margin": "5馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 12,
-          "no": 12,
-          "name": "クロワデュノワール",
-          "timeSeconds": 143.59931992357875,
-          "margin": "2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 13,
-          "no": 1,
-          "name": "シンボリクリスマス",
-          "timeSeconds": 143.60589485402218,
-          "margin": "ハナ",
-          "prizeYen": 0
-        },
-        {
-          "place": 14,
-          "no": 10,
-          "name": "リスグラシュガー",
-          "timeSeconds": 143.78513672221442,
-          "margin": "1 1/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 15,
-          "no": 9,
-          "name": "ディープブリランチ",
-          "timeSeconds": 144.0426969711156,
-          "margin": "2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 16,
-          "no": 14,
-          "name": "ブエナビスター",
-          "timeSeconds": 145.08838735467782,
-          "margin": "7 3/4馬身",
-          "prizeYen": 0
-        }
-      ]
-    },
-    {
       "registrations": [],
       "horseTokens": [],
       "registrationSnapshotMs": 0,
@@ -15350,13 +15200,174 @@
           "prizeYen": 0
         }
       ]
+    },
+    {
+      "registrations": [],
+      "horseTokens": [],
+      "registrationSnapshotMs": 0,
+      "slot": 1993740,
+      "intervalMinutes": 15,
+      "file": "races/1993740.json.gz",
+      "raceId": "dfvs-mwbizk0t-z9rxsm0k",
+      "name": "オークス",
+      "venue": "東京",
+      "distance": 2400,
+      "month": 5,
+      "durationMs": 142575,
+      "firstPrizeYen": 150000000,
+      "results": [
+        {
+          "place": 1,
+          "no": 3,
+          "name": "ダンスパートニャー",
+          "timeSeconds": 139.11024537549034,
+          "margin": "―",
+          "prizeYen": 150000000
+        },
+        {
+          "place": 2,
+          "no": 12,
+          "name": "スターズオンマース",
+          "timeSeconds": 139.15285194734702,
+          "margin": "クビ",
+          "prizeYen": 60000000
+        },
+        {
+          "place": 3,
+          "no": 5,
+          "name": "エイシンサニーサ",
+          "timeSeconds": 139.16851762299203,
+          "margin": "アタマ",
+          "prizeYen": 37500000
+        },
+        {
+          "place": 4,
+          "no": 16,
+          "name": "トールポッピー",
+          "timeSeconds": 139.87133288297852,
+          "margin": "5 1/2馬身",
+          "prizeYen": 22500000
+        },
+        {
+          "place": 5,
+          "no": 4,
+          "name": "ファレノプシズ",
+          "timeSeconds": 140.14454141782,
+          "margin": "2馬身",
+          "prizeYen": 15000000
+        },
+        {
+          "place": 6,
+          "no": 2,
+          "name": "ヌーヴォレコード",
+          "timeSeconds": 140.29151455829853,
+          "margin": "1馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 7,
+          "no": 6,
+          "name": "エリンコートラ",
+          "timeSeconds": 140.47078688357328,
+          "margin": "1 1/2馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 8,
+          "no": 18,
+          "name": "シーザリオン",
+          "timeSeconds": 140.59358513030924,
+          "margin": "1馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 9,
+          "no": 8,
+          "name": "ダイワエルシエール",
+          "timeSeconds": 140.62938453212558,
+          "margin": "クビ",
+          "prizeYen": 0
+        },
+        {
+          "place": 10,
+          "no": 1,
+          "name": "デアリングタクミ",
+          "timeSeconds": 140.6655322240981,
+          "margin": "クビ",
+          "prizeYen": 0
+        },
+        {
+          "place": 11,
+          "no": 13,
+          "name": "サクラキャンディ",
+          "timeSeconds": 141.27915831148232,
+          "margin": "4 1/2馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 12,
+          "no": 14,
+          "name": "ウメノファイター",
+          "timeSeconds": 141.300178749281,
+          "margin": "アタマ",
+          "prizeYen": 0
+        },
+        {
+          "place": 13,
+          "no": 15,
+          "name": "スティルインラフ",
+          "timeSeconds": 141.41036757957036,
+          "margin": "3/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 14,
+          "no": 7,
+          "name": "ユーバーレーベル",
+          "timeSeconds": 141.70503821593783,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 15,
+          "no": 10,
+          "name": "スマイルトゥモロウ",
+          "timeSeconds": 142.0081451279633,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 16,
+          "no": 11,
+          "name": "ホクトベガス",
+          "timeSeconds": 142.09507650545177,
+          "margin": "3/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 17,
+          "no": 17,
+          "name": "アドラーブルー",
+          "timeSeconds": 142.19947205019596,
+          "margin": "3/4馬身",
+          "prizeYen": 0
+        },
+        {
+          "place": 18,
+          "no": 9,
+          "name": "イソノルーブルー",
+          "timeSeconds": 142.56923065235327,
+          "margin": "2 1/2馬身",
+          "prizeYen": 0
+        }
+      ]
     }
   ],
   "registrationSummary": {
     "version": 1,
     "registeredCount": 0,
-    "asOfMs": 1794364786297,
-    "nextSlot": 1993739,
+    "asOfMs": 1794365660086,
+    "nextSlot": 1993740,
     "nextCandidateCount": 0,
     "nextFinal": true
   }
