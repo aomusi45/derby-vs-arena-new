@@ -15,6 +15,7 @@
   let auth=null,db=null, sdk=null,chosen=null,busy=false,ready=false;
   let selectionSerial=0;
   let reservedOwnerName='',profileLoaded=false;
+  let lockedHorse=null,lockedCount=null,weeklyRegistered=null,weeklyCheckedIndex=null;
   // Enter your deployed Worker URL here. This URL is public; never put the private key here.
   const SECURE_REGISTER_URL='https://derby-vs-registration.aomusi45.workers.dev';
   const workerReady=()=>/^https:\/\/[^\s/]+\/?.*$/i.test(SECURE_REGISTER_URL) && !SECURE_REGISTER_URL.includes('SET_YOUR_');
@@ -25,7 +26,12 @@
   // browsers; its aggregate is published by the existing server recording job.
   const SLOT_MS=15*60*1000;
   const REGISTRATION_OPEN_MS=8*60*1000; // Close seven minutes before the next heat.
-  const acceptingNow=()=>Date.now()%SLOT_MS<REGISTRATION_OPEN_MS;
+  const WEEK_MS=7*24*60*60*1000;
+  const WEEK_EPOCH_MS=Date.UTC(1970,0,4,15); // Monday 00:00 JST
+  const jstWeekIndex=ms=>Math.floor((ms-WEEK_EPOCH_MS)/WEEK_MS);
+  const currentWeek=()=>jstWeekIndex(Date.now());
+  const acceptingNow=()=>Date.now()%SLOT_MS<REGISTRATION_OPEN_MS &&
+    currentWeek()===jstWeekIndex((Math.floor(Date.now()/SLOT_MS)+1)*SLOT_MS);
   const registrationForm=$('vs-entry-form'),persisted=$('vs-entry-persisted');
   const nextRaceName=$('vs-next-race-name');
   const nextRaceDetail=$('vs-next-race-detail');
@@ -34,6 +40,8 @@
   const entryRace=$('vs-entry-race-name');
   const entryRoster=$('vs-entry-roster');
   const entryDeadline=$('vs-entry-deadline');
+  const ownerLockLabel=$('vs-owner-horse-lock');
+  const weeklyCapLabel=$('vs-weekly-registration-cap');
   let publicCatalog=null,publicManifest=null,ownRegistration=null,ownRegistrationId=null;
   let sharedEntries=null,sharedEntriesError='',sharedEntriesLoading=false;
   let publicError='',refreshingPublic=false,lastRegistrationName='';
@@ -102,7 +110,21 @@
     // Recording starts at :08/:23/:38/:53, seven minutes before each race.
     // Applications arriving after the server snapshot cannot enter this heat.
     const closingMs=slotMs-7*60*1000;
-    if(registrationForm)registrationForm.hidden=!card||!acceptingNow()||!!ownRegistration;
+    const activeLock=lockedHorse?.weekIndex===currentWeek()?lockedHorse:null;
+    if(ownerLockLabel){
+      ownerLockLabel.textContent=!activeLock?'今週の登録馬：未登録（週に1頭・変更不可）':
+        '今週の登録馬：'+activeLock.horseName+'（'+
+          (lockedCount===null?'出走履歴確認中':lockedCount+'/20戦')+
+          '）。日曜日で参加終了、翌週の再登録は禁止です。';
+    }
+    if(weeklyCapLabel){
+      weeklyCapLabel.textContent='今週の登録枠：'+
+        (weeklyCheckedIndex===currentWeek()&&Number.isInteger(weeklyRegistered)
+          ?weeklyRegistered+' / 120頭':'確認中 / 120頭')+
+        '（1頭につき1週間のみ・再登録不可）';
+    }
+    if(registrationForm)registrationForm.hidden=!card||!acceptingNow()||!!ownRegistration||
+      (weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&!activeLock);
     if(persisted)persisted.textContent=ownForCurrentSlot()
       ?'登録済み：'+String(ownRegistration.horseName||'不明')+' ／ オーナー：'+String(ownRegistration.ownerName||'不明')+'（差し替え不可）'
       :(ownRegistration?'前回の登録はこの開催の対象外です。結果確定後のサーバー整理を確認中です。'
@@ -296,11 +318,57 @@
     return {horseId,name,runner,jsonOwner,originalSnapshot:snapshot};
   }
   const updateSubmit=()=>{
-    submit.textContent=ownRegistration ? '登録済み（変更不可）' : 'この馬を公式VSに登録する';
+    const activeLock=lockedHorse?.weekIndex===currentWeek()?lockedHorse:null;
+    const wrongHorse=!!activeLock && !!chosen&&!chosen.sealed&&
+      chosen.horseId!==activeLock.horseId;
+    const exhausted=!!activeLock&&lockedCount===20;
+    const fullWeek=weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&!activeLock;
+    submit.textContent=ownRegistration ? '登録済み（変更不可）' :
+      wrongHorse?'今週は別の馬に変更できません' :
+      exhausted?'この馬は20戦終了です' :
+      fullWeek?'今週の120頭枠は満員です':'この馬を公式VSに登録する';
     submit.disabled=busy||!ready||!profileLoaded||!workerReady()||!!ownRegistration||!acceptingNow()||
-    !chosen||!auth?.currentUser||
-    (!chosen.sealed&&!validOwner(cleanOwner(ownerInput.value)));};
+      wrongHorse||exhausted||fullWeek||!chosen||!auth?.currentUser||
+      (!chosen.sealed&&!validOwner(cleanOwner(ownerInput.value)));};
   ownerInput.addEventListener('input',updateSubmit);
+  async function refreshWeeklyCapacity(){
+    if(!ready||!db||!sdk)return;
+    const week=currentWeek();
+    try{
+      const cap=await sdk.getDocFromServer(sdk.doc(db,'vs_weekly_registration_counts','w'+week));
+      const n=cap.exists()?Number(cap.data().count):0;
+      if(!Number.isInteger(n)||n<0||n>120)throw Error('週間登録数が不正です');
+      if(currentWeek()!==week)return;
+      weeklyRegistered=n;
+      weeklyCheckedIndex=week;
+      renderPublicStatus();updateSubmit();
+    }catch(err){
+      weeklyRegistered=null;weeklyCheckedIndex=null;
+      console.warn('週間登録枠を取得できません',err);
+      renderPublicStatus();
+    }
+  }
+  async function refreshHorseLock(user){
+    const week=currentWeek();
+    const snapshot=await sdk.getDocFromServer(sdk.doc(db,'vs_owner_horse_locks',user.uid));
+    if(auth?.currentUser?.uid!==user.uid)return;
+    if(!snapshot.exists()){
+      lockedHorse=null;lockedCount=null;
+    }else{
+      const state=snapshot.data();
+      if(typeof state.horseId!=='string'||typeof state.horseKey!=='string'||
+         !/^[a-f0-9]{64}$/.test(state.horseKey))throw Error('登録馬データが不正です');
+      lockedHorse={horseId:state.horseId,horseName:state.horseName,weekIndex:state.weekIndex};
+      if(state.weekIndex===week){
+        const usage=await sdk.getDocFromServer(sdk.doc(db,'vs_horse_usage',state.horseKey));
+        if(auth?.currentUser?.uid!==user.uid)return;
+        const n=usage.exists()?Number(usage.data().count):0;
+        if(!validAppearances(n))throw Error('出走回数が不正です');
+        lockedCount=n;
+      }else lockedCount=null;
+    }
+    updateSubmit();renderPublicStatus();
+  }
   async function init(){
     if(!cfg||cfg.projectId!=='derby-vs-arena'||!cfg.apiKey){
       say('Firebaseの公開設定が見つかりません。登録機能は停止中です。');return;
@@ -316,6 +384,8 @@
     auth=authSdk.getAuth(app);
     await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
     db=fsSdk.getFirestore(app);ready=true;
+    refreshWeeklyCapacity();
+    setInterval(refreshWeeklyCapacity,30000);
     // Live Firestore listener: other devices update as soon as the mirror changes.
     fsSdk.onSnapshot(fsSdk.collection(db,'vs_public_entries'),
       snapshot=>{try{applySharedSnapshot(snapshot);}catch(err){console.warn(err);}},
@@ -323,6 +393,7 @@
     refreshSharedEntries();
     authSdk.onAuthStateChanged(auth,async user=>{
       ownRegistration=null;ownRegistrationId=null;localConfirmed=null;
+      lockedHorse=null;lockedCount=null;
       reservedOwnerName='';profileLoaded=false;
       ownerInput.readOnly=false;
       if(ownerHint)ownerHint.textContent='ログインするとオーナー名の取得状況を確認します。';
@@ -348,6 +419,7 @@
           if(ownerHint)ownerHint.textContent='最初の登録でオーナー名を取得します。ほかのユーザーと同じ名前は使えません。';
         }
         profileLoaded=true;updateSubmit();
+        await refreshHorseLock(user);
         const snap=await fsSdk.getDocFromServer(fsSdk.doc(db,'vs_entries',user.uid));
         if(auth.currentUser?.uid!==user.uid)return;
         if(snap.exists()){
@@ -371,6 +443,7 @@
     const user=auth?.currentUser;
     if(!user||busy||!ready)return;
     try{
+      await refreshHorseLock(user);
       const snap=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
       if(auth?.currentUser?.uid!==user.uid)return;
       if(snap.exists()){
@@ -379,7 +452,7 @@
       }else if(ownRegistration){
         const racedName=String(ownRegistration.horseName||'登録馬');
         ownRegistration=null;ownRegistrationId=null;renderPublicStatus();
-        say(racedName+'の登録は出走完了により解除されました。再登録できます。');
+        say(racedName+'の開催申込みは終了しました。同じ週なら同じ馬で次のGⅠへ申込みできます。翌週の再登録はできません。');
       }
     }catch(err){console.warn('登録状態の更新に失敗',err);}
   }
@@ -489,12 +562,14 @@
       reservedOwnerName=publicOwner;
       profileLoaded=true;ownerInput.value=publicOwner;ownerInput.readOnly=true;
       if(ownerHint)ownerHint.textContent='専用オーナー名として取得済み。出走後も保存されます。';
-      say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。このオーナー名は本人専用です。1回出走すると馬の登録だけ解除されます。');
-      preview.textContent='※ 1登録1出走・登録後の変更不可・同じ馬の通算出走上限20回。';
+      say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。今週はこの馬1頭で参加し、日曜日で終了します。');
+      preview.textContent='※ 週に最大120頭。馬は1週間限定で登録し、翌週は20戦未満でも永久に再登録できません。同一GⅠ通算2回・週内最大20戦。';
       localConfirmed={slot:nextSlot(),uid:user.uid,horseName:String(stored.data().horseName||horseName),
         ownerName:String(stored.data().ownerName||publicOwner),
         appearanceCount:validAppearances(result.appearances)?result.appearances:null};
       await updateOwnFromDocument(user,stored.data(),result.appearances);
+      await refreshHorseLock(user);
+      await refreshWeeklyCapacity();
       await refreshSharedEntries();
       renderPublicStatus();
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}

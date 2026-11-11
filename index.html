@@ -18,7 +18,7 @@
 .vs-action-btn{display:block;border:1px solid #ebce87;border-radius:8px;padding:12px 20px;min-height:45px;background:linear-gradient(180deg,#f8dfa3,#c49643);color:#152920;font:inherit;font-weight:900;cursor:pointer;max-width:100%}
 .vs-action-btn:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.4)}
 
-/* Official VS results / daily prize rankings only. */
+/* Official VS results and permanent weekly prize rankings. */
 #vs-ranking-panel{margin-bottom:30px;min-height:0}
 #vs-ranking-panel h2{color:#f8e5ad;margin:12px 0}
 .vs-ranking-grid{width:100%;border-collapse:collapse;font-size:13px}
@@ -31,7 +31,13 @@
 .vs-result-item:first-child{border-top:0}
 .vs-result-title{color:#f5db98;font-size:13px;font-weight:700}
 #vs-ranking-description{color:#b5c7bf;font-size:12px;margin:6px 0 14px}
-@media(max-width:520px){.vs-ranking-grid{font-size:12px}.vs-ranking-grid th,.vs-ranking-grid td{padding:9px 4px}}
+#vs-awards-panel{margin-bottom:36px;min-height:0}
+.vs-award-row{border-top:1px solid #b895515c;padding:13px 0}
+.vs-award-row strong{color:#ffe4a0;font-size:15px}
+.vs-award-row .meta{color:#bcd1c4;font-size:12px;line-height:1.7}
+#vs-awards-more{margin:14px 0 0}
+#vs-awards-more[hidden]{display:none!important}
+@media(max-width:520px){.vs-ranking-grid{font-size:11px}.vs-ranking-grid th,.vs-ranking-grid td{padding:9px 3px;overflow-wrap:anywhere}}
   #vs-entry-file{display:block;width:100%;padding:10px 0;color:#f1e1b6;font-size:13px}
   #vs-entry-unlock{width:100%}
   .vs-entry-label{display:block;margin-top:13px;color:#ffe6ae;font-size:13px}
@@ -91,7 +97,12 @@
         <div>
           <div class="guide-label">RACE CONCIERGE</div>
           <h2>秘書からのご案内</h2>
-          <p>ようこそ、公式VSレース会場へ♡<br>ゲームから書き出した暗号化VS登録馬（.dbfvs）をパスワードなしで登録できます。従来のJSON読み込みも維持しています。</p>
+          <p>ようこそ、公式VSレース会場へ♡<br>
+          <strong>週間賞金TOP10：</strong>月曜日～日曜日に獲得した賞金を馬ごとに集計し、馬名・オーナー名とともに常時表示します。<br>
+          <strong>歴代年度代表馬：</strong>週間賞金1位を「第○代 年度代表馬」に認定し、永久に記録します。<br>
+          <strong>同じGⅠは通算2回：</strong>日付・週が変わってもリセットされません。<br>
+          <strong>毎週120頭・1頭1週間：</strong>1週間に参加できるのは最大120頭。登録馬はその週だけ参加でき、20戦未満でも翌週以降は再登録できません。<br>
+          <strong>週内最大20戦：</strong>その週の登録馬で最大20戦まで参加できます。オーナー名は初回登録後に固定されます。</p>
         </div>
       </section>
 
@@ -121,14 +132,16 @@
             <p class="vs-entry-schedule-label">出走受付中のレース</p>
             <strong id="vs-entry-race-name">レース名を確認中…</strong>
             <p id="vs-entry-deadline" class="vs-entry-deadline" aria-live="off">受付終了まで ――</p>
+            <strong id="vs-weekly-registration-cap">今週の登録枠：確認中 / 120頭</strong>
             <strong id="vs-entry-total">登録総数：集計中</strong>
             <div id="vs-entry-roster" class="vs-entry-roster" aria-label="登録済みの馬名とオーナー名">登録馬を集計中です。</div>
             <p id="vs-entry-updated">登録頭数はGitHub Actionsの最終集計時点の数字です。</p>
             <p id="vs-entry-next-candidates">次回GⅠの登録馬候補：確認中／最大18頭</p>
             <p id="vs-entry-myhorse">自分の登録馬：ログイン後に確認できます。</p>
+            <p id="vs-owner-horse-lock">登録馬：ログイン後に固定馬を確認します。</p>
             <p id="vs-entry-my-status">出走状況：未確認</p>
           </div>
-          <p>新しいゲームから書き出した .dbfvs ファイルを選ぶだけで準備完了。パスワード入力は不要です。従来のJSONも読み込めます。登録は1アカウントにつき1頭です。</p>
+          <p>毎週の新規登録は最大120頭、1アカウントにつき1頭。登録馬は日曜日で参加終了となり、20戦していなくても翌週以降は再登録できません。同じ週の次のレースには同じ馬で申込みできます。新しいゲームから書き出した .dbfvs ファイルを選ぶだけで登録できます。</p>
           <div class="vs-entry-auth" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
             <button class="vs-action-btn" id="vs-entry-google" type="button">Googleでログイン</button>
             <button class="vs-action-btn" id="vs-entry-guest" type="button">ゲストでログイン</button>
@@ -157,11 +170,19 @@
           <div id="vs-result-list" aria-live="polite"><p>直近24時間のレース記録を確認しています。</p></div>
         </section>
       </div>
-      <section class="panel" id="vs-ranking-panel" aria-label="当日獲得賞金ランキング">
-        <div class="num">04 / DAILY PRIZE RANKING</div>
-        <h2>本日の獲得賞金 TOP10</h2>
-        <p id="vs-ranking-description">日本時間 0:00～23:59／次のレース開始時に更新</p>
-        <table class="vs-ranking-grid"><thead><tr><th>順位</th><th>馬名</th><th>獲得賞金</th></tr></thead><tbody id="vs-ranking-body"><tr><td colspan="3">集計中です。</td></tr></tbody></table>
+      <section class="panel" id="vs-ranking-panel" aria-label="週間獲得賞金ランキング">
+        <div class="num">04 / WEEKLY PRIZE RANKING</div>
+        <h2>週間獲得賞金 TOP10</h2>
+        <p id="vs-ranking-description">日本時間・月曜0:00～日曜23:59／確定結果を集計</p>
+        <table class="vs-ranking-grid"><thead><tr><th>順位</th><th>馬名</th><th>オーナー</th><th>週間賞金</th></tr></thead>
+          <tbody id="vs-ranking-body"><tr><td colspan="4">集計中です。</td></tr></tbody></table>
+      </section>
+      <section class="panel" id="vs-awards-panel" aria-label="歴代年度代表馬">
+        <div class="num">05 / HALL OF CHAMPIONS</div>
+        <h2>歴代年度代表馬</h2>
+        <p class="small">毎週の獲得賞金1位を第1代、第2代…と永久記録します。</p>
+        <div id="vs-awards-list" aria-live="polite">受賞記録を読み込み中…</div>
+        <button class="vs-action-btn" type="button" id="vs-awards-more" hidden>もっと見る（20件ずつ）</button>
       </section>
     </main>
 

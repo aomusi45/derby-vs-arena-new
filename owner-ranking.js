@@ -1,83 +1,81 @@
-/* Additional display-only owner labels for the existing daily prize TOP10.
-   Uses public result metadata, never downloads private Firebase registrations.
-   The original 3D viewer, race calculations and site.js are not modified. */
+/* Persistent weekly TOP10 + archived champions; no private identifiers on the site. */
 (()=>{
   'use strict';
   const body=document.getElementById('vs-ranking-body');
-  if(!body)return;
-  const SLOT_MS=900000,PAPER_MS=30000,DAY_MS=86400000;
-  let manifest=null, loading=false, rendering=false;
-  const dateKey=ms=>new Intl.DateTimeFormat('en-CA',{
-    timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
-  }).format(new Date(ms));
-  const prize=amount=>new Intl.NumberFormat('ja-JP').format(amount)+'円';
-  const startMs=m=>m.slot*(m.intervalMinutes===15?SLOT_MS:600000);
-  const completedMs=m=>startMs(m)+PAPER_MS+m.durationMs;
-  const releaseMs=m=>startMs(m)+(m.intervalMinutes===15?SLOT_MS:600000);
-  const normalOwner=name=>typeof name==='string' && [...name].length<=24 &&
-    !/[\u0000-\u001f\u007f]/.test(name) ? name.trim():'';
-  function rows(){
-    if(!manifest?.records)return null;
-    const now=Date.now(),today=dateKey(now),total=new Map();
-    for(const meta of manifest.records){
-      if(!meta || !Number.isSafeInteger(meta.slot) || !Number.isFinite(meta.durationMs) || !Array.isArray(meta.results))continue;
-      const completed=completedMs(meta);
-      if(now<completed || now<releaseMs(meta) || now>=completed+DAY_MS || dateKey(completed)!==today)continue;
-      for(const row of meta.results){
-        if(!row || typeof row.name!=='string' || !Number.isSafeInteger(row.prizeYen) || row.prizeYen<=0)continue;
-        const owner=normalOwner(row.ownerName),key=owner?'player\u0000'+owner+'\u0000'+row.name:'horse\u0000'+row.name;
-        if(!total.has(key))total.set(key,{name:row.name,owner,amount:0});
-        total.get(key).amount+=row.prizeYen;
-      }
-    }
-    return [...total.values()].sort((a,b)=>b.amount-a.amount||a.name.localeCompare(b.name,'ja')).slice(0,10);
+  const description=document.getElementById('vs-ranking-description');
+  const archive=document.getElementById('vs-awards-list');
+  const more=document.getElementById('vs-awards-more');
+  if(!body||!archive||!description||!more)return;
+  let data=null,visible=20,fetching=false;
+  const money=n=>new Intl.NumberFormat('ja-JP').format(n)+'円';
+  const weekKey=()=>{
+    const formatted=new Intl.DateTimeFormat('en-CA',{
+      timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
+    }).format(new Date());
+    const d=new Date(formatted+'T00:00:00Z');
+    const shift=(d.getUTCDay()+6)%7;
+    d.setUTCDate(d.getUTCDate()-shift);
+    return d.toISOString().slice(0,10);
+  };
+  function cell(row,value){
+    const td=document.createElement('td');td.textContent=value;row.append(td);
   }
   function render(){
-    if(rendering)return;
-    const ranking=rows();
-    // Before public owner-bearing race results exist, the original site.js
-    // handles all ranking behaviour unchanged, including older COM results.
-    if(!ranking || !ranking.some(row=>row.owner))return;
-    const signature=JSON.stringify(ranking);
-    if(body.dataset.ownerRankingSignature===signature && body.querySelector('tr[data-owner-ranking-row]'))return;
-    rendering=true;
-    try{
-      const fragment=document.createDocumentFragment();
-      ranking.forEach((entry,i)=>{
-        const tr=document.createElement('tr');tr.dataset.ownerRankingRow='1';
-        const pos=document.createElement('td');pos.textContent=(i+1)+'位';
-        const horse=document.createElement('td');horse.textContent=entry.name;
-        if(entry.owner){
-          const owner=document.createElement('div');owner.className='vs-ranking-owner';
-          owner.textContent='オーナー：'+entry.owner;
-          owner.style.cssText='font-size:11px;color:#cbb277;line-height:1.5;margin-top:3px;';
-          horse.append(owner);
-        }
-        const amount=document.createElement('td');amount.textContent=prize(entry.amount);
-        tr.append(pos,horse,amount);fragment.append(tr);
+    if(!data)return;
+    body.replaceChildren();
+    if(data.weekStart!==weekKey()){
+      const tr=document.createElement('tr');cell(tr,'新しい週の集計データを更新中です。');
+      tr.firstChild.colSpan=4;body.append(tr);
+      description.textContent='日本時間の週間ランキングを更新中です。';
+    }else{
+      description.textContent='日本時間 '+data.weekStart+'（月）～'+data.weekEnd+'（日）／毎週月曜日に0円から再集計';
+      if(!data.top10.length){
+        const tr=document.createElement('tr');cell(tr,'今週の確定賞金はまだありません。');
+        tr.firstChild.colSpan=4;body.append(tr);
+      }
+      data.top10.slice(0,10).forEach((h,i)=>{
+        const tr=document.createElement('tr');
+        cell(tr,(i+1)+'位');cell(tr,h.horseName);
+        cell(tr,h.ownerName||'COM');cell(tr,money(h.prizeYen));
+        body.append(tr);
       });
-      body.dataset.ownerRankingSignature=signature;
-      body.replaceChildren(fragment);
-    }finally{rendering=false;}
+    }
+    archive.replaceChildren();
+    const rows=data.awards||[];
+    if(!rows.length){archive.textContent='歴代年度代表馬はまだ決定していません。';}
+    rows.slice(0,visible).forEach(x=>{
+      const item=document.createElement('div');item.className='vs-award-row';
+      const title=document.createElement('strong');
+      title.textContent='第'+x.generation+'代 年度代表馬　'+x.horseName;
+      const detail=document.createElement('div');detail.className='meta';
+      detail.textContent='オーナー：'+(x.ownerName||'COM')+' ／ 週間賞金：'+money(x.prizeYen)+' ／ '+x.weekStart+'～'+x.weekEnd;
+      item.append(title,detail);archive.append(item);
+    });
+    more.hidden=rows.length<=visible;
   }
-  const observer=new MutationObserver(()=>{
-    if(!rendering)queueMicrotask(render);
-  });
-  observer.observe(body,{childList:true,subtree:false});
+  more.addEventListener('click',()=>{visible+=20;render();});
   async function refresh(){
-    if(loading)return;
-    loading=true;
+    if(fetching)return;fetching=true;
     try{
-      const response=await fetch('./race_playlist.json?owner='+Date.now(),{cache:'no-store'});
-      if(!response.ok)throw Error('レース一覧取得失敗');
-      const doc=await response.json();
-      if(doc?.version!==2 || !Array.isArray(doc.records))throw Error('レース一覧形式不一致');
-      manifest=doc;render();
-    }catch(e){console.warn('オーナー付き賞金ランキングを取得できません',e);}
-    finally{loading=false;}
+      const result=await fetch('./weekly_awards.json?ts='+Date.now(),{cache:'no-store'});
+      if(!result.ok)throw Error('HTTP '+result.status);
+      const next=await result.json();
+      if(next.version!==1||next.timezone!=='Asia/Tokyo'||
+         !/^\d{4}-\d{2}-\d{2}$/.test(next.weekStart)||
+         !Array.isArray(next.top10)||!Array.isArray(next.awards)||
+         next.top10.length>10||next.awards.length>20000||
+         !next.top10.every(r=>typeof r.horseName==='string'&&typeof r.ownerName==='string'&&
+           Number.isSafeInteger(r.prizeYen)&&r.prizeYen>=0))
+        throw Error('賞金集計の形式が不正です');
+      data=next;render();
+    }catch(error){
+      console.warn('週間賞金の更新を確認できません',error);
+      if(!data){body.replaceChildren();const tr=document.createElement('tr');
+        cell(tr,'週間賞金データを確認中です。');tr.firstChild.colSpan=4;body.append(tr);
+        archive.textContent='受賞記録の公開を確認中です。';}
+    }finally{fetching=false;}
   }
-  refresh();
-  setInterval(refresh,30000);
-  setInterval(render,10000);
+  refresh();setInterval(refresh,30000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+  setInterval(render,60000);
 })();

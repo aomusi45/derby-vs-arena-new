@@ -88,28 +88,9 @@
       });
       box.append(heading,play);results.append(box);
     }
-    const total=new Map();
-    for(const meta of released){
-      if(dateKey(completedAt(meta))!==today)continue;
-      for(const row of meta.results){
-        if(row.prizeYen===0)continue;
-        total.set(row.name,(total.get(row.name)||0)+row.prizeYen);
-      }
-    }
-    const ranking=[...total.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'ja')).slice(0,10);
-    const body=$('vs-ranking-body');body.replaceChildren();
-    if(!ranking.length){
-      const tr=document.createElement('tr');const td=document.createElement('td');
-      td.colSpan=3;td.textContent='本日の公開済み賞金記録はまだありません。';tr.append(td);body.append(tr);
-    }
-    ranking.forEach(([name,prize],i)=>{
-      const tr=document.createElement('tr');
-      for(const value of [String(i+1)+'位',name,yen(prize)]){
-        const td=document.createElement('td');td.textContent=value;tr.append(td);
-      }
-      body.append(tr);
-    });
-    $('vs-ranking-description').textContent='日本時間 '+today+' 0:00～23:59 ／ 次レース開始時に公開された賞金を集計';
+    // Weekly TOP10 is rendered from the permanent official Firestore summary
+    // by owner-ranking.js. Do not overwrite it with the old 24-hour daily sum.
+
   }
   function showAvailability(){
     const now=Date.now(),slot=slotAt(now),end=(slot+1)*SLOT_MS;
