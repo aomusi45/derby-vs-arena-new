@@ -152,6 +152,28 @@
     </footer>
   </div>
 
+<style id="dbf-legacy-watch-style">
+.vs-watch-btn{display:block;margin-top:10px;border:1px solid #ebce87;border-radius:8px;padding:12px 20px;min-height:45px;background:linear-gradient(180deg,#f8dfa3,#c49643);color:#152920;font:inherit;font-weight:900;cursor:pointer;max-width:100%}
+#vs-watchroom[hidden],#vs-watchroom-loading[hidden],#vs-watchroom-frame[hidden]{display:none!important}
+#vs-watchroom{margin:18px auto 38px;width:min(1100px,94%);border:1px solid #b89551;border-radius:12px;padding:16px;background:#0b2520}
+#vs-watchroom-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+#vs-watchroom-title{color:#ffe6a4;font-size:18px;margin:0}
+#vs-watchroom-state{font-size:13px;line-height:1.8;color:#d8e1cf;margin:0 0 12px}
+#vs-watchroom-frame{display:block;width:100%;height:max(680px,85vh);border:1px solid #b89551;border-radius:8px;background:#091915}
+#vs-watchroom-loading{padding:16px;line-height:1.8;color:#f5d88c;white-space:pre-line}
+body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{display:none!important}
+@media(max-width:720px){#vs-watchroom-frame{height:calc(100dvh - 175px);min-height:480px}}
+</style>
+<section id="vs-watchroom" hidden aria-label="レースの再生画面">
+  <div id="vs-watchroom-top">
+    <h2 id="vs-watchroom-title">公式VSレース 再生</h2>
+    <button type="button" class="vs-watch-btn" id="vs-watchroom-back">ホームページに戻る</button>
+  </div>
+  <p id="vs-watchroom-state" role="status" aria-live="polite"></p>
+  <div id="vs-watchroom-loading" role="status"></div>
+  <iframe id="vs-watchroom-frame" hidden title="保存済みレースの再生映像" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
+</section>
+<script src="legacy-replay.js" defer></script>
 <script src="site.js" defer></script>
 <script src="owner-ranking.js" defer></script>
 <script src="firebase-config.js" defer></script>

@@ -80,7 +80,13 @@
       const box=document.createElement('div');box.className='vs-result-item';
       const heading=document.createElement('div');heading.className='vs-result-title';
       heading.textContent=meta.name;
-      box.append(heading);results.append(box);
+      const play=document.createElement('button');
+      play.type='button';play.className='vs-watch-btn';play.textContent='▶ 記録を観戦';
+      play.addEventListener('click',()=>{
+        if(window.DBFArchiveLegacy?.open) window.DBFArchiveLegacy.open(meta);
+        else window.alert('再生機能を読み込めませんでした。ページを再読み込みしてください。');
+      });
+      box.append(heading,play);results.append(box);
     }
     const total=new Map();
     for(const meta of released){
