@@ -48,6 +48,12 @@
   .vs-entry-summary strong{display:block;color:#f6e2ae;font-size:17px}
   .vs-entry-summary p{font-size:12px;line-height:1.6;margin:5px 0;color:#d3ddd1}
   #vs-entry-myhorse{color:#ffe0a1}
+  .vs-entry-schedule-label{font-size:12px!important;color:#d6c18a!important;margin:2px 0 4px!important}
+  #vs-entry-race-name{font-size:20px;color:#ffe5a0}
+  #vs-entry-deadline{color:#f8dda2;font-weight:750;font-variant-numeric:tabular-nums;font-size:15px;margin:7px 0 12px}
+  .vs-entry-roster{margin:12px 0 0;max-height:230px;overflow-y:auto;font-size:12px;color:#d8e3d9}
+  .vs-entry-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:7px 4px;border-bottom:1px solid #b8955135;overflow-wrap:anywhere}
+  .vs-entry-row-head{font-weight:700;color:#e4c986}
 </style>
 </head>
 <body>
@@ -105,7 +111,11 @@
           <h2>出走馬登録</h2>
           <span class="status" id="vs-entry-state">登録馬受付</span>
           <div class="vs-entry-summary" aria-label="登録頭数と次回の出走状況">
+            <p class="vs-entry-schedule-label">出走受付中のレース</p>
+            <strong id="vs-entry-race-name">レース名を確認中…</strong>
+            <p id="vs-entry-deadline" class="vs-entry-deadline" aria-live="off">受付終了まで ――</p>
             <strong id="vs-entry-total">登録総数：集計中</strong>
+            <div id="vs-entry-roster" class="vs-entry-roster" aria-label="登録済みの馬名とオーナー名">登録馬を集計中です。</div>
             <p id="vs-entry-updated">登録頭数はGitHub Actionsの最終集計時点の数字です。</p>
             <p id="vs-entry-next-candidates">次回GⅠの登録馬候補：確認中／最大18頭</p>
             <p id="vs-entry-myhorse">自分の登録馬：ログイン後に確認できます。</p>
@@ -165,7 +175,19 @@
 #vs-watchroom-frame{display:block;width:100%;height:max(680px,85vh);border:1px solid #b89551;border-radius:8px;background:#091915}
 #vs-watchroom-loading{padding:16px;line-height:1.8;color:#f5d88c;white-space:pre-line}
 body.vs-watch-view .hero,body.vs-watch-view main,body.vs-watch-view .footer{display:none!important}
-@media(max-width:720px){#vs-watchroom-frame{height:calc(100dvh - 175px);min-height:480px}}
+@media(max-width:720px){
+  body.vs-watch-view{overflow:hidden}
+  body.vs-watch-view>.wrap{display:none!important}
+  #vs-watchroom:not([hidden]){position:fixed;inset:0;z-index:2147482900;display:flex;flex-direction:column;
+    width:100%;height:100vh;height:100dvh;max-width:none;margin:0;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    border:0;border-radius:0;background:#05100f;overflow:hidden}
+  #vs-watchroom-top{flex:0 0 auto;min-height:44px;margin:0;padding:4px 8px;gap:6px;flex-wrap:nowrap}
+  #vs-watchroom-title{font-size:13px;line-height:1.3;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #vs-watchroom-back{margin:0;min-height:36px;padding:6px 10px;font-size:12px;flex-shrink:0}
+  #vs-watchroom-state{flex:0 0 auto;margin:0;padding:2px 8px;font-size:11px;line-height:1.4}
+  #vs-watchroom-frame:not([hidden]){flex:1 1 0;min-height:0;height:auto;width:100%;border:0;border-radius:0}
+  #vs-watchroom-loading:not([hidden]){flex:1 1 auto;overflow:auto}
+}
 </style>
 <section id="vs-watchroom" hidden aria-label="レースの再生画面">
   <div id="vs-watchroom-top">
@@ -245,7 +267,18 @@ const state={watchSerial:0,enginePromise:null,watchMode:'',archiveMeta:null,reco
       clear(){values.clear()},key(i){return [...values.keys()][i]??null},get length(){return values.size}};
       Object.defineProperty(window,'localStorage',{configurable:true,value:store});
     })();<\/script>`;
-    return html.replace(/<head[^>]*>/i,tag=>tag+shim);
+    // Mobile spectator presentation only: maximize the existing race viewport.
+    // No race calculation, camera, playback, or controls are modified.
+    const spectatorStyle=`<style id="dbf-mobile-spectator-layout">
+      @media(max-width:720px){
+        body[data-game-screen="race-view"] #viewport{
+          height:calc(100dvh - 130px)!important;min-height:330px!important;max-height:none!important;
+        }
+        body[data-game-screen="race-view"] .app{padding:0!important;max-width:none!important}
+        body[data-game-screen="race-view"] .shell{margin:0!important;max-width:none!important;border-radius:0!important}
+      }
+    </style>`;
+    return html.replace(/<head[^>]*>/i,tag=>tag+shim+spectatorStyle);
   }
   async function loadEngine(){
     if(!state.enginePromise)state.enginePromise=Promise.all(['vs_replay_engine_part1.txt','vs_replay_engine_part2.txt']
@@ -360,7 +393,7 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 <script src="site.js" defer></script>
 <script src="owner-ranking.js" defer></script>
 <script src="firebase-config.js" defer></script>
-<script src="registration.js?v=20261111-window-lock-1" defer></script>
+<script src="registration.js?v=20261111-entry-race-mobile-2" defer></script>
 <!-- DBF arena return-to-game button. Place immediately before </body>. -->
 <style id="dbf-arena-return-style">
   #dbf-return-to-game[hidden]{display:none!important}
