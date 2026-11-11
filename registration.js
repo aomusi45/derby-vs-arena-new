@@ -28,10 +28,9 @@
   const nextRaceDetail=$('vs-next-race-detail');
   const nextRaceCountdown=$('vs-next-race-countdown');
   const totalLabel=$('vs-entry-total');
-  const totalUpdated=$('vs-entry-updated');
-  const nextCandidates=$('vs-entry-next-candidates');
-  const ownHorseLabel=$('vs-entry-myhorse');
-  const ownStatusLabel=$('vs-entry-my-status');
+  const entryRace=$('vs-entry-race-name');
+  const entryRoster=$('vs-entry-roster');
+  const entryDeadline=$('vs-entry-deadline');
   let publicCatalog=null,publicManifest=null,ownRegistration=null,ownRegistrationId=null;
   let publicError='',refreshingPublic=false,lastRegistrationName='';
   const jpDate=ms=>new Intl.DateTimeFormat('ja-JP',{
@@ -57,42 +56,20 @@
     return pad(Math.floor(total/60))+':'+pad(total%60);
   };
   const nextRecorded=slot=>publicManifest?.records?.find(row=>row?.intervalMinutes===15&&row.slot===slot)||null;
-  function showOwnRaceStatus(card,slot,finalized){
-    if(!ownHorseLabel||!ownStatusLabel)return;
-    if(!auth?.currentUser){
-      ownHorseLabel.textContent='自分の登録馬：ログイン後に確認できます。';
-      ownStatusLabel.textContent='出走状況：未ログイン';
-      return;
+  function renderEntryRoster(rows){
+    if(!entryRoster)return;
+    entryRoster.replaceChildren();
+    if(!rows?.length){entryRoster.textContent='登録済み馬はありません（または集計待ちです）。';return;}
+    const head=document.createElement('div');head.className='vs-entry-row vs-entry-row-head';
+    for(const label of ['馬名','オーナー名']){const cell=document.createElement('span');cell.textContent=label;head.append(cell);}
+    entryRoster.append(head);
+    for(const row of rows){
+      const item=document.createElement('div');item.className='vs-entry-row';
+      for(const value of [row.horseName,row.ownerName||'未設定']){
+        const cell=document.createElement('span');cell.textContent=value;item.append(cell);
+      }
+      entryRoster.append(item);
     }
-    if(!ownRegistration){
-      ownHorseLabel.textContent='自分の登録馬：未登録';
-      ownStatusLabel.textContent=lastRegistrationName?'出走状況：前回の登録は終了。再登録できます':'出走状況：登録受付中';
-      return;
-    }
-    ownHorseLabel.textContent='自分の登録馬：'+String(ownRegistration.horseName||'名称不明');
-    if(!card || !publicManifest?.records){
-      ownStatusLabel.textContent='出走状況：レース一覧を確認中';
-      return;
-    }
-    if(!ownRegistrationId){
-      ownStatusLabel.textContent='出走状況：本人の出走記録を確認中';
-      return;
-    }
-    const record=finalized||nextRecorded(slot);
-    if(record){
-      ownStatusLabel.textContent=record.registrations?.includes(ownRegistrationId)
-        ?'次回の'+card.name+'：出走が記録されています（確定）'
-        :'次回の'+card.name+'：出走記録に含まれていません';
-      return;
-    }
-    const day=jpDay(slot*SLOT_MS);
-    const raced=publicManifest.records.some(row=>row?.name===card.name &&
-      Number.isInteger(row.slot) &&
-      jpDay(row.slot*(row.intervalMinutes===15?SLOT_MS:600000))===day &&
-      Array.isArray(row.registrations)&&row.registrations.includes(ownRegistrationId));
-    ownStatusLabel.textContent=raced
-      ?'次回の'+card.name+'：本日同じGⅠに出走済みのため対象外'
-      :'次回の'+card.name+'：出走抽選の対象（出走未確定）';
   }
   function renderPublicStatus(){
     const slot=nextSlot(),slotMs=slot*SLOT_MS;
@@ -104,32 +81,27 @@
     if(nextRaceCountdown)nextRaceCountdown.textContent=card
       ?'次回開催まで '+timeRemaining(slotMs-Date.now())
       :'次回開催まで ――';
+    if(entryRace)entryRace.textContent=card?.name||'番組表を確認中';
+    // Recording starts at :08/:23/:38/:53, seven minutes before each race.
+    // Applications arriving after the server snapshot cannot enter this heat.
+    const closingMs=slotMs-7*60*1000;
+    if(entryDeadline)entryDeadline.textContent=!card?'受付終了まで ――':
+      Date.now()>=closingMs?'このレースの受付時間は終了しました':
+      '受付終了まで '+timeRemaining(closingMs-Date.now());
     const summary=publicManifest?.registrationSummary;
-    const valid=summary?.version===1 && Number.isInteger(summary.registeredCount)&&
-      summary.registeredCount>=0 && summary.registeredCount<=150 &&
-      Number.isSafeInteger(summary.asOfMs) && summary.asOfMs>0;
-    if(totalLabel){
-      totalLabel.textContent=valid?'登録総数：'+summary.registeredCount+'頭（最終集計値）':'登録総数：集計待ち';
+    const valid=summary?.version===1 && Number.isInteger(summary.nextCandidateCount) &&
+      summary.nextCandidateCount>=0 && summary.nextCandidateCount<=18 &&
+      Number.isSafeInteger(summary.asOfMs) && summary.asOfMs>0 && summary.nextSlot===slot;
+    const rows=valid&&Array.isArray(summary.nextEntries)&&
+      summary.nextEntries.length===summary.nextCandidateCount&&
+      summary.nextEntries.every(row=>typeof row.horseName==='string'&&typeof row.ownerName==='string')
+      ?summary.nextEntries:null;
+    if(totalLabel)totalLabel.textContent='18頭中 '+(valid?summary.nextCandidateCount:'―')+'頭登録済み';
+    if(entryRoster){
+      if(!valid){entryRoster.textContent='次回レースの登録馬を集計中です。';}
+      else if(rows===null){entryRoster.textContent='馬名・オーナー名の公開集計を確認中です。';}
+      else renderEntryRoster(rows);
     }
-    if(totalUpdated){
-      const age=valid?Date.now()-summary.asOfMs:0;
-      totalUpdated.textContent=valid
-        ?'最終集計：'+jpDate(summary.asOfMs)+(age>45*60000?' ／ 更新が遅れています':'')+' ※登録直後は次の集計で反映'
-        :(publicError?'登録数を取得できません。最新公開データを確認してください。':'GitHub Actionsの次の集計後に表示されます。');
-    }
-    const record=nextRecorded(slot);
-    const finalCount=record && Array.isArray(record.registrations) ? record.registrations.length:null;
-    if(nextCandidates){
-      if(finalCount!==null){
-        nextCandidates.textContent='次回GⅠの登録馬出走確定：'+finalCount+'頭／最大18頭';
-      }else if(valid && summary.nextSlot===slot && !summary.nextFinal &&
-          Number.isInteger(summary.nextCandidateCount) && summary.nextCandidateCount>=0){
-        nextCandidates.textContent='次回GⅠの出走候補：'+summary.nextCandidateCount+'頭／最大18頭（抽選前）';
-      }else{
-        nextCandidates.textContent='次回GⅠの出走候補：未集計／最大18頭（出走未確定）';
-      }
-    }
-    showOwnRaceStatus(card,slot,record);
   }
   async function refreshPublicStatus(){
     if(refreshingPublic)return;
