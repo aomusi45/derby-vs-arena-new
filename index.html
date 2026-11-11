@@ -47,7 +47,13 @@
   .vs-entry-summary{padding:11px 12px;margin:12px 0;border:1px solid #9e814a88;border-radius:8px;background:#061a1899}
   .vs-entry-summary strong{display:block;color:#f6e2ae;font-size:17px}
   .vs-entry-summary p{font-size:12px;line-height:1.6;margin:5px 0;color:#d3ddd1}
-  #vs-entry-myhorse{color:#ffe0a1}
+  .vs-entry-kicker{color:#cbb277;font-size:12px;letter-spacing:.04em;margin:10px 0 5px}
+  #vs-entry-race-name{font-size:20px}
+  #vs-entry-total{color:#ffe5a0;font-size:16px;font-weight:800}
+  #vs-entry-roster{max-height:195px;overflow-y:auto;color:#d7e3d8;font-size:12px}
+  .vs-entry-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;padding:6px 0;border-bottom:1px solid #b8955133;overflow-wrap:anywhere}
+  .vs-entry-row-head{color:#cbb277;font-weight:700}
+  #vs-entry-deadline{font-size:15px;color:#ffe0a1;font-weight:800;margin-top:14px}
 </style>
 </head>
 <body>
@@ -103,15 +109,14 @@
         <section class="panel">
           <div class="num">02 / ENTRY</div>
           <h2>出走馬登録</h2>
-          <span class="status" id="vs-entry-state">登録馬受付</span>
-          <div class="vs-entry-summary" aria-label="登録頭数と次回の出走状況">
-            <strong id="vs-entry-total">登録総数：集計中</strong>
-            <p id="vs-entry-updated">登録頭数はGitHub Actionsの最終集計時点の数字です。</p>
-            <p id="vs-entry-next-candidates">次回GⅠの登録馬候補：確認中／最大18頭</p>
-            <p id="vs-entry-myhorse">自分の登録馬：ログイン後に確認できます。</p>
-            <p id="vs-entry-my-status">出走状況：未確認</p>
+          <div class="vs-entry-summary" aria-label="受付中のレースと登録馬一覧">
+            <div class="vs-entry-kicker">出走受付中のレース</div>
+            <strong id="vs-entry-race-name">番組表を確認中…</strong>
+            <p id="vs-entry-total">18頭中 ―頭登録済み</p>
+            <div class="vs-entry-kicker">登録済み馬名・オーナー名</div>
+            <div id="vs-entry-roster" aria-live="polite">登録馬を確認中です。</div>
+            <p id="vs-entry-deadline">受付終了まで ――</p>
           </div>
-          <p>新しいゲームから書き出した .dbfvs ファイルを選ぶだけで準備完了。パスワード入力は不要です。従来のJSONも読み込めます。登録は1アカウントにつき1頭です。</p>
           <div class="vs-entry-auth" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
             <button class="vs-action-btn" id="vs-entry-google" type="button">Googleでログイン</button>
             <button class="vs-action-btn" id="vs-entry-guest" type="button">ゲストでログイン</button>
