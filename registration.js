@@ -35,6 +35,7 @@
   const entryRoster=$('vs-entry-roster');
   const entryDeadline=$('vs-entry-deadline');
   let publicCatalog=null,publicManifest=null,ownRegistration=null,ownRegistrationId=null;
+  let sharedEntries=null,sharedEntriesError='',sharedEntriesLoading=false;
   let publicError='',refreshingPublic=false,lastRegistrationName='';
   // Show this browser's server-confirmed registration before the next public snapshot.
   let localConfirmed=null;
@@ -105,9 +106,13 @@
       summary.nextEntries.length===summary.nextCandidateCount&&
       summary.nextEntries.every(row=>typeof row.horseName==='string'&&typeof row.ownerName==='string')
       ?summary.nextEntries:null;
+    // Public Firestore mirror is authoritative across devices. The GitHub
+    // snapshot is used only as a fallback when mirror reads fail.
+    const shared=Array.isArray(sharedEntries)?sharedEntries:null;
+    const publishedRows=shared===null?rows:shared;
     // The public roster comes from the server. Only this user's verified
     // registration may be shown early; never replace another owner's record.
-    let displayed=rows?rows.map(row=>({horseName:row.horseName,ownerName:row.ownerName})):[];
+    let displayed=publishedRows?publishedRows.map(row=>({horseName:row.horseName,ownerName:row.ownerName})):[];
     const local=localConfirmed?.slot===slot&&localConfirmed?.uid===auth?.currentUser?.uid
       ?localConfirmed:null;
     if(local){
@@ -117,13 +122,13 @@
       else if(displayed.length<18)displayed.push(ownRow);
     }
     if(totalLabel){
-      const count=valid?Math.max(summary.nextCandidateCount,displayed.length):
-        (local?displayed.length:null);
+      const count=shared!==null?displayed.length:(valid?Math.max(summary.nextCandidateCount,displayed.length):
+        (local?displayed.length:null));
       totalLabel.textContent='18頭中 '+(count===null?'―':Math.min(18,count))+'頭登録済み'+
         (local?'（自分の登録は反映済み）':'');
     }
     if(entryRoster){
-      if(rows||local)renderEntryRoster(displayed);
+      if(publishedRows||local)renderEntryRoster(displayed);
       else entryRoster.textContent=valid?'馬名・オーナー名の公開集計を確認中です。':
         '次回レースの登録馬を集計中です。';
     }
@@ -147,6 +152,32 @@
     }catch(err){publicError=String(err.message||err);}
     finally{refreshingPublic=false;renderPublicStatus();}
   }
+  function applySharedSnapshot(snapshot){
+    if(snapshot.size>150)throw Error('公開登録数が上限を超えています');
+    const rows=[];
+    snapshot.forEach(doc=>{
+      const d=doc.data();
+      if(typeof d.ownerName==='string'&&typeof d.horseName==='string'&&
+          d.ownerName===doc.id&&d.ownerName.length<=96&&d.horseName.length<=60)
+        rows.push({ownerName:d.ownerName,horseName:d.horseName});
+    });
+    rows.sort((a,b)=>a.ownerName.localeCompare(b.ownerName,'ja'));
+    sharedEntries=rows;sharedEntriesError='';renderPublicStatus();
+  }
+  async function refreshSharedEntries(){
+    if(sharedEntriesLoading||!ready||!db||!sdk)return;
+    sharedEntriesLoading=true;
+    try{
+      // This intentionally uses the restricted public collection, NOT vs_entries.
+      const snapshot=await sdk.getDocsFromServer(sdk.collection(db,'vs_public_entries'));
+      applySharedSnapshot(snapshot);
+    }catch(err){
+      sharedEntriesError=String(err.code||err.message||err);
+      console.warn('公開出走登録一覧の取得失敗',sharedEntriesError);
+    }finally{sharedEntriesLoading=false;renderPublicStatus();}
+  }
+  // Read immediately on first SDK initialization and periodically across devices.
+  // No client-provided horse data is treated as a server-confirmed registration.
   async function hashRegisteredHorse(uid,horseId,serverTime){
     // Match registered_horses.py: each Firestore submission has a unique receipt ID.
     if(!globalThis.crypto?.subtle)return null;
@@ -175,7 +206,7 @@
   refreshPublicStatus();
   setInterval(()=>{renderPublicStatus();updateSubmit();},1000);
   setInterval(refreshPublicStatus,30000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshPublicStatus();});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshPublicStatus();refreshSharedEntries();}});
   const num=(raw,def,lo,hi)=>{
     if(raw===null||raw===undefined||raw==='')return def;
     const n=Number(raw);
@@ -248,6 +279,11 @@
     auth=authSdk.getAuth(app);
     await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
     db=fsSdk.getFirestore(app);ready=true;
+    // Live Firestore listener: other devices update as soon as the mirror changes.
+    fsSdk.onSnapshot(fsSdk.collection(db,'vs_public_entries'),
+      snapshot=>{try{applySharedSnapshot(snapshot);}catch(err){console.warn(err);}},
+      err=>{sharedEntriesError=String(err.code||err.message||err);console.warn('公開一覧の監視に失敗',err);});
+    refreshSharedEntries();
     authSdk.onAuthStateChanged(auth,async user=>{
       ownRegistration=null;ownRegistrationId=null;localConfirmed=null;
       reservedOwnerName='';profileLoaded=false;
@@ -421,6 +457,7 @@
       localConfirmed={slot:nextSlot(),uid:user.uid,horseName:String(stored.data().horseName||horseName),
         ownerName:String(stored.data().ownerName||publicOwner)};
       await updateOwnFromDocument(user,stored.data());
+      await refreshSharedEntries();
       renderPublicStatus();
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
     finally{busy=false;updateSubmit();}
