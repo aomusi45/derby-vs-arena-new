@@ -17,6 +17,8 @@ on:
       - 'tools/registered_horses.py'
       - 'tools/consume_vs_entries.py'
       - 'tools/horse_appearance_ledger.py'
+      - 'tools/weekly_awards.py'
+      - 'tools/migrate_g1_history.py'
   workflow_dispatch:
   schedule:
     # 7 minutes before each 15-minute boundary, UTC minutes = JST minutes.
@@ -52,6 +54,11 @@ jobs:
         run: |
           python -m pip install 'playwright==1.56.0' 'google-auth[requests]>=2.35,<3'
           command -v google-chrome || command -v chromium
+      - name: Migrate existing official G1 starts exactly once
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: python tools/migrate_g1_history.py
       - name: Reconcile already published appearances before the next race
         env:
           FIREBASE_PROJECT_ID: derby-vs-arena
@@ -85,8 +92,12 @@ jobs:
           FIREBASE_PROJECT_ID: derby-vs-arena
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: python tools/sync_public_entries.py
-      - name: Publish refreshed entry count
-        continue-on-error: true
+      - name: Count weekly prizes and archive previous weekly champion
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: python tools/weekly_awards.py
+      - name: Publish refreshed entry count and current weekly TOP10
         run: python tools/push_recorded_races.py
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -95,6 +106,7 @@ jobs:
           mkdir -p public_site/races
           cp index.html site.js owner-ranking.js registration.js firebase-config.js race_catalog.json race_playlist.json public_site/
           cp vs_replay_engine_part1.txt vs_replay_engine_part2.txt public_site/
+          cp weekly_awards.json public_site/
           cp -a races/. public_site/races/
       - name: Upload official VS site
         uses: actions/upload-pages-artifact@v4
