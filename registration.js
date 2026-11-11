@@ -33,6 +33,8 @@
   const entryDeadline=$('vs-entry-deadline');
   let publicCatalog=null,publicManifest=null,ownRegistration=null,ownRegistrationId=null;
   let publicError='',refreshingPublic=false,lastRegistrationName='';
+  // Show this browser's server-confirmed registration before the next public snapshot.
+  let localConfirmed=null;
   const jpDate=ms=>new Intl.DateTimeFormat('ja-JP',{
     timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',weekday:'short',
     hour:'2-digit',minute:'2-digit',hour12:false
@@ -96,11 +98,27 @@
       summary.nextEntries.length===summary.nextCandidateCount&&
       summary.nextEntries.every(row=>typeof row.horseName==='string'&&typeof row.ownerName==='string')
       ?summary.nextEntries:null;
-    if(totalLabel)totalLabel.textContent='18頭中 '+(valid?summary.nextCandidateCount:'―')+'頭登録済み';
+    // The public roster comes from the server. Only this user's verified
+    // registration may be shown early; never replace another owner's record.
+    let displayed=rows?rows.map(row=>({horseName:row.horseName,ownerName:row.ownerName})):[];
+    const local=localConfirmed?.slot===slot&&localConfirmed?.uid===auth?.currentUser?.uid
+      ?localConfirmed:null;
+    if(local){
+      const existing=displayed.findIndex(row=>row.ownerName===local.ownerName);
+      const ownRow={horseName:local.horseName,ownerName:local.ownerName};
+      if(existing>=0)displayed[existing]=ownRow;
+      else if(displayed.length<18)displayed.push(ownRow);
+    }
+    if(totalLabel){
+      const count=valid?Math.max(summary.nextCandidateCount,displayed.length):
+        (local?displayed.length:null);
+      totalLabel.textContent='18頭中 '+(count===null?'―':Math.min(18,count))+'頭登録済み'+
+        (local?'（自分の登録は反映済み）':'');
+    }
     if(entryRoster){
-      if(!valid){entryRoster.textContent='次回レースの登録馬を集計中です。';}
-      else if(rows===null){entryRoster.textContent='馬名・オーナー名の公開集計を確認中です。';}
-      else renderEntryRoster(rows);
+      if(rows||local)renderEntryRoster(displayed);
+      else entryRoster.textContent=valid?'馬名・オーナー名の公開集計を確認中です。':
+        '次回レースの登録馬を集計中です。';
     }
   }
   async function refreshPublicStatus(){
@@ -221,7 +239,7 @@
     await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
     db=fsSdk.getFirestore(app);ready=true;
     authSdk.onAuthStateChanged(auth,async user=>{
-      ownRegistration=null;ownRegistrationId=null;
+      ownRegistration=null;ownRegistrationId=null;localConfirmed=null;
       reservedOwnerName='';profileLoaded=false;
       ownerInput.readOnly=false;
       if(ownerHint)ownerHint.textContent='ログインするとオーナー名の取得状況を確認します。';
@@ -377,7 +395,10 @@
       if(ownerHint)ownerHint.textContent='専用オーナー名として取得済み。出走後も保存されます。';
       say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。このオーナー名は本人専用です。1回出走すると馬の登録だけ解除されます。');
       preview.textContent='※ 1登録1出走・最大18頭。同じ馬が同じGⅠに出走できるのは日本時間で1日1回まで。';
+      localConfirmed={slot:nextSlot(),uid:user.uid,horseName:String(stored.data().horseName||horseName),
+        ownerName:String(stored.data().ownerName||publicOwner)};
       await updateOwnFromDocument(user,stored.data());
+      renderPublicStatus();
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
     finally{busy=false;updateSubmit();}
   });
