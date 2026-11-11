@@ -8,6 +8,7 @@ No race or registration semantics are changed.
 from __future__ import annotations
 import json
 import os
+import time
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 import registered_horses
@@ -15,6 +16,7 @@ import registered_horses
 PROJECT = 'derby-vs-arena'
 BASE = f'projects/{PROJECT}/databases/(default)/documents'
 API = 'https://firestore.googleapis.com/v1/'
+SLOT_MS = 15 * 60 * 1000
 
 
 def request_json(url, token, data=None):
@@ -39,10 +41,15 @@ def simple_field(doc, key, kind='stringValue'):
     return doc.get('fields',{}).get(key,{}).get(kind)
 
 
-def active_names(documents):
+def active_names(documents, target_slot=None):
     result={}
+    if target_slot is None:
+        target_slot=int(time.time()*1000)//SLOT_MS+1
     for doc in documents:
         row=registered_horses._decode_document(doc)
+        submitted_ms=registered_horses.timestamp_us(row['updatedAt'])//1000
+        if submitted_ms//SLOT_MS+1!=target_slot:
+            continue
         owner=row['ownerName']
         if not owner or '/' in owner:
             raise ValueError('公開オーナー名が不正です')

@@ -24,9 +24,11 @@ def consumption_plan(documents: list[dict], records: list[dict]) -> list[dict]:
     published_receipts = set()
     legacy_receipts = {}
     used_horse_cutoffs = {}
+    published_slots = set()
     for record in records:
         if record.get('intervalMinutes') != 15 or not isinstance(record.get('slot'), int):
             continue
+        published_slots.add(record['slot'])
         identifiers = record.get('registrations', [])
         published_receipts.update(i for i in identifiers if isinstance(i, str))
         for identifier in identifiers:
@@ -46,7 +48,13 @@ def consumption_plan(documents: list[dict], records: list[dict]) -> list[dict]:
                       updated_us <= legacy_receipts[row['legacyId']] * 1000)
             cloned = (row['horseToken'] in used_horse_cutoffs and
                       updated_us <= used_horse_cutoffs[row['horseToken']] * 1000)
-            if not (matched or legacy or cloned):
+            # A submission made within a 15-minute cycle is for the next
+            # scheduled slot. Once that slot has a published result, its
+            # registration is no longer active, even if the race fell back to
+            # COM-only. Never count this as a completed horse appearance.
+            assigned_slot = (updated_us // 1000) // 900_000 + 1
+            completed_slot = assigned_slot in published_slots
+            if not (matched or legacy or cloned or completed_slot):
                 continue
             version = doc.get('updateTime')
             name = doc.get('name')
