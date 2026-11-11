@@ -102,7 +102,7 @@
     if(registrationForm)registrationForm.hidden=!card||!acceptingNow()||!!ownRegistration;
     if(persisted)persisted.textContent=ownForCurrentSlot()
       ?'登録済み：'+String(ownRegistration.horseName||'不明')+' ／ オーナー：'+String(ownRegistration.ownerName||'不明')+'（差し替え不可）'
-      :(ownRegistration?'前回の登録結果を整理中です。新しい登録は整理完了後に可能になります。'
+      :(ownRegistration?'前回の登録はこの開催の対象外です。結果確定後のサーバー整理を確認中です。'
       :(!card?'受付状況を確認中':(!acceptingNow()?'現在は出走登録の受付時間外です。':'')));
     if(entryDeadline)entryDeadline.textContent=!card?'受付終了まで ――':
       Date.now()>=closingMs?'このレースの受付時間は終了しました':
