@@ -50,6 +50,14 @@
     timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
   }).format(new Date(ms));
   const nextSlot=()=>Math.floor(Date.now()/SLOT_MS)+1;
+  // A registration belongs only to the immediately following 15-minute heat.
+  // The Firestore server timestamp, not browser cache or local clock at signup,
+  // identifies the slot. Older public records are never shown in later heats.
+  const assignedSlot=stamp=>{
+    const ms=stamp?.toMillis?.() ?? (typeof stamp==='string'?Date.parse(stamp):NaN);
+    return Number.isFinite(ms)&&ms>0?Math.floor(ms/SLOT_MS)+1:null;
+  };
+  const ownForCurrentSlot=()=>!!ownRegistration&&assignedSlot(ownRegistration.updatedAt)===nextSlot();
   const slotCard=slot=>{
     if(!publicCatalog?.races?.length)return null;
     const anchor=Math.floor(Date.parse(publicCatalog.cycleStartsAt)/SLOT_MS);
@@ -92,9 +100,10 @@
     // Applications arriving after the server snapshot cannot enter this heat.
     const closingMs=slotMs-7*60*1000;
     if(registrationForm)registrationForm.hidden=!card||!acceptingNow()||!!ownRegistration;
-    if(persisted)persisted.textContent=ownRegistration
+    if(persisted)persisted.textContent=ownForCurrentSlot()
       ?'登録済み：'+String(ownRegistration.horseName||'不明')+' ／ オーナー：'+String(ownRegistration.ownerName||'不明')+'（差し替え不可）'
-      :(!card?'受付状況を確認中':(!acceptingNow()?'現在は出走登録の受付時間外です。':''));
+      :(ownRegistration?'前回の登録結果を整理中です。新しい登録は整理完了後に可能になります。'
+      :(!card?'受付状況を確認中':(!acceptingNow()?'現在は出走登録の受付時間外です。':'')));
     if(entryDeadline)entryDeadline.textContent=!card?'受付終了まで ――':
       Date.now()>=closingMs?'このレースの受付時間は終了しました':
       '受付終了まで '+timeRemaining(closingMs-Date.now());
@@ -108,7 +117,7 @@
       ?summary.nextEntries:null;
     // Public Firestore mirror is authoritative across devices. The GitHub
     // snapshot is used only as a fallback when mirror reads fail.
-    const shared=Array.isArray(sharedEntries)?sharedEntries:null;
+    const shared=Array.isArray(sharedEntries)?sharedEntries.filter(row=>row.slot===slot):null;
     const publishedRows=shared===null?rows:shared;
     // The public roster comes from the server. Only this user's verified
     // registration may be shown early; never replace another owner's record.
@@ -159,7 +168,7 @@
       const d=doc.data();
       if(typeof d.ownerName==='string'&&typeof d.horseName==='string'&&
           d.ownerName===doc.id&&d.ownerName.length<=96&&d.horseName.length<=60)
-        rows.push({ownerName:d.ownerName,horseName:d.horseName});
+        rows.push({ownerName:d.ownerName,horseName:d.horseName,slot:assignedSlot(d.updatedAt)});
     });
     rows.sort((a,b)=>a.ownerName.localeCompare(b.ownerName,'ja'));
     sharedEntries=rows;sharedEntriesError='';renderPublicStatus();
@@ -192,7 +201,7 @@
     if(auth?.currentUser?.uid!==user.uid)return;
     ownRegistration=docData;ownRegistrationId=null;
     if(docData?.horseName)lastRegistrationName=String(docData.horseName);
-    localConfirmed=docData?{slot:nextSlot(),uid:user.uid,horseName:String(docData.horseName||''),ownerName:String(docData.ownerName||'')}:null;
+    localConfirmed=docData?{slot:assignedSlot(docData.updatedAt),uid:user.uid,horseName:String(docData.horseName||''),ownerName:String(docData.ownerName||'')}:null;
     if(docData?.ownerName && !reservedOwnerName && !ownerInput.value)ownerInput.value=cleanOwner(docData.ownerName);
     updateSubmit();renderPublicStatus();
     if(docData?.horseId){
