@@ -119,6 +119,10 @@
     $('live-race-status').textContent=active?'開催中':'開催準備中';
     $('live-race-name').textContent=card?.name||'GⅠレース一覧を取得中';
     $('live-race-info').textContent=active?'':(state.error||'開催情報を確認しています。');
+    // Result disclosure remains gated by the existing publication logic.
+    // The next 15-minute slot is only an estimated display time.
+    const resultTimer=$('vs-live-result-countdown');
+    if(resultTimer)resultTimer.textContent=active?'あと '+countdown(end-now):'確認中…';
     $('live-race-next').textContent='開催枠（日本時間）：'+clock(slot*SLOT_MS)+'～'+clock(end)+' ／ 次の切替まで '+countdown(end-now);
   }
   async function refresh(){

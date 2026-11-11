@@ -54,6 +54,10 @@
   .vs-entry-roster{margin:12px 0 0;max-height:230px;overflow-y:auto;font-size:12px;color:#d8e3d9}
   .vs-entry-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:7px 4px;border-bottom:1px solid #b8955135;overflow-wrap:anywhere}
   .vs-entry-row-head{font-weight:700;color:#e4c986}
+  /* Only three visible items in the live-race card. Keep hidden compatibility nodes hidden. */
+  #live-race-panel [hidden]{display:none!important}
+  #live-race-panel .vs-live-result-label{font-size:12px;color:#cbb277;margin:13px 0 3px}
+  #vs-live-result-countdown{font-size:23px;font-weight:800;color:#ffe6a4;font-variant-numeric:tabular-nums;margin:2px 0 11px}
 </style>
 </head>
 <body>
@@ -95,16 +99,19 @@
         <section class="panel" id="live-race-panel" aria-label="開催中のVSレース">
           <div class="num">01 / RACE SCHEDULE</div>
           <h2>開催中のレース</h2>
-          <span class="status" id="live-race-status">確認中</span>
-          <p class="race-name" id="live-race-name">レース記録を確認しています。</p>
-          <p id="live-race-info" aria-live="polite">15分ごとの開催枠を確認中です。</p>
-          <p class="race-footnote" id="live-race-next"></p>
-          <div class="vs-next-info" aria-label="次回のGⅠ開催予定">
-            <div class="vs-next-kicker">NEXT GⅠ / 次回開催予定（日本時間）</div>
+          <p class="race-name" id="live-race-name">開催レースを確認中…</p>
+          <p class="vs-live-result-label">レース結果公開まで（目安）</p>
+          <p id="vs-live-result-countdown" class="vs-live-result-countdown" aria-live="off">確認中…</p>
+          <div class="vs-next-info" aria-label="次の開催レース">
+            <div class="vs-next-kicker">次の開催レース</div>
             <div class="vs-next-name" id="vs-next-race-name">次回GⅠを確認中…</div>
-            <p class="vs-next-detail" id="vs-next-race-detail">番組表を読み込んでいます。</p>
-            <div class="vs-next-counter" id="vs-next-race-countdown">次回開催まで ――</div>
           </div>
+          <!-- Existing scripts update these compatibility nodes; not visible in the streamlined panel. -->
+          <span id="live-race-status" hidden></span>
+          <p id="live-race-info" hidden></p>
+          <p id="live-race-next" hidden></p>
+          <p id="vs-next-race-detail" hidden></p>
+          <p id="vs-next-race-countdown" hidden></p>
         </section>
         <section class="panel">
           <div class="num">02 / ENTRY</div>
