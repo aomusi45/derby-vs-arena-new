@@ -5,167 +5,6 @@
       "registrations": [],
       "horseTokens": [],
       "registrationSnapshotMs": 0,
-      "slot": 1993800,
-      "intervalMinutes": 15,
-      "file": "races/1993800.json.gz",
-      "raceId": "dfvs-mwcf4xem-tlwweshn",
-      "name": "菊花賞",
-      "venue": "京都",
-      "distance": 3000,
-      "month": 10,
-      "durationMs": 181075,
-      "firstPrizeYen": 200000000,
-      "results": [
-        {
-          "place": 1,
-          "no": 2,
-          "name": "セイウンスゴイ",
-          "timeSeconds": 177.1762435734665,
-          "margin": "―",
-          "prizeYen": 200000000
-        },
-        {
-          "place": 2,
-          "no": 3,
-          "name": "ソングオブウインク",
-          "timeSeconds": 177.46437409643565,
-          "margin": "2馬身",
-          "prizeYen": 80000000
-        },
-        {
-          "place": 3,
-          "no": 5,
-          "name": "エネルジカル",
-          "timeSeconds": 177.92957659971384,
-          "margin": "3 1/2馬身",
-          "prizeYen": 50000000
-        },
-        {
-          "place": 4,
-          "no": 4,
-          "name": "フィエールマロン",
-          "timeSeconds": 178.16979672367248,
-          "margin": "1 3/4馬身",
-          "prizeYen": 30000000
-        },
-        {
-          "place": 5,
-          "no": 17,
-          "name": "ダンスインザパーク",
-          "timeSeconds": 178.8756164612217,
-          "margin": "5馬身",
-          "prizeYen": 20000000
-        },
-        {
-          "place": 6,
-          "no": 16,
-          "name": "アサクサキングズ",
-          "timeSeconds": 179.37005099132054,
-          "margin": "3 1/2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 7,
-          "no": 11,
-          "name": "マチカネフクキタレ",
-          "timeSeconds": 179.57904887300958,
-          "margin": "1 1/2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 8,
-          "no": 1,
-          "name": "オウケンブルースリム",
-          "timeSeconds": 179.7643727318969,
-          "margin": "1 1/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 9,
-          "no": 18,
-          "name": "コントレイン",
-          "timeSeconds": 179.84425036780164,
-          "margin": "1/2馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 10,
-          "no": 6,
-          "name": "ヒシミラクリ",
-          "timeSeconds": 179.86530081539743,
-          "margin": "アタマ",
-          "prizeYen": 0
-        },
-        {
-          "place": 11,
-          "no": 10,
-          "name": "アスクビクターモヤ",
-          "timeSeconds": 179.871822393327,
-          "margin": "ハナ",
-          "prizeYen": 0
-        },
-        {
-          "place": 12,
-          "no": 9,
-          "name": "ビッグウィンク",
-          "timeSeconds": 179.90968517632464,
-          "margin": "クビ",
-          "prizeYen": 0
-        },
-        {
-          "place": 13,
-          "no": 8,
-          "name": "マンハッタンカレー",
-          "timeSeconds": 180.05490579774224,
-          "margin": "1馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 14,
-          "no": 7,
-          "name": "スリーロールケ",
-          "timeSeconds": 180.0873652654843,
-          "margin": "アタマ",
-          "prizeYen": 0
-        },
-        {
-          "place": 15,
-          "no": 15,
-          "name": "ワールドプレミアム",
-          "timeSeconds": 180.20846433591998,
-          "margin": "3/4馬身",
-          "prizeYen": 0
-        },
-        {
-          "place": 16,
-          "no": 13,
-          "name": "ビワハヤヒゲ",
-          "timeSeconds": 180.21825612976482,
-          "margin": "ハナ",
-          "prizeYen": 0
-        },
-        {
-          "place": 17,
-          "no": 14,
-          "name": "エアシャカールル",
-          "timeSeconds": 180.26654414669156,
-          "margin": "クビ",
-          "prizeYen": 0
-        },
-        {
-          "place": 18,
-          "no": 12,
-          "name": "レオダーバンズ",
-          "timeSeconds": 181.0653597971929,
-          "margin": "5 1/2馬身",
-          "prizeYen": 0
-        }
-      ]
-    },
-    {
-      "registrations": [],
-      "horseTokens": [],
-      "registrationSnapshotMs": 0,
       "slot": 1993801,
       "intervalMinutes": 15,
       "file": "races/1993801.json.gz",
@@ -16741,13 +16580,193 @@
           "rankingId": "c_b6b74fc0511267f688ed479b5948797a"
         }
       ]
+    },
+    {
+      "registrations": [],
+      "horseTokens": [],
+      "horseKeys": [],
+      "registrationSnapshotMs": 0,
+      "slot": 1993897,
+      "intervalMinutes": 15,
+      "file": "races/1993897.json.gz",
+      "raceId": "dfvs-mwdv4i0p-wb1s7m06",
+      "name": "桜花賞",
+      "venue": "阪神",
+      "distance": 1600,
+      "month": 4,
+      "durationMs": 92250,
+      "firstPrizeYen": 140000000,
+      "results": [
+        {
+          "place": 1,
+          "no": 5,
+          "name": "グランアレグリラ",
+          "timeSeconds": 86.69110893263824,
+          "margin": "―",
+          "prizeYen": 140000000,
+          "rankingId": "c_df19a98cdeb225db2a2b60c9b47a4f9b"
+        },
+        {
+          "place": 2,
+          "no": 1,
+          "name": "ラインクラブ",
+          "timeSeconds": 88.19564578445117,
+          "margin": "大差",
+          "prizeYen": 56000000,
+          "rankingId": "c_94c32bfe77328aa0508bd54034b76d89"
+        },
+        {
+          "place": 3,
+          "no": 18,
+          "name": "ジュエラート",
+          "timeSeconds": 88.77500218004192,
+          "margin": "4 3/4馬身",
+          "prizeYen": 35000000,
+          "rankingId": "c_6b097b56ea33bbc3364eca3c90921cc7"
+        },
+        {
+          "place": 4,
+          "no": 4,
+          "name": "ハープスターラ",
+          "timeSeconds": 88.99934548749295,
+          "margin": "1 3/4馬身",
+          "prizeYen": 21000000,
+          "rankingId": "c_a894d8c6c4584a2cd23e4bf19d489279"
+        },
+        {
+          "place": 5,
+          "no": 3,
+          "name": "アローキャリーカー",
+          "timeSeconds": 89.23944476798367,
+          "margin": "2馬身",
+          "prizeYen": 14000000,
+          "rankingId": "c_7587426710f6603aea1aee1ee8cd1e81"
+        },
+        {
+          "place": 6,
+          "no": 9,
+          "name": "キョウエイマーチン",
+          "timeSeconds": 89.7178475206435,
+          "margin": "3 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_a69bdb6540c627fdab1a8ff4ea2aadc2"
+        },
+        {
+          "place": 7,
+          "no": 7,
+          "name": "ブエナビスター",
+          "timeSeconds": 89.95825564809789,
+          "margin": "1 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_f15acb39b4bc46927ad0b40910d671bd"
+        },
+        {
+          "place": 8,
+          "no": 12,
+          "name": "マルセリーヌ",
+          "timeSeconds": 90.2451671588142,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_d6d40e2fec7b43c13f13108d5629303f"
+        },
+        {
+          "place": 9,
+          "no": 11,
+          "name": "テイエムオーシャンプ",
+          "timeSeconds": 90.28285694144397,
+          "margin": "クビ",
+          "prizeYen": 0,
+          "rankingId": "c_b209f1d30db4dfd89655b15611f0e5fb"
+        },
+        {
+          "place": 10,
+          "no": 13,
+          "name": "シスタートウショー",
+          "timeSeconds": 90.34991821367194,
+          "margin": "1/2馬身",
+          "prizeYen": 0,
+          "rankingId": "c_4fdf0dacbfb992357372add38deca03a"
+        },
+        {
+          "place": 11,
+          "no": 16,
+          "name": "ウオッカナ",
+          "timeSeconds": 90.48940465384503,
+          "margin": "1 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_fb4031a97e1be5b332be10b4bd35ea12"
+        },
+        {
+          "place": 12,
+          "no": 15,
+          "name": "レーヌミノリン",
+          "timeSeconds": 90.55920429710574,
+          "margin": "1/2馬身",
+          "prizeYen": 0,
+          "rankingId": "c_64d1d54be673cb1c2f80fd68ef6567db"
+        },
+        {
+          "place": 13,
+          "no": 10,
+          "name": "ファイトガリバン",
+          "timeSeconds": 90.62678388213627,
+          "margin": "1/2馬身",
+          "prizeYen": 0,
+          "rankingId": "c_ed8cd69ba77dc30278c23cd0c6ab8c79"
+        },
+        {
+          "place": 14,
+          "no": 2,
+          "name": "スターズオンマース",
+          "timeSeconds": 90.731878141468,
+          "margin": "3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_6e4b6c003e29f11725a78551a5cfc8b9"
+        },
+        {
+          "place": 15,
+          "no": 6,
+          "name": "ファレノプシズ",
+          "timeSeconds": 90.91483887643453,
+          "margin": "1 1/2馬身",
+          "prizeYen": 0,
+          "rankingId": "c_1fce2b39a8277621c3554ead0f6e847c"
+        },
+        {
+          "place": 16,
+          "no": 14,
+          "name": "ソダシロ",
+          "timeSeconds": 91.35832948216519,
+          "margin": "3 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_e8018b409fbd2164c56dad96b1964978"
+        },
+        {
+          "place": 17,
+          "no": 8,
+          "name": "アユサンド",
+          "timeSeconds": 91.75993464845742,
+          "margin": "3馬身",
+          "prizeYen": 0,
+          "rankingId": "c_5e25db10141765576c6a46983dd1660f"
+        },
+        {
+          "place": 18,
+          "no": 17,
+          "name": "キストゥヘヴンズ",
+          "timeSeconds": 92.22697164973637,
+          "margin": "3 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_10ad324996ab062f51b690ab1ff6fb34"
+        }
+      ]
     }
   ],
   "registrationSummary": {
     "version": 1,
     "registeredCount": 0,
-    "asOfMs": 1794506188344,
-    "nextSlot": 1993896,
+    "asOfMs": 1794506965744,
+    "nextSlot": 1993897,
     "nextCandidateCount": 0,
     "nextFinal": true
   }
