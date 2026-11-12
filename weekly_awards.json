@@ -47,6 +47,12 @@
       "starts": 64
     },
     {
+      "horseName": "ラヴズオンリーニャ",
+      "ownerName": "",
+      "prizeYen": 2542500000,
+      "starts": 50
+    },
+    {
       "horseName": "サクラローレルル",
       "ownerName": "",
       "prizeYen": 2520000000,
@@ -57,12 +63,6 @@
       "ownerName": "",
       "prizeYen": 2445000000,
       "starts": 46
-    },
-    {
-      "horseName": "ダイワスカーレッタ",
-      "ownerName": "",
-      "prizeYen": 2413000000,
-      "starts": 76
     }
   ],
   "standings": [
@@ -110,33 +110,33 @@
     },
     {
       "rank": 8,
+      "horseName": "ラヴズオンリーニャ",
+      "ownerName": "",
+      "prizeYen": 2542500000
+    },
+    {
+      "rank": 9,
       "horseName": "サクラローレルル",
       "ownerName": "",
       "prizeYen": 2520000000
     },
     {
-      "rank": 9,
+      "rank": 10,
       "horseName": "ライスシャワーズ",
       "ownerName": "",
       "prizeYen": 2445000000
     },
     {
-      "rank": 10,
+      "rank": 11,
       "horseName": "ダイワスカーレッタ",
       "ownerName": "",
       "prizeYen": 2413000000
     },
     {
-      "rank": 11,
+      "rank": 12,
       "horseName": "グラスパンダー",
       "ownerName": "",
       "prizeYen": 2395000000
-    },
-    {
-      "rank": 12,
-      "horseName": "ラヴズオンリーニャ",
-      "ownerName": "",
-      "prizeYen": 2392500000
     },
     {
       "rank": 13,
@@ -160,7 +160,7 @@
       "rank": 16,
       "horseName": "リスグラシュガー",
       "ownerName": "",
-      "prizeYen": 1399500000
+      "prizeYen": 1422000000
     },
     {
       "rank": 17,
@@ -178,7 +178,7 @@
       "rank": 19,
       "horseName": "クロノジェネシア",
       "ownerName": "",
-      "prizeYen": 1087500000
+      "prizeYen": 1102500000
     },
     {
       "rank": 20,
@@ -260,21 +260,21 @@
     },
     {
       "rank": 33,
+      "horseName": "ダンスパートニャー",
+      "ownerName": "",
+      "prizeYen": 525000000
+    },
+    {
+      "rank": 34,
       "horseName": "マイネルラブリー",
       "ownerName": "",
       "prizeYen": 501500000
     },
     {
-      "rank": 34,
+      "rank": 35,
       "horseName": "ゴールドスキップ",
       "ownerName": "",
       "prizeYen": 500000000
-    },
-    {
-      "rank": 35,
-      "horseName": "ダンスパートニャー",
-      "ownerName": "",
-      "prizeYen": 487500000
     },
     {
       "rank": 36,
@@ -284,21 +284,21 @@
     },
     {
       "rank": 37,
+      "horseName": "スターズオンマース",
+      "ownerName": "",
+      "prizeYen": 487500000
+    },
+    {
+      "rank": 38,
       "horseName": "ロードカナリア",
       "ownerName": "",
       "prizeYen": 487000000
     },
     {
-      "rank": 38,
+      "rank": 39,
       "horseName": "アドラーブルー",
       "ownerName": "",
       "prizeYen": 432500000
-    },
-    {
-      "rank": 39,
-      "horseName": "スターズオンマース",
-      "ownerName": "",
-      "prizeYen": 427500000
     },
     {
       "rank": 40,
