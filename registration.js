@@ -503,15 +503,18 @@
       const raw=await f.text();
       if(serial!==selectionSerial)return;
       const parsed=JSON.parse(raw);
-      if(/\.dbfvs$/i.test(f.name)){
-        if(!validSealed(parsed))throw Error('旧式または非対応の .dbfvs です。新しいDBFゲームから書き出し直してください。');
+      // New DBF game exports use .dbfvs.json; also support legacy .dbfvs.
+      // Detect sealed payloads by format as well, not only by filename.
+      const sealedFile=/\.dbfvs(?:\.json)?$/i.test(f.name) || parsed?.format===SEALED_FORMAT;
+      if(sealedFile){
+        if(!validSealed(parsed))throw Error('旧式または非対応の暗号化VSデータです。新しいDBFゲームから書き出し直してください。');
         chosen={sealed:true,envelope:parsed};
         preview.textContent='自動暗号化VS馬：'+f.name+'（馬名・能力は登録サーバーで確認）';
         say(workerReady()?'パスワード不要です。「この馬を公式VSに登録する」を押してください。':
           '管理者による暗号化登録サーバーの設定がまだ終わっていません。');
       }else{
-        if(parsed?.format===SEALED_FORMAT || parsed?.format==='derby-fantasy-vs-locked')
-          throw Error('暗号化馬は .dbfvs ファイルを選択してください。');
+        if(parsed?.format==='derby-fantasy-vs-locked')
+          throw Error('旧式の暗号化VSデータです。新しいDBFゲームから書き出し直してください。');
         applyParsedHorse(parsed,serial);
       }
     }catch(err){if(serial===selectionSerial)say('読み込めません：'+String(err.message||err));}
