@@ -143,13 +143,41 @@ def commit_race(token,meta):
     week=week_start(datetime.fromtimestamp(slot*SLOT_MS/1000,timezone.utc))
     receipt_path=f'vs_weekly_race_receipts/{slot}'
     digest=hashlib.sha256(json.dumps(rows,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
+    race_name=meta.get('name')
+    if not isinstance(race_name,str) or not race_name or len(race_name)>100:
+        raise ValueError('レース名が不正です')
+    def result_transform(row):
+        # Firestore's arrayUnion keeps race results attached to each weekly
+        # player-horse document already loaded for the weekly standings.
+        # COM race results are not needed for a player's personal history.
+        return {'fieldPath':'raceResults','appendMissingElements':{'values':[
+            {'mapValue':{'fields':fields({
+                'slot':slot,'raceName':race_name,'place':row['place'],
+                'prizeYen':row['prizeYen']})}}
+        ]}}
     prior=doc_get(token,receipt_path)
     if prior:
         if prior['fields'].get('digest',{}).get('stringValue')!=digest:
             raise RuntimeError('同じ開催枠の賞金記録が変更されました。再加算を中止します')
+        # Backfill legacy receipts ONCE, without ever crediting prize/starts
+        # again. The marker prevents repetitive writes on every 15-minute run.
+        if prior['fields'].get('historyVersion',{}).get('integerValue')=='1':
+            return False
+        backfill=[{'update':{'name':BASE+'/'+receipt_path,
+                    'fields':fields({'historyVersion':1})},
+                    'updateMask':{'fieldPaths':['historyVersion']},
+                    'currentDocument':{'updateTime':prior['updateTime']}}]
+        backfill.extend({'transform':{
+                    'document':BASE+f'/vs_weekly_horses/{week}/horses/{r["rankingId"]}',
+                    'fieldTransforms':[result_transform(r)]}}
+                  for r in rows if not r['isCom'])
+        try:commit(token,backfill)
+        except HTTPError as e:
+            if e.code in (409,412):return False
+            raise
         return False
     writes=[{'update':{'name':BASE+'/'+receipt_path,'fields':fields({
-        'slot':slot,'weekStart':week,'digest':digest})},'currentDocument':{'exists':False}}]
+        'slot':slot,'weekStart':week,'digest':digest,'historyVersion':1})},'currentDocument':{'exists':False}}]
     for row in rows:
         path=f'vs_weekly_horses/{week}/horses/{row["rankingId"]}'
         current={'horseName':row['horseName'],'ownerName':row['ownerName'],'isCom':row['isCom'],
@@ -159,7 +187,8 @@ def commit_race(token,meta):
             'updateTransforms':[
                 {'fieldPath':'prizeYen','increment':{'integerValue':str(row['prizeYen'])}},
                 {'fieldPath':'starts','increment':{'integerValue':'1'}},
-                *([{'fieldPath':f'places.p{row["place"]}','increment':{'integerValue':'1'}}] if 1<=row['place']<=5 else [])]})
+                *([{'fieldPath':f'places.p{row["place"]}','increment':{'integerValue':'1'}}] if 1<=row['place']<=5 else []),
+                *([result_transform(row)] if not row['isCom'] else [])]})
         if row['isCom']:
             writes.append(update_com(token,row,slot))
     try:
@@ -182,10 +211,21 @@ def ranking(token,week):
         if prizes<0:raise ValueError('週間賞金の数値が不正です')
         places=f.get('places',{}).get('mapValue',{}).get('fields',{})
         counts=[int(places.get('p'+str(i),{}).get('integerValue','0')) for i in range(1,6)]
+        # Weekly result snippets are attached to the same verified horse
+        # document as prize and starts. No extra database query is required.
+        race_results=[]
+        for value in f.get('raceResults',{}).get('arrayValue',{}).get('values',[]):
+            row=value.get('mapValue',{}).get('fields',{})
+            race_results.append({'slot':int(row['slot']['integerValue']),
+                'raceName':row['raceName']['stringValue'],
+                'place':int(row['place']['integerValue']),
+                'prizeYen':int(row['prizeYen']['integerValue'])})
+        if len(race_results)>20:raise ValueError('登録馬の週間出走記録が20戦を超えています')
         result.append({'horseName':f['horseName']['stringValue'],
             'ownerName':f['ownerName']['stringValue'],'prizeYen':prizes,
             'rankingId':f['rankingId']['stringValue'],
-            'starts':int(f.get('starts',{}).get('integerValue','0')),'places':counts})
+            'starts':int(f.get('starts',{}).get('integerValue','0')),'places':counts,
+            'raceResults':race_results})
     return sorted(result,key=lambda h:(-h['prizeYen'],*[-n for n in h['places']],h['horseName'],h['ownerName'],h['rankingId']))
 
 
@@ -321,10 +361,24 @@ def archive(token):
 
 def public_board(token,now):
     current=week_start(now)
+    board=ranking(token,current)
+    # Only PUBLIC owner names and race earnings. Never publish UID, horseKey,
+    # encrypted data, private horse statistics or future registrations.
+    standings=[{'rank':pos,'horseName':horse['horseName'],
+                'ownerName':horse['ownerName'],'prizeYen':horse['prizeYen']}
+               for pos,horse in enumerate(board,1)]
+    # Race results are already published when each race completes. Export
+    # only public name/owner/time/place/money; never UID/horseKey/envelope.
+    race_results=[{'ownerName':h['ownerName'],'horseName':h['horseName'],**r}
+                  for h in board if h['ownerName'] for r in h.get('raceResults',[])]
+    if len(race_results)>4000:raise ValueError('週間出走結果の公開上限を超えました')
+    race_results.sort(key=lambda r:(-r['slot'],r['place'],r['horseName']))
     result={'version':1,'timezone':'Asia/Tokyo','weekStart':current,
             'weekEnd':(datetime.fromisoformat(current)+timedelta(days=6)).date().isoformat(),
             'top10':[{k:v for k,v in row.items() if k in ('horseName','ownerName','prizeYen','starts')}
-                     for row in ranking(token,current)[:10]],
+                     for row in board[:10]],
+            'standings':standings,
+            'raceResults':race_results,
             'awards':archive(token)}
     return result
 
