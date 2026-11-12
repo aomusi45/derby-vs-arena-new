@@ -578,6 +578,18 @@
     }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
     finally{busy=false;updateSubmit();}
   });
+  // Display-only identity for the personal results panel. Never used for access control.
+  // The name is sourced from the server-verified immutable owner profile.
+  window.DBFMyArenaIdentity=Object.freeze({
+    snapshot(){
+      if(!auth?.currentUser || !profileLoaded || !validOwner(reservedOwnerName))return null;
+      const week=currentWeek();
+      const active=lockedHorse?.weekIndex===week?lockedHorse:null;
+      return {ownerName:reservedOwnerName,
+        horseName:active&&typeof active.horseName==='string'?active.horseName:'',
+        weekIndex:week};
+    }
+  });
   window.VSEntry=Object.freeze({normalize});
   init().catch(err=>{
     ready=false;updateSubmit();say('Firebaseに接続できません：'+String(err.code||err.message||err));

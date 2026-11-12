@@ -64,6 +64,32 @@
   #live-race-panel [hidden]{display:none!important}
   #live-race-panel .vs-live-result-label{font-size:12px;color:#cbb277;margin:13px 0 3px}
   #vs-live-result-countdown{font-size:23px;font-weight:800;color:#ffe6a4;font-variant-numeric:tabular-nums;margin:2px 0 11px}
+
+/* V9: personal weekly status and private-display replay filter. Existing race UI is untouched. */
+#vs-my-week-card{margin:10px 0 16px;padding:14px 12px;border:1px solid #c5a45f;border-radius:10px;background:linear-gradient(145deg,#0d2925,#071b19)}
+#vs-my-week-card .vs-my-kicker{margin:0 0 8px;color:#d6ba79;font-size:12px;letter-spacing:.08em}
+#vs-my-week-horse{display:block;color:#ffe6ac;font-size:19px;overflow-wrap:anywhere}
+.vs-my-metrics{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:11px 0}
+.vs-my-metric{border-radius:7px;background:#0b1d1b;padding:10px 8px;border:1px solid #b8955138}
+.vs-my-metric-label{display:block;color:#b9c8c0;font-size:11px}
+.vs-my-metric-value{display:block;color:#ffe6ae;font-weight:800;font-size:clamp(15px,3vw,19px);overflow-wrap:anywhere;margin-top:5px}
+#vs-my-races-toggle{width:100%;text-align:center;justify-content:center;margin-top:9px}
+#vs-my-races-list{margin-top:12px;max-height:330px;overflow-y:auto}
+#vs-my-races-list[hidden]{display:none!important}
+.vs-my-race-item{padding:11px 0;border-top:1px solid #b8955140}
+.vs-my-race-item-title{font-size:13px;font-weight:750;color:#f5dba2}
+.vs-my-race-item-detail{font-size:12px;color:#c4d1c7;line-height:1.8;overflow-wrap:anywhere}
+.vs-my-race-watch{padding:8px 14px;min-height:36px;margin-top:5px}
+#vs-my-week-note{color:#b6c8bc;font-size:11px;line-height:1.6;margin:5px 0 0}
+/* V10: weekly results persist until Sunday; replay links remain 24h only. */
+.vs-my-week-results-heading{margin:15px 0 5px;color:#f3db9e;font-size:14px;font-weight:800}
+#vs-my-week-results{max-height:340px;overflow-y:auto;margin:6px 0 10px;border-top:1px solid #b8955140}
+#vs-my-week-results .vs-my-week-result{border-bottom:1px solid #b8955138;padding:10px 2px}
+.vs-my-week-result-race{font-size:13px;font-weight:750;color:#f5dcaa;overflow-wrap:anywhere}
+.vs-my-week-result-detail{font-size:12px;line-height:1.8;color:#d4e0d4}
+.vs-my-week-result-replay{margin-top:5px;min-height:35px;padding:6px 12px;font-size:12px}
+.vs-my-week-result-expired{font-size:11px;color:#a8bbae;display:block;margin-top:3px}
+@media(max-width:520px){#vs-my-week-card{padding:12px 9px}.vs-my-metrics{gap:6px}}
 </style>
 </head>
 <body>
@@ -127,6 +153,19 @@
         <section class="panel">
           <div class="num">02 / ENTRY</div>
           <h2>出走馬登録</h2>
+          <div id="vs-my-week-card" aria-label="今週の登録馬と個人成績">
+            <p class="vs-my-kicker">MY HORSE · 今週の登録馬</p>
+            <strong id="vs-my-week-horse">ログイン後に表示します</strong>
+            <div class="vs-my-metrics">
+              <div class="vs-my-metric"><span class="vs-my-metric-label">今週の獲得賞金</span><strong class="vs-my-metric-value" id="vs-my-week-prize">―</strong></div>
+              <div class="vs-my-metric"><span class="vs-my-metric-label">週間ランキング</span><strong class="vs-my-metric-value" id="vs-my-week-rank">―</strong></div>
+            </div>
+            <p id="vs-my-week-note">確定したレース結果を集計します。</p>
+            <h3 class="vs-my-week-results-heading">今週の出走レース結果</h3>
+            <div id="vs-my-week-results">ログイン後に確認できます。</div>
+            <button type="button" class="vs-action-btn" id="vs-my-races-toggle" disabled aria-expanded="false" aria-controls="vs-my-races-list">自分の馬の出走レースを見る</button>
+            <div id="vs-my-races-list" hidden aria-live="polite">ログイン後に確認できます。</div>
+          </div>
           <span class="status" id="vs-entry-state">登録馬受付</span>
           <div class="vs-entry-summary" aria-label="登録頭数と次回の出走状況">
             <p class="vs-entry-schedule-label">出走受付中のレース</p>
@@ -421,7 +460,8 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 <script src="site.js" defer></script>
 <script src="owner-ranking.js" defer></script>
 <script src="firebase-config.js" defer></script>
-<script src="registration.js?v=20261112-sealed-json-3" defer></script>
+<script src="registration.js?v=20261113-myhorse-2" defer></script>
+<script src="my-arena-stats.js?v=20261113-myhorse-2" defer></script>
 <!-- DBF arena return-to-game button. Place immediately before </body>. -->
 <style id="dbf-arena-return-style">
   #dbf-return-to-game[hidden]{display:none!important}
