@@ -12,6 +12,7 @@ on:
       - 'site.js'
       - 'index.html'
       - 'registration.js'
+      - 'my-arena-stats.js'
       - 'owner-ranking.js'
       - 'firebase-config.js'
       - 'tools/registered_horses.py'
@@ -115,7 +116,7 @@ jobs:
           mkdir -p public_site/races
           cp index.html site.js owner-ranking.js registration.js firebase-config.js race_catalog.json race_playlist.json public_site/
           cp vs_replay_engine_part1.txt vs_replay_engine_part2.txt public_site/
-          cp weekly_awards.json public_site/
+          cp weekly_awards.json my-arena-stats.js public_site/
           cp -a races/. public_site/races/
       - name: Upload official VS site
         uses: actions/upload-pages-artifact@v4
