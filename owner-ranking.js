@@ -48,7 +48,7 @@
       const title=document.createElement('strong');
       title.textContent='第'+x.generation+'代 年度代表馬　'+x.horseName;
       const detail=document.createElement('div');detail.className='meta';
-      detail.textContent='オーナー：'+(x.ownerName||'COM')+' ／ 週間賞金：'+money(x.prizeYen)+' ／ '+x.weekStart+'～'+x.weekEnd;
+      detail.textContent='オーナー：'+(x.ownerName||'COM')+' ／ 週間賞金：'+money(x.prizeYen)+' ／ '+(x.awardWeekLabel||'受賞週')+'（'+x.weekStart+'～'+x.weekEnd+'）'+(x.hasReplayHorse?' ／ 受賞馬データ保存済':'');
       item.append(title,detail);archive.append(item);
     });
     more.hidden=rows.length<=visible;
