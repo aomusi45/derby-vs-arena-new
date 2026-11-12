@@ -7,8 +7,8 @@
     {
       "horseName": "エルコンドルパスタ",
       "ownerName": "",
-      "prizeYen": 7350000000,
-      "starts": 18
+      "prizeYen": 7475000000,
+      "starts": 19
     },
     {
       "horseName": "グランアレグリラ",
@@ -25,20 +25,20 @@
     {
       "horseName": "ブエナビスター",
       "ownerName": "",
-      "prizeYen": 2877000000,
-      "starts": 79
+      "prizeYen": 2952000000,
+      "starts": 80
+    },
+    {
+      "horseName": "キングカメハメハハ",
+      "ownerName": "",
+      "prizeYen": 2900000000,
+      "starts": 9
     },
     {
       "horseName": "ウオッカナ",
       "ownerName": "",
       "prizeYen": 2713000000,
-      "starts": 59
-    },
-    {
-      "horseName": "キングカメハメハハ",
-      "ownerName": "",
-      "prizeYen": 2700000000,
-      "starts": 8
+      "starts": 60
     },
     {
       "horseName": "サイレンススズキ",
@@ -70,7 +70,7 @@
       "rank": 1,
       "horseName": "エルコンドルパスタ",
       "ownerName": "",
-      "prizeYen": 7350000000
+      "prizeYen": 7475000000
     },
     {
       "rank": 2,
@@ -88,19 +88,19 @@
       "rank": 4,
       "horseName": "ブエナビスター",
       "ownerName": "",
-      "prizeYen": 2877000000
+      "prizeYen": 2952000000
     },
     {
       "rank": 5,
-      "horseName": "ウオッカナ",
+      "horseName": "キングカメハメハハ",
       "ownerName": "",
-      "prizeYen": 2713000000
+      "prizeYen": 2900000000
     },
     {
       "rank": 6,
-      "horseName": "キングカメハメハハ",
+      "horseName": "ウオッカナ",
       "ownerName": "",
-      "prizeYen": 2700000000
+      "prizeYen": 2713000000
     },
     {
       "rank": 7,
@@ -152,15 +152,15 @@
     },
     {
       "rank": 15,
-      "horseName": "リスグラシュガー",
+      "horseName": "リバティアイラン",
       "ownerName": "",
-      "prizeYen": 1279500000
+      "prizeYen": 1300000000
     },
     {
       "rank": 16,
-      "horseName": "リバティアイラン",
+      "horseName": "リスグラシュガー",
       "ownerName": "",
-      "prizeYen": 1250000000
+      "prizeYen": 1279500000
     },
     {
       "rank": 17,
@@ -176,57 +176,57 @@
     },
     {
       "rank": 19,
+      "horseName": "テンノツカイ",
+      "ownerName": "あおむし",
+      "prizeYen": 1070000000
+    },
+    {
+      "rank": 20,
       "horseName": "メジロマックイーヌ",
       "ownerName": "",
       "prizeYen": 1060000000
     },
     {
-      "rank": 20,
+      "rank": 21,
       "horseName": "クロワデュノワール",
       "ownerName": "",
       "prizeYen": 940000000
     },
     {
-      "rank": 21,
+      "rank": 22,
       "horseName": "エアグルービー",
       "ownerName": "",
       "prizeYen": 877000000
     },
     {
-      "rank": 22,
+      "rank": 23,
       "horseName": "レガレイララ",
       "ownerName": "",
       "prizeYen": 849000000
     },
     {
-      "rank": 23,
+      "rank": 24,
       "horseName": "フォーエバーヤンキー",
       "ownerName": "",
       "prizeYen": 763000000
     },
     {
-      "rank": 24,
+      "rank": 25,
       "horseName": "アーモンドアイ",
       "ownerName": "サンプルオーナー",
       "prizeYen": 750000000
     },
     {
-      "rank": 25,
+      "rank": 26,
       "horseName": "アグネスデジカル",
       "ownerName": "",
       "prizeYen": 715500000
     },
     {
-      "rank": 26,
+      "rank": 27,
       "horseName": "ダイワメジャック",
       "ownerName": "",
       "prizeYen": 637000000
-    },
-    {
-      "rank": 27,
-      "horseName": "テンノツカイ",
-      "ownerName": "あおむし",
-      "prizeYen": 570000000
     },
     {
       "rank": 28,
@@ -1226,6 +1226,14 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "あおむし",
+      "horseName": "テンノツカイ",
+      "slot": 1993894,
+      "raceName": "ジャパンカップ",
+      "place": 1,
+      "prizeYen": 500000000
+    },
     {
       "ownerName": "あおむし",
       "horseName": "テンノツカイ",
