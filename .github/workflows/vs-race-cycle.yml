@@ -19,6 +19,7 @@ on:
       - 'tools/horse_appearance_ledger.py'
       - 'tools/weekly_awards.py'
       - 'tools/migrate_g1_history.py'
+      - 'tools/reconcile_weekly_registration_count.py'
   workflow_dispatch:
   schedule:
     # 7 minutes before each 15-minute boundary, UTC minutes = JST minutes.
@@ -64,6 +65,14 @@ jobs:
           FIREBASE_PROJECT_ID: derby-vs-arena
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: python tools/horse_appearance_ledger.py
+      # Auxiliary quota repair must never stop the scheduled race if Firestore
+      # is temporarily unavailable. Check this step's log for any correction.
+      - name: Reconcile unique weekly horses (one per owner, not per G1 application)
+        continue-on-error: true
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: python tools/reconcile_weekly_registration_count.py
       - name: Synchronize privacy-safe public registration names
         env:
           FIREBASE_PROJECT_ID: derby-vs-arena
