@@ -15270,14 +15270,194 @@
           "rankingId": "c_5e25db10141765576c6a46983dd1660f"
         }
       ]
+    },
+    {
+      "registrations": [],
+      "horseTokens": [],
+      "horseKeys": [],
+      "registrationSnapshotMs": 0,
+      "slot": 1993826,
+      "intervalMinutes": 15,
+      "file": "races/1993826.json.gz",
+      "raceId": "dfvs-mwct2qje-94x2gts5",
+      "name": "皐月賞",
+      "venue": "中山",
+      "distance": 2000,
+      "month": 4,
+      "durationMs": 123450,
+      "firstPrizeYen": 200000000,
+      "results": [
+        {
+          "place": 1,
+          "no": 12,
+          "name": "ナリタタイシンゴ",
+          "timeSeconds": 116.0080980402222,
+          "margin": "―",
+          "prizeYen": 200000000,
+          "rankingId": "c_2a0ee26da98f389d5182651419b185a8"
+        },
+        {
+          "place": 2,
+          "no": 3,
+          "name": "アンライバルドン",
+          "timeSeconds": 116.70359791932675,
+          "margin": "5 1/2馬身",
+          "prizeYen": 80000000,
+          "rankingId": "c_c8ca57ae3d267757ff0c195157624708"
+        },
+        {
+          "place": 3,
+          "no": 7,
+          "name": "ミュージアムマイク",
+          "timeSeconds": 117.20935349380916,
+          "margin": "4馬身",
+          "prizeYen": 50000000,
+          "rankingId": "c_fb242e075ccf61327cc011b8c1fe6bd6"
+        },
+        {
+          "place": 4,
+          "no": 17,
+          "name": "コントレイン",
+          "timeSeconds": 117.25138470949997,
+          "margin": "クビ",
+          "prizeYen": 30000000,
+          "rankingId": "c_ab21704a4b0edff08e7b14bd4a255943"
+        },
+        {
+          "place": 5,
+          "no": 10,
+          "name": "ドゥラメンタイ",
+          "timeSeconds": 117.65677839794152,
+          "margin": "3馬身",
+          "prizeYen": 20000000,
+          "rankingId": "c_b188bf5bb670dec90af7a74c5f85e5bc"
+        },
+        {
+          "place": 6,
+          "no": 15,
+          "name": "エフフォーリアル",
+          "timeSeconds": 118.04618202068646,
+          "margin": "2 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_ad31aa0aedf701a93bc34d87b3f647b0"
+        },
+        {
+          "place": 7,
+          "no": 1,
+          "name": "アルアインコ",
+          "timeSeconds": 118.05592972775544,
+          "margin": "ハナ",
+          "prizeYen": 0,
+          "rankingId": "c_67c0858edc100e6cbd36f66809905a2e"
+        },
+        {
+          "place": 8,
+          "no": 4,
+          "name": "ヴィクトリーオ",
+          "timeSeconds": 118.07363673217378,
+          "margin": "アタマ",
+          "prizeYen": 0,
+          "rankingId": "c_9f37d55d0e05cd294213009cf4867550"
+        },
+        {
+          "place": 9,
+          "no": 18,
+          "name": "エポカドーナツ",
+          "timeSeconds": 118.22977463657836,
+          "margin": "1 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_9e97bcff71565eca66f9c5affc58923f"
+        },
+        {
+          "place": 10,
+          "no": 16,
+          "name": "ミホノブルポン",
+          "timeSeconds": 118.63897346578177,
+          "margin": "3馬身",
+          "prizeYen": 0,
+          "rankingId": "c_99a3408b2894fe0cf60c99a7a06ca198"
+        },
+        {
+          "place": 11,
+          "no": 13,
+          "name": "ライスシャワーズ",
+          "timeSeconds": 118.77435400247823,
+          "margin": "1馬身",
+          "prizeYen": 0,
+          "rankingId": "c_5626bfa893e5ed24e6f310922bd92909"
+        },
+        {
+          "place": 12,
+          "no": 8,
+          "name": "ジオグリフル",
+          "timeSeconds": 118.8229870004515,
+          "margin": "クビ",
+          "prizeYen": 0,
+          "rankingId": "c_d945467c5b92e6a181dc9974554cd4ae"
+        },
+        {
+          "place": 13,
+          "no": 14,
+          "name": "イシノサンデス",
+          "timeSeconds": 119.0085902547396,
+          "margin": "1 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_6960043401ef3292fddd2f2351484a4c"
+        },
+        {
+          "place": 14,
+          "no": 11,
+          "name": "サニーブライワン",
+          "timeSeconds": 119.20135751064542,
+          "margin": "1 1/2馬身",
+          "prizeYen": 0,
+          "rankingId": "c_ea802fa2dea922e37077e42afd0f75c2"
+        },
+        {
+          "place": 15,
+          "no": 6,
+          "name": "セイウンスゴイ",
+          "timeSeconds": 123.05965793718678,
+          "margin": "大差",
+          "prizeYen": 0,
+          "rankingId": "c_a96a40ed18ac3933afed0968fc90c90a"
+        },
+        {
+          "place": 16,
+          "no": 5,
+          "name": "ヴィクトワールピザ",
+          "timeSeconds": 123.2252401654025,
+          "margin": "1 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_ee509839f12f7276ad46e0e5bef17b7d"
+        },
+        {
+          "place": 17,
+          "no": 2,
+          "name": "レガレイララ",
+          "timeSeconds": 123.22750981728184,
+          "margin": "ハナ",
+          "prizeYen": 0,
+          "rankingId": "c_e061d7fd44e234a6d713f7de8bde42c7"
+        },
+        {
+          "place": 18,
+          "no": 9,
+          "name": "イスラボニーニャ",
+          "timeSeconds": 123.43316887552996,
+          "margin": "1 1/2馬身",
+          "prizeYen": 0,
+          "rankingId": "c_435315f76c93710dccd94e494a457c7b"
+        }
+      ]
     }
   ],
   "registrationSummary": {
     "version": 1,
     "registeredCount": 0,
-    "asOfMs": 1794442809800,
+    "asOfMs": 1794443059909,
     "nextSlot": 1993826,
     "nextCandidateCount": 0,
-    "nextFinal": false
+    "nextFinal": true
   }
 }
