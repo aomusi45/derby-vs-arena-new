@@ -57,7 +57,7 @@ def count_commit(token,slot,key,race_name):
          'currentDocument':{'exists':False}},
         {'transform':{'document':usage,'fieldTransforms':[
             {'fieldPath':'count','increment':{'integerValue':'1'}},
-            {'fieldPath':'g1Counts.'+race_code,'increment':{'integerValue':'1'}}]}}
+            {'fieldPath':'g1Counts.`'+race_code+'`','increment':{'integerValue':'1'}}]}}
     ]
     req=Request(REST+f'projects/{PROJECT}/databases/(default)/documents:commit',
         data=json.dumps({'writes':writes}).encode(),method='POST',
@@ -85,7 +85,7 @@ def count_commit(token,slot,key,race_name):
                         'raceCode':{'stringValue':race_code}}},
                      'currentDocument':{'exists':False}},
                     {'transform':{'document':usage,'fieldTransforms':[
-                        {'fieldPath':'g1Counts.'+race_code,'increment':{'integerValue':'1'}}]}}
+                        {'fieldPath':'g1Counts.`'+race_code+'`','increment':{'integerValue':'1'}}]}}
                 ]
                 try:
                     req=Request(REST+f'projects/{PROJECT}/databases/(default)/documents:commit',

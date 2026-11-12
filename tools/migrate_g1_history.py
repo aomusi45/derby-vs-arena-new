@@ -82,7 +82,7 @@ def split_batches(tasks,max_events=180):
             increments[key][code]+=1
         for key,g1 in increments.items():
             writes.append({'transform':{'document':BASE+'/vs_horse_usage/'+key,
-                'fieldTransforms':[{'fieldPath':'g1Counts.'+code,
+                'fieldTransforms':[{'fieldPath':'g1Counts.`'+code+'`',
                     'increment':{'integerValue':str(amount)}} for code,amount in g1.items()]}})
         if len(writes)>500:raise ValueError('Firestore書込制限を超えました')
         yield writes
