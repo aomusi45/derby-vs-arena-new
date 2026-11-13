@@ -23,6 +23,12 @@
       "starts": 4
     },
     {
+      "horseName": "ウオッカナ",
+      "ownerName": "",
+      "prizeYen": 333000000,
+      "starts": 20
+    },
+    {
       "horseName": "グランアレグリラ",
       "ownerName": "",
       "prizeYen": 241500000,
@@ -57,12 +63,6 @@
       "ownerName": "おお",
       "prizeYen": 150000000,
       "starts": 1
-    },
-    {
-      "horseName": "リバティアイラン",
-      "ownerName": "",
-      "prizeYen": 150000000,
-      "starts": 20
     }
   ],
   "standings": [
@@ -86,81 +86,81 @@
     },
     {
       "rank": 4,
+      "horseName": "ウオッカナ",
+      "ownerName": "",
+      "prizeYen": 333000000
+    },
+    {
+      "rank": 5,
       "horseName": "グランアレグリラ",
       "ownerName": "",
       "prizeYen": 241500000
     },
     {
-      "rank": 5,
+      "rank": 6,
       "horseName": "ダイワスカーレッタ",
       "ownerName": "",
       "prizeYen": 199500000
     },
     {
-      "rank": 6,
+      "rank": 7,
       "horseName": "ブエナビスター",
       "ownerName": "",
       "prizeYen": 188000000
     },
     {
-      "rank": 7,
+      "rank": 8,
       "horseName": "サンプルブレイズ",
       "ownerName": "サンプルオーナー",
       "prizeYen": 150000000
     },
     {
-      "rank": 8,
+      "rank": 9,
       "horseName": "テンノツカイ",
       "ownerName": "あお",
       "prizeYen": 150000000
     },
     {
-      "rank": 9,
+      "rank": 10,
       "horseName": "テンノツカイ",
       "ownerName": "おお",
       "prizeYen": 150000000
     },
     {
-      "rank": 10,
+      "rank": 11,
       "horseName": "リバティアイラン",
       "ownerName": "",
       "prizeYen": 150000000
     },
     {
-      "rank": 11,
+      "rank": 12,
       "horseName": "ジェンティルドンニ",
       "ownerName": "",
       "prizeYen": 97500000
     },
     {
-      "rank": 12,
+      "rank": 13,
       "horseName": "ラッキーライラッキ",
       "ownerName": "",
       "prizeYen": 60000000
     },
     {
-      "rank": 13,
+      "rank": 14,
       "horseName": "リスグラシュガー",
       "ownerName": "",
       "prizeYen": 52500000
     },
     {
-      "rank": 14,
+      "rank": 15,
       "horseName": "エアグルービー",
       "ownerName": "",
       "prizeYen": 43500000
     },
     {
-      "rank": 15,
+      "rank": 16,
       "horseName": "グラスパンダー",
       "ownerName": "",
       "prizeYen": 30000000
-    },
-    {
-      "rank": 16,
-      "horseName": "ウオッカナ",
-      "ownerName": "",
-      "prizeYen": 27500000
     },
     {
       "rank": 17,
