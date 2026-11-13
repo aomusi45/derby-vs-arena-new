@@ -29,22 +29,28 @@
       "starts": 94
     },
     {
+      "horseName": "サイレンススズキ",
+      "ownerName": "",
+      "prizeYen": 3300000000,
+      "starts": 18
+    },
+    {
       "horseName": "キングカメハメハハ",
       "ownerName": "",
       "prizeYen": 3200000000,
       "starts": 10
     },
     {
-      "horseName": "サイレンススズキ",
-      "ownerName": "",
-      "prizeYen": 3180000000,
-      "starts": 17
-    },
-    {
       "horseName": "ウオッカナ",
       "ownerName": "",
       "prizeYen": 3138500000,
       "starts": 70
+    },
+    {
+      "horseName": "ラヴズオンリーニャ",
+      "ownerName": "",
+      "prizeYen": 2842500000,
+      "starts": 52
     },
     {
       "horseName": "サクラローレルル",
@@ -56,13 +62,7 @@
       "horseName": "ライスシャワーズ",
       "ownerName": "",
       "prizeYen": 2565000000,
-      "starts": 48
-    },
-    {
-      "horseName": "ラヴズオンリーニャ",
-      "ownerName": "",
-      "prizeYen": 2542500000,
-      "starts": 51
+      "starts": 49
     }
   ],
   "standings": [
@@ -92,15 +92,15 @@
     },
     {
       "rank": 5,
-      "horseName": "キングカメハメハハ",
+      "horseName": "サイレンススズキ",
       "ownerName": "",
-      "prizeYen": 3200000000
+      "prizeYen": 3300000000
     },
     {
       "rank": 6,
-      "horseName": "サイレンススズキ",
+      "horseName": "キングカメハメハハ",
       "ownerName": "",
-      "prizeYen": 3180000000
+      "prizeYen": 3200000000
     },
     {
       "rank": 7,
@@ -110,21 +110,21 @@
     },
     {
       "rank": 8,
+      "horseName": "ラヴズオンリーニャ",
+      "ownerName": "",
+      "prizeYen": 2842500000
+    },
+    {
+      "rank": 9,
       "horseName": "サクラローレルル",
       "ownerName": "",
       "prizeYen": 2820000000
     },
     {
-      "rank": 9,
+      "rank": 10,
       "horseName": "ライスシャワーズ",
       "ownerName": "",
       "prizeYen": 2565000000
-    },
-    {
-      "rank": 10,
-      "horseName": "ラヴズオンリーニャ",
-      "ownerName": "",
-      "prizeYen": 2542500000
     },
     {
       "rank": 11,
@@ -160,7 +160,7 @@
       "rank": 16,
       "horseName": "リスグラシュガー",
       "ownerName": "",
-      "prizeYen": 1422000000
+      "prizeYen": 1452000000
     },
     {
       "rank": 17,
@@ -178,7 +178,7 @@
       "rank": 19,
       "horseName": "クロノジェネシア",
       "ownerName": "",
-      "prizeYen": 1102500000
+      "prizeYen": 1177500000
     },
     {
       "rank": 20,
@@ -650,175 +650,175 @@
     },
     {
       "rank": 98,
+      "horseName": "ドリームジャージー",
+      "ownerName": "",
+      "prizeYen": 90000000
+    },
+    {
+      "rank": 99,
       "horseName": "エフフォーリアル",
       "ownerName": "",
       "prizeYen": 80000000
     },
     {
-      "rank": 99,
+      "rank": 100,
       "horseName": "ディーマジェスティー",
       "ownerName": "",
       "prizeYen": 80000000
     },
     {
-      "rank": 100,
+      "rank": 101,
       "horseName": "ナリタトップロール",
       "ownerName": "",
       "prizeYen": 80000000
     },
     {
-      "rank": 101,
+      "rank": 102,
       "horseName": "ノーリーズンズ",
       "ownerName": "",
       "prizeYen": 80000000
     },
     {
-      "rank": 102,
+      "rank": 103,
       "horseName": "ワールドプレミアム",
       "ownerName": "",
       "prizeYen": 80000000
     },
     {
-      "rank": 103,
+      "rank": 104,
       "horseName": "ヴィクトリーオ",
       "ownerName": "",
       "prizeYen": 80000000
     },
     {
-      "rank": 104,
+      "rank": 105,
       "horseName": "ヒシミラクリ",
       "ownerName": "",
       "prizeYen": 80000000
     },
     {
-      "rank": 105,
+      "rank": 106,
       "horseName": "ダイワエルシエール",
       "ownerName": "",
       "prizeYen": 75000000
     },
     {
-      "rank": 106,
+      "rank": 107,
       "horseName": "アドマイヤムーヴ",
       "ownerName": "",
       "prizeYen": 75000000
     },
     {
-      "rank": 107,
+      "rank": 108,
       "horseName": "ジャングルポケモン",
       "ownerName": "",
       "prizeYen": 75000000
     },
     {
-      "rank": 108,
+      "rank": 109,
       "horseName": "タスティエーララ",
       "ownerName": "",
       "prizeYen": 75000000
     },
     {
-      "rank": 109,
+      "rank": 110,
       "horseName": "ソダシロ",
       "ownerName": "",
       "prizeYen": 73500000
     },
     {
-      "rank": 110,
+      "rank": 111,
       "horseName": "ショウナンパンデラ",
       "ownerName": "",
       "prizeYen": 71500000
     },
     {
-      "rank": 111,
+      "rank": 112,
       "horseName": "アローキャリーカー",
       "ownerName": "",
       "prizeYen": 70000000
     },
     {
-      "rank": 112,
+      "rank": 113,
       "horseName": "ジュエラート",
       "ownerName": "",
       "prizeYen": 70000000
     },
     {
-      "rank": 113,
+      "rank": 114,
       "horseName": "メジロドーベリー",
       "ownerName": "",
       "prizeYen": 67500000
     },
     {
-      "rank": 114,
+      "rank": 115,
       "horseName": "ダンスインザムーン",
       "ownerName": "",
       "prizeYen": 65000000
     },
     {
-      "rank": 115,
+      "rank": 116,
       "horseName": "ウメノファイター",
       "ownerName": "",
       "prizeYen": 60000000
     },
     {
-      "rank": 116,
+      "rank": 117,
       "horseName": "トールポッピー",
       "ownerName": "",
       "prizeYen": 60000000
     },
     {
-      "rank": 117,
+      "rank": 118,
       "horseName": "ブレイディヴェガ",
       "ownerName": "",
       "prizeYen": 60000000
     },
     {
-      "rank": 118,
+      "rank": 119,
       "horseName": "ヌーヴォレコード",
       "ownerName": "",
       "prizeYen": 60000000
     },
     {
-      "rank": 119,
+      "rank": 120,
       "horseName": "シーキングザパル",
       "ownerName": "",
       "prizeYen": 59500000
     },
     {
-      "rank": 120,
+      "rank": 121,
       "horseName": "ソングライオン",
       "ownerName": "",
       "prizeYen": 58500000
     },
     {
-      "rank": 121,
+      "rank": 122,
       "horseName": "プリモディーヌ",
       "ownerName": "",
       "prizeYen": 56000000
     },
     {
-      "rank": 122,
+      "rank": 123,
       "horseName": "アスコリピチェーネ",
       "ownerName": "",
       "prizeYen": 52500000
     },
     {
-      "rank": 123,
+      "rank": 124,
       "horseName": "キセキラ",
       "ownerName": "",
       "prizeYen": 50000000
     },
     {
-      "rank": 124,
+      "rank": 125,
       "horseName": "タイトルホルドン",
       "ownerName": "",
       "prizeYen": 50000000
     },
     {
-      "rank": 125,
-      "horseName": "アドマイヤベガス",
-      "ownerName": "",
-      "prizeYen": 45000000
-    },
-    {
       "rank": 126,
-      "horseName": "ドリームジャージー",
+      "horseName": "アドマイヤベガス",
       "ownerName": "",
       "prizeYen": 45000000
     },
