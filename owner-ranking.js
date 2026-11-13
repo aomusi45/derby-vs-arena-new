@@ -25,18 +25,22 @@
     body.replaceChildren();
     if(data.weekStart!==weekKey()){
       const tr=document.createElement('tr');cell(tr,'新しい週の集計データを更新中です。');
-      tr.firstChild.colSpan=4;body.append(tr);
+      tr.firstChild.colSpan=5;body.append(tr);
       description.textContent='日本時間の週間ランキングを更新中です。';
     }else{
       description.textContent='日本時間 '+data.weekStart+'（月）～'+data.weekEnd+'（日）／毎週月曜日に0円から再集計';
       if(!data.top10.length){
         const tr=document.createElement('tr');cell(tr,'今週の確定賞金はまだありません。');
-        tr.firstChild.colSpan=4;body.append(tr);
+        tr.firstChild.colSpan=5;body.append(tr);
       }
       data.top10.slice(0,10).forEach((h,i)=>{
         const tr=document.createElement('tr');
         cell(tr,(i+1)+'位');cell(tr,h.horseName);
-        cell(tr,h.ownerName||'COM');cell(tr,money(h.prizeYen));
+        cell(tr,h.ownerName||'COM');
+        // The authoritative weekly_awards.json field is updated only after a
+        // race is committed. Never infer the start count from award money.
+        cell(tr,Number.isSafeInteger(h.starts)&&h.starts>=0?h.starts+'戦終了':'—');
+        cell(tr,money(h.prizeYen));
         body.append(tr);
       });
     }
@@ -65,13 +69,14 @@
          !Array.isArray(next.top10)||!Array.isArray(next.awards)||
          next.top10.length>10||next.awards.length>20000||
          !next.top10.every(r=>typeof r.horseName==='string'&&typeof r.ownerName==='string'&&
-           Number.isSafeInteger(r.prizeYen)&&r.prizeYen>=0))
+           Number.isSafeInteger(r.prizeYen)&&r.prizeYen>=0&&
+           (r.starts===undefined||(Number.isSafeInteger(r.starts)&&r.starts>=0))))
         throw Error('賞金集計の形式が不正です');
       data=next;render();
     }catch(error){
       console.warn('週間賞金の更新を確認できません',error);
       if(!data){body.replaceChildren();const tr=document.createElement('tr');
-        cell(tr,'週間賞金データを確認中です。');tr.firstChild.colSpan=4;body.append(tr);
+        cell(tr,'週間賞金データを確認中です。');tr.firstChild.colSpan=5;body.append(tr);
         archive.textContent='受賞記録の公開を確認中です。';}
     }finally{fetching=false;}
   }
