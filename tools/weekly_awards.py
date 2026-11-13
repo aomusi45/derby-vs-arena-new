@@ -115,25 +115,98 @@ def race_rows(meta):
 
 
 def update_com(token,row,slot):
+    """Count COM starts permanently, but do not retain their prize records here.
+
+    COM prize cycles belong only to their JST weekly horse document. Older
+    lifetime cyclePrize/lastCompletedCyclePrize fields are removed on update.
+    """
     path='vs_com_career/'+row['rankingId']
     previous=doc_get(token,path)
     if previous:
         raw=previous.get('fields',{})
         old_count=int(raw['count']['integerValue'])
-        old_prize=int(raw.get('cyclePrize',{}).get('integerValue','0'))
         last_slot=int(raw.get('lastSlot',{}).get('integerValue','0'))
         if slot<=last_slot:
-            # A delayed GitHub Actions recovery may publish an older heat
-            # after a newer one. Never drop its official start/prize.
             print('WARNING: late COM heat integrated:',slot,'after',last_slot,flush=True)
-    else:old_count=old_prize=0
-    total=old_prize+row['prizeYen'];count=old_count+1
-    completed=(count%20==0)
-    new={'name':BASE+'/'+path,'fields':fields({
-        'horseName':row['horseName'],'count':count,'cyclePrize':0 if completed else total,
-        'lastCompletedCyclePrize':total if completed else (int(previous.get('fields',{}).get('lastCompletedCyclePrize',{}).get('integerValue','0')) if previous else 0),
-        'lastSlot':max(slot,last_slot if previous else 0)})}
-    return {'update':new,'currentDocument':{'updateTime':previous['updateTime']} if previous else {'exists':False}}
+    else:
+        old_count=last_slot=0
+    data={'horseName':row['horseName'],'count':old_count+1,
+          'lastSlot':max(slot,last_slot)}
+    update={'name':BASE+'/'+path,'fields':fields(data)}
+    # A missing field named in updateMask is deleted in Firestore. Leave only
+    # the lifetime start counter, which remains useful for race records.
+    return {'update':update,
+            'updateMask':{'fieldPaths':list(data)+['cyclePrize','lastCompletedCyclePrize']},
+            'currentDocument':{'updateTime':previous['updateTime']} if previous else {'exists':False}}
+
+
+def com_weekly_write(token,path,row,week):
+    """Make the COM scoreboard a BEST-20-START block for this week only.
+
+    A fresh Firestore document is created for every Monday in JST. Complete
+    the 20th heat *before* zeroing the active block for heat 21. Keep the best
+    completed block while also counting the currently active, incomplete block.
+    Receipt + weekly horse + career updates are committed atomically.
+    """
+    previous=doc_get(token,path)
+    f=previous.get('fields',{}) if previous else {}
+    starts=int(f.get('starts',{}).get('integerValue','0'))
+    if starts<0:raise ValueError('COM週間出走回数が不正です')
+    if previous and f.get('rankingId',{}).get('stringValue') not in ('',row['rankingId']):
+        raise ValueError('COM馬IDが既存の週間賞金記録と不一致です')
+    old_com_schema=f.get('comPrizeVersion',{}).get('integerValue')=='1'
+    legacy={}
+    if old_com_schema:
+        block_starts=int(f.get('comBlockStarts',{}).get('integerValue','0'))
+        block_prize=int(f.get('comBlockPrizeYen',{}).get('integerValue','0'))
+        best=int(f.get('comBest20PrizeYen',{}).get('integerValue','0'))
+        if not 0<=block_starts<20 or block_prize<0 or best<0:
+            raise ValueError('COM馬20戦集計の保存値が不正です')
+    else:
+        old_sum=int(f.get('prizeYen',{}).get('integerValue','0'))
+        if old_sum<0:raise ValueError('COM馬旧週間賞金が不正です')
+        if starts<20:
+            # An old week with fewer than 20 starts is reconstructible:
+            # the historical sum is exactly the current block's prize.
+            block_starts,block_prize,best=starts,old_sum,0
+        elif starts==20:
+            # Exactly 20 starts: the entire sum is one completed block.
+            block_starts,block_prize,best=0,0,old_sum
+        else:
+            # Older releases stored only the weekly TOTAL and a receipt hash.
+            # Per-20 results cannot be reconstructed after the 24h race archive
+            # expires. Never invent an award amount; preserve old totals only
+            # as clearly labelled migration audit data (NOT for rankings).
+            # Preserve the next 20th-heat boundary (40th/60th/...) even
+            # though the old partial-block *amount* cannot be recovered.
+            block_starts=starts%20
+            block_prize=best=0
+            legacy={'comLegacyStarts':starts,'comLegacyTotalYen':old_sum,
+                    'comLegacyIncomplete':True}
+            print('WARNING: COM pre-fix weekly total cannot be split into 20-start blocks:',
+                  week,row['horseName'],'starts=',starts,flush=True)
+    block_starts+=1
+    block_prize+=row['prizeYen']
+    if block_starts==20:
+        best=max(best,block_prize)
+        block_starts=0
+        block_prize=0
+    # While the next block is active, keep the previous completed high score.
+    # If no block has completed yet, the active partial total participates.
+    standing=max(best,block_prize)
+    data={'horseName':row['horseName'],'ownerName':row['ownerName'],
+          'isCom':True,'weekStart':week,'rankingId':row['rankingId'],
+          'starts':starts+1,'prizeYen':standing,
+          'comPrizeVersion':1,'comBlockStarts':block_starts,
+          'comBlockPrizeYen':block_prize,'comBest20PrizeYen':best,
+          **legacy}
+    write={'update':{'name':BASE+'/'+path,'fields':fields(data)},
+           'updateMask':{'fieldPaths':list(data)},
+           'currentDocument':{'updateTime':previous['updateTime']} if previous else {'exists':False}}
+    if 1<=row['place']<=5:
+        write['updateTransforms']=[{'fieldPath':f'places.p{row["place"]}',
+                                  'increment':{'integerValue':'1'}}]
+    return write
 
 
 def commit_race(token,meta):
@@ -180,7 +253,13 @@ def commit_race(token,meta):
         'slot':slot,'weekStart':week,'digest':digest,'historyVersion':1})},'currentDocument':{'exists':False}}]
     for row in rows:
         path=f'vs_weekly_horses/{week}/horses/{row["rankingId"]}'
-        current={'horseName':row['horseName'],'ownerName':row['ownerName'],'isCom':row['isCom'],
+        if row['isCom']:
+            # The previous implementation always incremented prizeYen here,
+            # which displayed lifetime-within-week totals after 20 starts.
+            writes.append(com_weekly_write(token,path,row,week))
+            writes.append(update_com(token,row,slot))
+            continue
+        current={'horseName':row['horseName'],'ownerName':row['ownerName'],'isCom':False,
                  'weekStart':week,'rankingId':row['rankingId']}
         writes.append({'update':{'name':BASE+'/'+path,'fields':fields(current)},
             'updateMask':{'fieldPaths':list(current)},
@@ -188,9 +267,7 @@ def commit_race(token,meta):
                 {'fieldPath':'prizeYen','increment':{'integerValue':str(row['prizeYen'])}},
                 {'fieldPath':'starts','increment':{'integerValue':'1'}},
                 *([{'fieldPath':f'places.p{row["place"]}','increment':{'integerValue':'1'}}] if 1<=row['place']<=5 else []),
-                *([result_transform(row)] if not row['isCom'] else [])]})
-        if row['isCom']:
-            writes.append(update_com(token,row,slot))
+                result_transform(row)]})
     try:
         commit(token,writes)
     except HTTPError as e:
