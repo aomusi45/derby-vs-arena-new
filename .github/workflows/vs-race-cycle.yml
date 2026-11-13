@@ -117,6 +117,11 @@ jobs:
           cp index.html site.js owner-ranking.js registration.js firebase-config.js race_catalog.json race_playlist.json public_site/
           cp vs_replay_engine_part1.txt vs_replay_engine_part2.txt public_site/
           cp weekly_awards.json my-arena-stats.js public_site/
+          # Publish Google Search Console verification and XML sitemap without changing the arena build.
+          if [ -f sitemap.xml ]; then cp sitemap.xml public_site/; fi
+          for file in google*.html; do
+            if [ -f "$file" ]; then cp "$file" public_site/; fi
+          done
           cp -a races/. public_site/races/
       - name: Upload official VS site
         uses: actions/upload-pages-artifact@v4
