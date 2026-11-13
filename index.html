@@ -259,8 +259,12 @@
             <p id="vs-my-week-note">確定したレース結果を集計します。</p>
             <h3 class="vs-my-week-results-heading">今週の出走レース結果</h3>
             <div id="vs-my-week-results">ログイン後に確認できます。</div>
-            <button type="button" class="vs-action-btn" id="vs-my-races-toggle" disabled aria-expanded="false" aria-controls="vs-my-races-list">自分の馬の出走レースを見る</button>
-            <div id="vs-my-races-list" hidden aria-live="polite">ログイン後に確認できます。</div>
+            <!-- V18: The duplicate lower results button has been removed from the visible UI.
+                 Retain inaccessible/hidden compatibility targets for the existing
+                 my-arena-stats.js (which checks these IDs before rendering the
+                 upper, permanent "今週の出走レース結果" list). -->
+            <button type="button" id="vs-my-races-toggle" hidden disabled tabindex="-1" aria-hidden="true" style="display:none!important" aria-expanded="false" aria-controls="vs-my-races-list"></button>
+            <div id="vs-my-races-list" hidden aria-hidden="true" style="display:none!important"></div>
           </div>
           <span class="status" id="vs-entry-state">登録馬受付</span>
           <div class="vs-entry-summary" aria-label="登録頭数と次回の出走状況">
@@ -551,6 +555,46 @@ const state={watchSerial:0,enginePromise:null,watchMode:'',archiveMeta:null,reco
 
 $('vs-watchroom-back').addEventListener('click',leaveWatch);
 window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='string')return openWatch('archive',meta); else throw Error('再生するレースが指定されていません。');}});
+})();
+</script>
+<script id="dbf-prize-display-v18">
+/* V18: yen text on the official arena homepage is displayed in 億/万円 units.
+   The numeric source-of-truth, ranking comparison, and archived race data
+   are not changed. The observer handles existing and late-loaded JS content. */
+(()=>{
+  'use strict';
+  const money=/(?:\d{1,3}(?:,\d{3})+|\d+)円/g;
+  function showYen(match){
+    const n=Number(match.slice(0,-1).replaceAll(',',''));
+    if(!Number.isSafeInteger(n)||n<10000)return match;
+    const oku=Math.floor(n/100000000);
+    const man=Math.floor(n%100000000/10000);
+    const yen=n%10000;
+    return (oku?oku+'億':'')+(man?man+'万':'')+
+      (yen?String(yen):'')+'円';
+  }
+  function convertText(node){
+    if(node.nodeType!==3||!node.nodeValue.includes('円'))return;
+    if(node.parentElement?.closest('script,style,template,noscript,textarea'))return;
+    const formatted=node.nodeValue.replace(money,showYen);
+    if(formatted!==node.nodeValue)node.nodeValue=formatted;
+  }
+  function convertTree(node){
+    if(node.nodeType===3){convertText(node);return;}
+    if(node.nodeType!==1||node.matches('script,style,template,noscript,textarea'))return;
+    const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);
+    let next;
+    while((next=walker.nextNode()))convertText(next);
+  }
+  const root=document.body;
+  if(!root)return;
+  convertTree(root);
+  new MutationObserver(changes=>{
+    for(const change of changes){
+      if(change.type==='characterData')convertText(change.target);
+      else for(const node of change.addedNodes)convertTree(node);
+    }
+  }).observe(root,{subtree:true,childList:true,characterData:true});
 })();
 </script>
 <script src="site.js" defer></script>
