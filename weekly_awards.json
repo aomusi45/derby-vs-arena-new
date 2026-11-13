@@ -48,6 +48,12 @@
     },
     {
       "horseName": "テンノツカイ",
+      "ownerName": "あお",
+      "prizeYen": 150000000,
+      "starts": 1
+    },
+    {
+      "horseName": "テンノツカイ",
       "ownerName": "おお",
       "prizeYen": 150000000,
       "starts": 1
@@ -56,12 +62,6 @@
       "horseName": "リバティアイラン",
       "ownerName": "",
       "prizeYen": 150000000,
-      "starts": 20
-    },
-    {
-      "horseName": "ジェンティルドンニ",
-      "ownerName": "",
-      "prizeYen": 97500000,
       "starts": 20
     }
   ],
@@ -111,71 +111,85 @@
     {
       "rank": 8,
       "horseName": "テンノツカイ",
-      "ownerName": "おお",
+      "ownerName": "あお",
       "prizeYen": 150000000
     },
     {
       "rank": 9,
+      "horseName": "テンノツカイ",
+      "ownerName": "おお",
+      "prizeYen": 150000000
+    },
+    {
+      "rank": 10,
       "horseName": "リバティアイラン",
       "ownerName": "",
       "prizeYen": 150000000
     },
     {
-      "rank": 10,
+      "rank": 11,
       "horseName": "ジェンティルドンニ",
       "ownerName": "",
       "prizeYen": 97500000
     },
     {
-      "rank": 11,
+      "rank": 12,
       "horseName": "ラッキーライラッキ",
       "ownerName": "",
       "prizeYen": 60000000
     },
     {
-      "rank": 12,
+      "rank": 13,
       "horseName": "リスグラシュガー",
       "ownerName": "",
       "prizeYen": 52500000
     },
     {
-      "rank": 13,
+      "rank": 14,
       "horseName": "エアグルービー",
       "ownerName": "",
       "prizeYen": 43500000
     },
     {
-      "rank": 14,
+      "rank": 15,
       "horseName": "グラスパンダー",
       "ownerName": "",
       "prizeYen": 30000000
     },
     {
-      "rank": 15,
+      "rank": 16,
       "horseName": "ウオッカナ",
       "ownerName": "",
       "prizeYen": 27500000
     },
     {
-      "rank": 16,
+      "rank": 17,
       "horseName": "アリーナテスト",
       "ownerName": "サンプルオーナー",
       "prizeYen": 15000000
     },
     {
-      "rank": 17,
+      "rank": 18,
       "horseName": "メジロドーベリー",
       "ownerName": "",
       "prizeYen": 15000000
     },
     {
-      "rank": 18,
+      "rank": 19,
       "horseName": "ラヴズオンリーニャ",
       "ownerName": "",
       "prizeYen": 11000000
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "あお",
+      "horseName": "テンノツカイ",
+      "slot": 1993991,
+      "raceName": "ヴィクトリアマイル",
+      "place": 1,
+      "prizeYen": 150000000
+    },
     {
       "ownerName": "あおむし",
       "horseName": "テンノツカイ",
