@@ -15964,14 +15964,149 @@
           "rankingId": "c_81fc880c13418b1529c2d5d99ab5868a"
         }
       ]
+    },
+    {
+      "registrations": [],
+      "horseTokens": [],
+      "horseKeys": [],
+      "registrationSnapshotMs": 0,
+      "slot": 1993992,
+      "intervalMinutes": 15,
+      "file": "races/1993992.json.gz",
+      "raceId": "dfvs-mwfa0nzh-duziy6ai",
+      "name": "オークス",
+      "venue": "東京",
+      "distance": 2400,
+      "month": 5,
+      "durationMs": 137650,
+      "firstPrizeYen": 150000000,
+      "results": [
+        {
+          "place": 1,
+          "no": 12,
+          "name": "アーモンドアイス",
+          "timeSeconds": 130.34388953986263,
+          "margin": "―",
+          "prizeYen": 150000000,
+          "rankingId": "c_cf37478c88f0bf6db11cc419da3de0e0"
+        },
+        {
+          "place": 2,
+          "no": 1,
+          "name": "ダイワスカーレッタ",
+          "timeSeconds": 133.0943211037774,
+          "margin": "大差",
+          "prizeYen": 60000000,
+          "rankingId": "c_70c058b2ac7435b23e99748fa377315a"
+        },
+        {
+          "place": 3,
+          "no": 2,
+          "name": "ジェンティルドンニ",
+          "timeSeconds": 133.3970881519163,
+          "margin": "2 1/2馬身",
+          "prizeYen": 37500000,
+          "rankingId": "c_dda39b1e4b8f18e8ea0263fc12de7b59"
+        },
+        {
+          "place": 4,
+          "no": 3,
+          "name": "リスグラシュガー",
+          "timeSeconds": 133.71176470718316,
+          "margin": "2 1/2馬身",
+          "prizeYen": 22500000,
+          "rankingId": "c_9acadd0125b6a05fa5d25a19f7104933"
+        },
+        {
+          "place": 5,
+          "no": 11,
+          "name": "ラヴズオンリーニャ",
+          "timeSeconds": 133.96237421873056,
+          "margin": "2馬身",
+          "prizeYen": 15000000,
+          "rankingId": "c_b04605fb6dd3982a182a0053602425d7"
+        },
+        {
+          "place": 6,
+          "no": 4,
+          "name": "ウオッカナ",
+          "timeSeconds": 134.4464975064391,
+          "margin": "4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_fb4031a97e1be5b332be10b4bd35ea12"
+        },
+        {
+          "place": 7,
+          "no": 8,
+          "name": "ブエナビスター",
+          "timeSeconds": 134.47138579877802,
+          "margin": "アタマ",
+          "prizeYen": 0,
+          "rankingId": "c_f15acb39b4bc46927ad0b40910d671bd"
+        },
+        {
+          "place": 8,
+          "no": 7,
+          "name": "リバティアイラン",
+          "timeSeconds": 134.54312705404007,
+          "margin": "1/2馬身",
+          "prizeYen": 0,
+          "rankingId": "c_81fc880c13418b1529c2d5d99ab5868a"
+        },
+        {
+          "place": 9,
+          "no": 5,
+          "name": "クロノジェネシア",
+          "timeSeconds": 134.8412587786117,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_1feeb8f79fb985d065f097012061256a"
+        },
+        {
+          "place": 10,
+          "no": 10,
+          "name": "エアグルービー",
+          "timeSeconds": 135.4979923519657,
+          "margin": "5馬身",
+          "prizeYen": 0,
+          "rankingId": "c_94d445f556fc2f71106fb3f73abf3893"
+        },
+        {
+          "place": 11,
+          "no": 6,
+          "name": "ラッキーライラッキ",
+          "timeSeconds": 135.88734516159226,
+          "margin": "3馬身",
+          "prizeYen": 0,
+          "rankingId": "c_c87e2d06fdd57cc7f0be02c757bb85f9"
+        },
+        {
+          "place": 12,
+          "no": 13,
+          "name": "メジロドーベリー",
+          "timeSeconds": 137.19020494557432,
+          "margin": "9 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_40d98312309d339674d2c8ad86ccc6ee"
+        },
+        {
+          "place": 13,
+          "no": 9,
+          "name": "アパパネコ",
+          "timeSeconds": 137.62881896227884,
+          "margin": "3 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_ceff773fde6b4bee5aafaa1e70602035"
+        }
+      ]
     }
   ],
   "registrationSummary": {
     "version": 1,
     "registeredCount": 0,
-    "asOfMs": 1794592156352,
+    "asOfMs": 1794592461217,
     "nextSlot": 1993992,
     "nextCandidateCount": 0,
-    "nextFinal": false
+    "nextFinal": true
   }
 }
