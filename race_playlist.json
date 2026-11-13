@@ -15937,14 +15937,104 @@
           "rankingId": "c_7f625db8a2c6d6e26bd374099361f561"
         }
       ]
+    },
+    {
+      "registrations": [],
+      "horseTokens": [],
+      "horseKeys": [],
+      "registrationSnapshotMs": 0,
+      "slot": 1993996,
+      "intervalMinutes": 15,
+      "file": "races/1993996.json.gz",
+      "raceId": "dfvs-mwfc5uu4-fust1wzf",
+      "name": "スプリンターズステークス",
+      "venue": "中山",
+      "distance": 1200,
+      "month": 9,
+      "durationMs": 68800,
+      "firstPrizeYen": 170000000,
+      "results": [
+        {
+          "place": 1,
+          "no": 1,
+          "name": "ヒシアケボーノ",
+          "timeSeconds": 65.55363373337784,
+          "margin": "―",
+          "prizeYen": 170000000,
+          "rankingId": "c_6731bbc9a56d61936cc3f3f8b8564c36"
+        },
+        {
+          "place": 2,
+          "no": 7,
+          "name": "アーモンドアイス",
+          "timeSeconds": 65.59922878988888,
+          "margin": "クビ",
+          "prizeYen": 68000000,
+          "rankingId": "c_cf37478c88f0bf6db11cc419da3de0e0"
+        },
+        {
+          "place": 3,
+          "no": 8,
+          "name": "グランアレグリラ",
+          "timeSeconds": 66.41209550778096,
+          "margin": "7 1/4馬身",
+          "prizeYen": 42500000,
+          "rankingId": "c_df19a98cdeb225db2a2b60c9b47a4f9b"
+        },
+        {
+          "place": 4,
+          "no": 2,
+          "name": "ロードカナリア",
+          "timeSeconds": 66.51087729147852,
+          "margin": "3/4馬身",
+          "prizeYen": 25500000,
+          "rankingId": "c_3b307422468635fa9896e8d20e3fa7cb"
+        },
+        {
+          "place": 5,
+          "no": 6,
+          "name": "マイネルラブリー",
+          "timeSeconds": 67.1306858157668,
+          "margin": "5 1/4馬身",
+          "prizeYen": 17000000,
+          "rankingId": "c_fff4830a99971b5a3e3cc5f8c6b15fe2"
+        },
+        {
+          "place": 6,
+          "no": 4,
+          "name": "シンボリルドルフィ",
+          "timeSeconds": 67.4453894666802,
+          "margin": "2 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_1309b2ba92fffc3d6134b62ad5bac217"
+        },
+        {
+          "place": 7,
+          "no": 3,
+          "name": "グラスパンダー",
+          "timeSeconds": 67.56146684197371,
+          "margin": "1馬身",
+          "prizeYen": 0,
+          "rankingId": "c_312c180ea1634648876cf5b22218987b"
+        },
+        {
+          "place": 8,
+          "no": 5,
+          "name": "ソングライオン",
+          "timeSeconds": 68.78133677149515,
+          "margin": "9 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_aeeba4aa2cbe7851d8f8da123b712d03"
+        }
+      ]
     }
   ],
   "registrationSummary": {
     "version": 1,
     "registeredCount": 0,
-    "asOfMs": 1794595729439,
+    "asOfMs": 1794596060720,
     "nextSlot": 1993996,
     "nextCandidateCount": 0,
-    "nextFinal": false
+    "nextFinal": true
   }
 }
