@@ -90,6 +90,22 @@
 .vs-my-week-result-replay{margin-top:5px;min-height:35px;padding:6px 12px;font-size:12px}
 .vs-my-week-result-expired{font-size:11px;color:#a8bbae;display:block;margin-top:3px}
 @media(max-width:520px){#vs-my-week-card{padding:12px 9px}.vs-my-metrics{gap:6px}}
+/* DBF official site: Android closed-test invitation (presentation only). */
+.dbf-closed-test{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:center;margin:0 0 25px;padding:24px 27px;border:1px solid #d7b570;border-radius:15px;background:linear-gradient(120deg,#193b31,#0a211f 70%);box-shadow:0 12px 36px #0006,inset 0 1px #f0d8a226}
+.dbf-test-kicker{margin:0 0 9px;color:#e8c982;font-size:11px;font-weight:800;letter-spacing:.18em}
+.dbf-closed-test h2{margin:0 0 10px;color:#fff1c7;font-size:clamp(20px,3vw,28px);line-height:1.4;letter-spacing:.02em}
+.dbf-test-intro{margin:0;color:#d4e2d7;font-size:13px;line-height:1.85}
+.dbf-test-guide{border-left:1px solid #b495566b;padding-left:23px}
+.dbf-test-guide h3{margin:0 0 8px;color:#f5df9e;font-size:14px}
+.dbf-test-steps{padding-left:20px;margin:0 0 14px;color:#e2e9e2;font-size:12px;line-height:1.9}
+.dbf-test-steps li{padding-left:2px}
+.dbf-test-links{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.dbf-test-join{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 18px;background:linear-gradient(180deg,#ffe4ac,#d1a65b);border:1px solid #f5db9c;border-radius:8px;color:#0d2720;font-size:13px;font-weight:900;text-decoration:none;box-shadow:0 5px 13px #0004}
+.dbf-test-join:hover{filter:brightness(1.07)}
+.dbf-test-play{color:#f3dfae;font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.dbf-test-join:focus-visible,.dbf-test-play:focus-visible{outline:3px solid #ffffff;outline-offset:3px}
+.dbf-test-note{margin:12px 0 0;color:#bacbbf;font-size:11px;line-height:1.7}
+@media(max-width:720px){.dbf-closed-test{grid-template-columns:1fr;gap:16px;padding:20px 16px}.dbf-test-guide{border-left:0;border-top:1px solid #b495566b;padding:14px 0 0}}
 </style>
 </head>
 <body>
@@ -107,6 +123,28 @@
     </header>
 
     <main>
+      <!-- DBF Android closed test: independent information panel, no application state changes. -->
+      <section id="dbf-closed-test" class="dbf-closed-test" aria-labelledby="dbf-closed-test-title">
+        <div>
+          <p class="dbf-test-kicker">DERBY FANTASY · ANDROID CLOSED TEST</p>
+          <h2 id="dbf-closed-test-title">正式サービスに向けて<br>クローズドテスト実施中！</h2>
+          <p class="dbf-test-intro">競走馬育成ゲーム「ダービーファンタジー」では、Android版のクローズドテスターを募集しています。正式サービスに向けた動作確認やプレイに、ぜひご協力ください。</p>
+        </div>
+        <div class="dbf-test-guide">
+          <h3>テストへの参加方法</h3>
+          <ol class="dbf-test-steps">
+            <li>テストに使用するGoogleアカウントでログインします。</li>
+            <li>「テスター参加ページ」を開き、参加できる場合は案内に従って登録します。</li>
+            <li>参加登録後、Google Playからアプリをインストールしてプレイします。</li>
+          </ol>
+          <div class="dbf-test-links">
+            <a class="dbf-test-join" href="https://play.google.com/apps/testing/com.derbyfantasy.game" target="_blank" rel="noopener noreferrer">テスター参加ページを開く ↗</a>
+            <a class="dbf-test-play" href="https://play.google.com/store/apps/details?id=com.derbyfantasy.game" target="_blank" rel="noopener noreferrer">Google Playのアプリページ</a>
+          </div>
+          <p class="dbf-test-note">※ クローズドテストは対象のGoogleアカウントのみ参加できます。参加できない場合は、テスターとしての事前登録が必要な可能性があります。</p>
+        </div>
+      </section>
+
       <section class="arena" aria-label="VSレース会場">
         <div class="arena-inner">
           <div class="arena-tag">THE GRAND RACE</div>
