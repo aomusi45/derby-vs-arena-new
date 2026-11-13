@@ -105,17 +105,61 @@ def build_game(card: dict) -> str:
         original = original.replace(old, new, 1)
     # Only the official production's roster SOURCE is switched. The original
     # physics, motion, camera, finish and recorder remain untouched.
+    # Arena-only S/SS equal-weight lottery. Do not change the normal game's
+    # special-horse gate, fixed race placements, ability data or racing physics.
     injection = r"""const field=(()=>{
-      const originals=fromPreparedField();
       const incoming=Array.isArray(window.__dfOfficialEntries)?window.__dfOfficialEntries:[];
-      if(!incoming.length)return originals;
       const selected=incoming.slice(0,18);
-      const names=new Set(selected.map(x=>x.runner.name));
+      const usedNames=new Set(selected.map(x=>x.runner.name));
       const field=selected.map(x=>({...x.runner,registrationId:x.registrationId,
         ownerName:x.ownerName||'',isCom:false}));
-      const count=Math.min(18,Math.max(originals.length,field.length));
-      const fillers=originals.filter(h=>!names.has(h.name));
-      field.push(...fillers.slice(0,Math.max(0,count-field.length)).map(h=>({...h,isCom:true})));
+      const card=currentRace;
+      const officialAge=(horse)=>{
+        const [debut,last]=registryAgeLimits(horse);
+        const age=card.ages==='2'?2:card.ages==='3'?3:
+          card.ages==='4+'?Math.max(4,debut):Math.max(3,debut);
+        if(age<debut||age>last||age>8)return null;
+        return age;
+      };
+      const candidates=[];
+      for(const h of HORSE_DB){
+        if(h.overallRank!=='S'&&h.overallRank!=='SS')continue;
+        if(h.surface!==card.surface||(card.female&&h.sex!=='牝'))continue;
+        if(usedNames.has(h.name))continue;
+        const age=officialAge(h);
+        if(age===null)continue;
+        // Original historical shortest/longest starts, each with the normal
+        // 200m aptitude allowance. No regular-season star/priority lottery.
+        const lo=Number.isFinite(h.coreMin)?Math.max(600,h.coreMin-200):h.aptMin;
+        const hi=Number.isFinite(h.coreMax)?h.coreMax+200:h.aptMax;
+        if(!Number.isFinite(lo)||!Number.isFinite(hi)||
+           card.distance<lo||card.distance>hi)continue;
+        candidates.push({h,age});
+      }
+      // Uniform selection without replacement: S and SS get no extra weight.
+      for(let i=candidates.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
+      }
+      for(const {h,age} of candidates){
+        if(field.length>=18)break;
+        field.push({
+          name:h.name,sex:h.sex,coatType:h.coatType,tactic:h.tactic,age,
+          growth:h.growth,bestDistance:h.bestDistance,
+          aptMin:h.aptMin,aptMax:h.aptMax,
+          speed:h.sp,sta:h.sta,kick:h.kick,early:h.early,
+          sustain:h.sustain,grit:h.grit,stability:h.stability,
+          health:h.health,temperament:h.temperament,
+          going:{...h.goingAptitude},g1Wins:h.g1Wins,
+          form:75,fatigue:0,earnedPrize:0,isCom:true
+        });
+        usedNames.add(h.name);
+      }
+      // Never fall back to the normal game's A-rank/star-priority field:
+      // that would silently violate the S+ and distance-aptitude rule.
+      if(field.length<2)throw Error('公式VSのS以上・適性馬が2頭未満です');
+      window.__dfOfficialComSelection={race:card.name,distance:card.distance,
+        eligible:candidates.length,selected:field.filter(x=>x.isCom).length};
       for(let i=field.length-1;i>0;i--){
         const j=Math.floor(Math.random()*(i+1));
         [field[i],field[j]]=[field[j],field[i]];
