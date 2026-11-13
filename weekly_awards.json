@@ -37,14 +37,20 @@
     {
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 1662500000,
-      "starts": 10
+      "prizeYen": 1707500000,
+      "starts": 11
     },
     {
       "horseName": "フォーエバーヤンキー",
       "ownerName": "",
       "prizeYen": 1165000000,
       "starts": 60
+    },
+    {
+      "horseName": "キタサンブラッキー",
+      "ownerName": "",
+      "prizeYen": 1125000000,
+      "starts": 9
     },
     {
       "horseName": "レガレイララ",
@@ -57,12 +63,6 @@
       "ownerName": "あおむし",
       "prizeYen": 1070000000,
       "starts": 4
-    },
-    {
-      "horseName": "シンボリルドルフィ",
-      "ownerName": "",
-      "prizeYen": 1030000000,
-      "starts": 8
     }
   ],
   "standings": [
@@ -100,7 +100,7 @@
       "rank": 6,
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 1662500000
+      "prizeYen": 1707500000
     },
     {
       "rank": 7,
@@ -110,39 +110,39 @@
     },
     {
       "rank": 8,
+      "horseName": "キタサンブラッキー",
+      "ownerName": "",
+      "prizeYen": 1125000000
+    },
+    {
+      "rank": 9,
       "horseName": "レガレイララ",
       "ownerName": "",
       "prizeYen": 1124000000
     },
     {
-      "rank": 9,
+      "rank": 10,
       "horseName": "テンノツカイ",
       "ownerName": "あおむし",
       "prizeYen": 1070000000
     },
     {
-      "rank": 10,
+      "rank": 11,
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
-      "prizeYen": 1030000000
+      "prizeYen": 1060000000
     },
     {
-      "rank": 11,
+      "rank": 12,
       "horseName": "アグネスデジカル",
       "ownerName": "",
       "prizeYen": 844500000
     },
     {
-      "rank": 12,
+      "rank": 13,
       "horseName": "ドゥラメンタイ",
       "ownerName": "",
       "prizeYen": 835000000
-    },
-    {
-      "rank": 13,
-      "horseName": "キタサンブラッキー",
-      "ownerName": "",
-      "prizeYen": 825000000
     },
     {
       "rank": 14,
@@ -152,21 +152,21 @@
     },
     {
       "rank": 15,
+      "horseName": "ディープインパルス",
+      "ownerName": "",
+      "prizeYen": 775000000
+    },
+    {
+      "rank": 16,
       "horseName": "アーモンドアイ",
       "ownerName": "サンプルオーナー",
       "prizeYen": 750000000
     },
     {
-      "rank": 16,
+      "rank": 17,
       "horseName": "アグネスフライド",
       "ownerName": "",
       "prizeYen": 720000000
-    },
-    {
-      "rank": 17,
-      "horseName": "ディープインパルス",
-      "ownerName": "",
-      "prizeYen": 700000000
     },
     {
       "rank": 18,
@@ -206,33 +206,33 @@
     },
     {
       "rank": 24,
+      "horseName": "ナリタブライワン",
+      "ownerName": "",
+      "prizeYen": 487000000
+    },
+    {
+      "rank": 25,
       "horseName": "アドラーブルー",
       "ownerName": "",
       "prizeYen": 455000000
     },
     {
-      "rank": 25,
+      "rank": 26,
       "horseName": "ワンアンドオンリーワン",
       "ownerName": "",
       "prizeYen": 455000000
     },
     {
-      "rank": 26,
+      "rank": 27,
       "horseName": "サニーブライワン",
       "ownerName": "",
       "prizeYen": 425000000
     },
     {
-      "rank": 27,
+      "rank": 28,
       "horseName": "エネルジカル",
       "ownerName": "",
       "prizeYen": 410000000
-    },
-    {
-      "rank": 28,
-      "horseName": "ナリタブライワン",
-      "ownerName": "",
-      "prizeYen": 367000000
     },
     {
       "rank": 29,
