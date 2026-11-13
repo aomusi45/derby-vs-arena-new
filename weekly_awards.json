@@ -20,7 +20,7 @@
       "horseName": "アーモンドアイス",
       "ownerName": "",
       "prizeYen": 3577500000,
-      "starts": 24
+      "starts": 25
     },
     {
       "horseName": "キングカメハメハハ",
@@ -37,8 +37,14 @@
     {
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
-      "prizeYen": 2062000000,
-      "starts": 18
+      "prizeYen": 2107000000,
+      "starts": 19
+    },
+    {
+      "horseName": "ディープインパルス",
+      "ownerName": "",
+      "prizeYen": 1975000000,
+      "starts": 10
     },
     {
       "horseName": "メジロマックイーヌ",
@@ -47,16 +53,10 @@
       "starts": 33
     },
     {
-      "horseName": "ディープインパルス",
-      "ownerName": "",
-      "prizeYen": 1675000000,
-      "starts": 9
-    },
-    {
       "horseName": "テイエムオペラオン",
       "ownerName": "",
-      "prizeYen": 1405000000,
-      "starts": 10
+      "prizeYen": 1525000000,
+      "starts": 11
     },
     {
       "horseName": "キタサンブラッキー",
@@ -100,25 +100,25 @@
       "rank": 6,
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
-      "prizeYen": 2062000000
+      "prizeYen": 2107000000
     },
     {
       "rank": 7,
+      "horseName": "ディープインパルス",
+      "ownerName": "",
+      "prizeYen": 1975000000
+    },
+    {
+      "rank": 8,
       "horseName": "メジロマックイーヌ",
       "ownerName": "",
       "prizeYen": 1965000000
     },
     {
-      "rank": 8,
-      "horseName": "ディープインパルス",
-      "ownerName": "",
-      "prizeYen": 1675000000
-    },
-    {
       "rank": 9,
       "horseName": "テイエムオペラオン",
       "ownerName": "",
-      "prizeYen": 1405000000
+      "prizeYen": 1525000000
     },
     {
       "rank": 10,
@@ -214,7 +214,7 @@
       "rank": 25,
       "horseName": "イクイノマックス",
       "ownerName": "",
-      "prizeYen": 509000000
+      "prizeYen": 539000000
     },
     {
       "rank": 26,
