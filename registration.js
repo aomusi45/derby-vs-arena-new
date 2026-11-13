@@ -13,6 +13,7 @@
   const validOwner=value=>value.length>=1 && [...value].length<=24 && !/[\u0000-\u001f\u007f]/.test(value);
   const cfg=window.VS_FIREBASE_CONFIG;
   let auth=null,db=null, sdk=null,chosen=null,busy=false,ready=false;
+  let authPending=false,googleSwitchExisting=false,authPersistence='local';
   let selectionSerial=0;
   let reservedOwnerName='',profileLoaded=false;
   let lockedHorse=null,lockedCount=null,weeklyRegistered=null,weeklyCheckedIndex=null;
@@ -328,7 +329,7 @@
       exhausted?'この馬は20戦終了です' :
       fullWeek?'今週の120頭枠は満員です':'この馬を公式VSに登録する';
     submit.disabled=busy||!ready||!profileLoaded||!workerReady()||!!ownRegistration||!acceptingNow()||
-      wrongHorse||exhausted||fullWeek||!chosen||!auth?.currentUser||
+      wrongHorse||exhausted||fullWeek||authPending||!chosen||!auth?.currentUser||
       (!chosen.sealed&&!validOwner(cleanOwner(ownerInput.value)));};
   ownerInput.addEventListener('input',updateSubmit);
   async function refreshWeeklyCapacity(){
@@ -382,8 +383,24 @@
     const app=appSdk.getApps().find(a=>a.options.projectId===cfg.projectId) ||
       appSdk.initializeApp(cfg,'vs-arena-registration');
     auth=authSdk.getAuth(app);
-    await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
+    // Keep Google login available when this browser refuses long-term storage.
+    // Never offer guest account creation without durable local persistence:
+    // a transient guest UID would irreversibly lose access to its horse/owner.
+    try{
+      await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
+    }catch(localError){
+      console.warn('Googleログイン用の永続保存が利用できません',localError);
+      try{
+        await authSdk.setPersistence(auth,authSdk.browserSessionPersistence);
+        authPersistence='session';
+      }catch(sessionError){
+        console.warn('セッション保存も利用できません',sessionError);
+        await authSdk.setPersistence(auth,authSdk.inMemoryPersistence);
+        authPersistence='memory';
+      }
+    }
     db=fsSdk.getFirestore(app);ready=true;
+    refreshAuthButtons();
     refreshWeeklyCapacity();
     setInterval(refreshWeeklyCapacity,30000);
     // Live Firestore listener: other devices update as soon as the mirror changes.
@@ -399,11 +416,16 @@
       if(ownerHint)ownerHint.textContent='ログインするとオーナー名の取得状況を確認します。';
       updateSubmit();renderPublicStatus();
       if(!user){
-        loginStatus.textContent='未ログイン';
-        say('Googleまたはゲストでログインして馬を登録してください。');
+        loginStatus.textContent='未ログイン'+(authPersistence==='local'?'':'（このブラウザではGoogleログインのみ）');
+        say(authPersistence==='local'?'Googleまたはゲストでログインして馬を登録してください。':
+          'このブラウザではログイン情報を永続保存できません。ゲスト登録は保護のため停止し、Googleログインのみ利用できます。');
+        refreshAuthButtons();
         return;
       }
-      loginStatus.textContent=(user.isAnonymous?'ゲスト':'ログイン中')+'：登録可能';
+      googleSwitchExisting=false;
+      loginStatus.textContent=user.isAnonymous?'ゲストでログイン済み：登録可能':
+        (user.providerData?.some(p=>p.providerId==='google.com')?'Googleログイン済み：登録可能':'ログイン済み：登録可能');
+      refreshAuthButtons();
       try{
         // Unlike vs_entries, this profile survives after a horse has raced.
         const profile=await fsSdk.getDocFromServer(fsSdk.doc(db,'vs_owner_profiles',user.uid));
@@ -456,15 +478,84 @@
       }
     }catch(err){console.warn('登録状態の更新に失敗',err);}
   }
+  // Google login on GitHub Pages: popup works without a cross-site redirect
+  // helper. Do NOT silently switch guest UIDs: owner profiles and horse locks
+  // are bound to Firebase UID, so first try to link the Google credential.
+  const googleLabel=google.textContent;
+  function refreshAuthButtons(){
+    google.disabled=!ready||authPending||busy;
+    guest.disabled=!ready||authPending||busy||authPersistence!=='local';
+    google.textContent=authPending?'Google認証中…':
+      (googleSwitchExisting?'既存Googleアカウントに切替':googleLabel);
+  }
+  function authFailureMessage(err){
+    const code=typeof err?.code==='string'?err.code:'unknown';
+    const remedies={
+      'auth/popup-blocked':'ブラウザが認証画面をブロックしました。ポップアップを許可し、公式サイトをChromeやSafariで直接開いてからもう一度押してください。',
+      'auth/popup-closed-by-user':'Googleのログイン画面が閉じられました。アカウントの選択を最後まで完了してください。',
+      'auth/cancelled-popup-request':'ログイン画面が重複しました。もう一度Googleログインを押してください。',
+      'auth/unauthorized-domain':'Firebase管理者設定で aomusi45.github.io を「Authentication → 設定 → 承認済みドメイン」に追加してください。',
+      'auth/operation-not-allowed':'Firebase管理者設定で「Authentication → ログイン方法 → Google」を有効にしてください。',
+      'auth/network-request-failed':'通信に失敗しました。接続状況を確認してからもう一度お試しください。',
+      'auth/web-storage-unsupported':'ブラウザの保存機能が使えません。シークレットモードを解除し、通常のChromeやSafariで開いてください。',
+      'auth/operation-not-supported-in-this-environment':'GoogleログインはHTTPSの通常のブラウザで開いてください。アプリ内ブラウザでは利用できない場合があります。',
+      'auth/account-exists-with-different-credential':'このメールアドレスは別のログイン方式で登録されています。管理者へご相談ください。'
+    };
+    return (remedies[code]||'認証に失敗しました。通常のChromeなどで公式サイトを直接開き直してください。')+' ['+code+']';
+  }
   google.addEventListener('click',async()=>{
-    if(!ready||busy)return;
-    try{await sdk.signInWithPopup(auth,new sdk.GoogleAuthProvider());}
-    catch(err){say('Googleログインに失敗：'+String(err.code||err.message||err));}
+    if(!ready){say('Googleログインの初期化中です。少ししてからもう一度押してください。');return;}
+    if(busy||authPending)return;
+    const switching=googleSwitchExisting;
+    // Must call the popup API directly from the click gesture (no await first).
+    authPending=true;refreshAuthButtons();updateSubmit();
+    loginStatus.textContent='Google認証画面を開いています…';
+    say(switching?'既存のGoogleアカウントへ切り替えます。ゲストでの登録データは移行されません。':
+      'Googleアカウントの選択画面でログインを完了してください。');
+    try{
+      const provider=new sdk.GoogleAuthProvider();
+      provider.setCustomParameters({prompt:'select_account'});
+      const linkGuest=!!auth.currentUser?.isAnonymous&&!switching;
+      const result=await (linkGuest?
+        sdk.linkWithPopup(auth.currentUser,provider):sdk.signInWithPopup(auth,provider));
+      googleSwitchExisting=false;
+      loginStatus.textContent='Googleログイン済み：登録可能';
+      say(linkGuest?'ゲストの登録情報を保ったままGoogleアカウントを連携しました。':
+        'Googleログインが完了しました。登録馬やオーナー名を確認しています。');
+      // onAuthStateChanged may not fire when linking: UID is unchanged.
+      if(result.user?.uid===auth.currentUser?.uid&&linkGuest){
+        updateSubmit();renderPublicStatus();
+      }
+    }catch(err){
+      const code=String(err?.code||'');
+      if(!switching&&auth.currentUser?.isAnonymous&&
+         (code==='auth/credential-already-in-use'||code==='auth/email-already-in-use')){
+        // Never replace the guest UID automatically. A subsequent explicit
+        // click can open the already-existing Google account instead.
+        googleSwitchExisting=true;
+        loginStatus.textContent='ゲストでログイン中（Google未連携）';
+        say('そのGoogleアカウントはすでに登録済みです。ゲストの馬・オーナーは自動移行されません。既存のGoogleアカウントを使うなら「既存Googleアカウントに切替」を押してください。');
+      }else{
+        loginStatus.textContent=auth.currentUser?.isAnonymous?'ゲストでログイン中':
+          (auth.currentUser?'ログイン済み':'未ログイン');
+        say('Googleログインに失敗：'+authFailureMessage(err));
+      }
+    }finally{
+      authPending=false;refreshAuthButtons();updateSubmit();
+    }
   });
   guest.addEventListener('click',async()=>{
-    if(!ready||busy)return;
+    if(!ready||busy||authPending)return;
+    if(authPersistence!=='local'){
+      say('このブラウザは保存機能が制限されているため、ゲスト登録を停止しています。Googleでログインしてください。');return;
+    }
+    if(auth.currentUser&&!auth.currentUser.isAnonymous){
+      say('Googleログイン済みです。ゲストへ切り替えるとオーナー・登録馬を引き継げないため、切り替えを停止しました。');return;
+    }
+    authPending=true;refreshAuthButtons();updateSubmit();
     try{await sdk.signInAnonymously(auth);}
     catch(err){say('ゲストログインに失敗：'+String(err.code||err.message||err));}
+    finally{authPending=false;refreshAuthButtons();updateSubmit();}
   });
   // New encrypted VS files: the browser cannot decrypt them, by design.
   // Only the private-key Worker can decrypt and persist the normalized roster.
@@ -521,7 +612,7 @@
     updateSubmit();
   });
   submit.addEventListener('click',async()=>{
-    if(!ready||!chosen||!auth.currentUser||busy||ownRegistration)return;
+    if(!ready||!chosen||!auth.currentUser||busy||authPending||ownRegistration)return;
     if(!acceptingNow()){say('受付時間外のため登録できません。');renderPublicStatus();return;}
     const ownerName=cleanOwner(ownerInput.value);
     if(ownerName&&!validOwner(ownerName)){say('公開するオーナー名は1〜24文字にしてください。');return;}
@@ -592,6 +683,6 @@
   });
   window.VSEntry=Object.freeze({normalize});
   init().catch(err=>{
-    ready=false;updateSubmit();say('Firebaseに接続できません：'+String(err.code||err.message||err));
+    ready=false;refreshAuthButtons();updateSubmit();say('Firebaseに接続できません：'+String(err.code||err.message||err));
   });
 })();
