@@ -14920,14 +14920,230 @@
           "rankingId": "c_e436c1ee354319197ae5aacca0a5bdba"
         }
       ]
+    },
+    {
+      "registrations": [],
+      "horseTokens": [],
+      "horseKeys": [],
+      "registrationSnapshotMs": 0,
+      "slot": 1994038,
+      "intervalMinutes": 15,
+      "file": "races/1994038.json.gz",
+      "raceId": "dfvs-mwfyo8qf-0g6w3di1",
+      "name": "ジャパンカップ",
+      "venue": "東京",
+      "distance": 2400,
+      "month": 11,
+      "durationMs": 136975,
+      "firstPrizeYen": 500000000,
+      "results": [
+        {
+          "place": 1,
+          "no": 15,
+          "name": "ディープインパルス",
+          "timeSeconds": 129.78358165462882,
+          "margin": "―",
+          "prizeYen": 500000000,
+          "rankingId": "c_f8c507c1fe48bf78cc8162c5f404dec1",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 2,
+          "no": 6,
+          "name": "イクイノマックス",
+          "timeSeconds": 130.09017752482782,
+          "margin": "2 3/4馬身",
+          "prizeYen": 200000000,
+          "rankingId": "c_99a379c30bc9bbe974c3e6960a9421ea",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 3,
+          "no": 8,
+          "name": "シンボリルドルフィ",
+          "timeSeconds": 130.10778251405122,
+          "margin": "アタマ",
+          "prizeYen": 125000000,
+          "rankingId": "c_1309b2ba92fffc3d6134b62ad5bac217",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 4,
+          "no": 17,
+          "name": "アーモンドアイス",
+          "timeSeconds": 130.79942213252946,
+          "margin": "6 1/4馬身",
+          "prizeYen": 75000000,
+          "rankingId": "c_cf37478c88f0bf6db11cc419da3de0e0",
+          "sex": "牝",
+          "age": 3
+        },
+        {
+          "place": 5,
+          "no": 16,
+          "name": "スペシャルウインク",
+          "timeSeconds": 131.599257592902,
+          "margin": "7馬身",
+          "prizeYen": 50000000,
+          "rankingId": "c_81c684bd5a6a146a68a5f778e07c4614",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 6,
+          "no": 14,
+          "name": "テイエムオペラオン",
+          "timeSeconds": 132.03518264641866,
+          "margin": "3 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_27793f4621317a3b90d881f5c5e22dda",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 7,
+          "no": 3,
+          "name": "ジェンティルドンニ",
+          "timeSeconds": 132.30520108030012,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_dda39b1e4b8f18e8ea0263fc12de7b59",
+          "sex": "牝",
+          "age": 3
+        },
+        {
+          "place": 8,
+          "no": 1,
+          "name": "リバティアイラン",
+          "timeSeconds": 133.1093048201237,
+          "margin": "6 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_81fc880c13418b1529c2d5d99ab5868a",
+          "sex": "牝",
+          "age": 3
+        },
+        {
+          "place": 9,
+          "no": 9,
+          "name": "グラスパンダー",
+          "timeSeconds": 133.58162718109423,
+          "margin": "4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_312c180ea1634648876cf5b22218987b",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 10,
+          "no": 4,
+          "name": "コントレイン",
+          "timeSeconds": 133.7946154122226,
+          "margin": "1 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_ab21704a4b0edff08e7b14bd4a255943",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 11,
+          "no": 18,
+          "name": "ラッキーライラッキ",
+          "timeSeconds": 134.10166506077266,
+          "margin": "2 1/2馬身",
+          "prizeYen": 0,
+          "rankingId": "c_c87e2d06fdd57cc7f0be02c757bb85f9",
+          "sex": "牝",
+          "age": 3
+        },
+        {
+          "place": 12,
+          "no": 2,
+          "name": "ラヴズオンリーニャ",
+          "timeSeconds": 134.38446338269418,
+          "margin": "2 1/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_b04605fb6dd3982a182a0053602425d7",
+          "sex": "牝",
+          "age": 3
+        },
+        {
+          "place": 13,
+          "no": 13,
+          "name": "ダイワスカーレッタ",
+          "timeSeconds": 134.96885729573543,
+          "margin": "4 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_70c058b2ac7435b23e99748fa377315a",
+          "sex": "牝",
+          "age": 3
+        },
+        {
+          "place": 14,
+          "no": 11,
+          "name": "クロワデュノワール",
+          "timeSeconds": 135.01326339143668,
+          "margin": "クビ",
+          "prizeYen": 0,
+          "rankingId": "c_e436c1ee354319197ae5aacca0a5bdba",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 15,
+          "no": 5,
+          "name": "ブエナビスター",
+          "timeSeconds": 135.05283111342447,
+          "margin": "クビ",
+          "prizeYen": 0,
+          "rankingId": "c_f15acb39b4bc46927ad0b40910d671bd",
+          "sex": "牝",
+          "age": 3
+        },
+        {
+          "place": 16,
+          "no": 12,
+          "name": "ドウデュースト",
+          "timeSeconds": 135.54745407285614,
+          "margin": "3 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_1296421523d0065e7c8ecfe6d3f5f945",
+          "sex": "牡",
+          "age": 3
+        },
+        {
+          "place": 17,
+          "no": 7,
+          "name": "メジロドーベリー",
+          "timeSeconds": 135.93485838175062,
+          "margin": "3馬身",
+          "prizeYen": 0,
+          "rankingId": "c_40d98312309d339674d2c8ad86ccc6ee",
+          "sex": "牝",
+          "age": 3
+        },
+        {
+          "place": 18,
+          "no": 10,
+          "name": "シンボリクリスマス",
+          "timeSeconds": 136.96905590783152,
+          "margin": "7 3/4馬身",
+          "prizeYen": 0,
+          "rankingId": "c_12d86e5d7e99425d689fd79dd5da7502",
+          "sex": "牡",
+          "age": 3
+        }
+      ]
     }
   ],
   "registrationSummary": {
     "version": 1,
     "registeredCount": 0,
-    "asOfMs": 1794633739785,
+    "asOfMs": 1794633858182,
     "nextSlot": 1994038,
     "nextCandidateCount": 0,
-    "nextFinal": false
+    "nextFinal": true
   }
 }
