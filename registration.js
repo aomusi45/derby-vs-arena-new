@@ -355,6 +355,30 @@
     google.textContent=authPending?'Google認証中…':(isGoogle()?'Googleログイン済み':'Googleでログイン');
   }
   const updateSubmit=showStages;
+  // V25: Restore this missing V23 routine. Its absence caused
+  // `refreshWeeklyCapacity is not defined` during init(), before the Firebase
+  // auth-state observer was installed. Quota is read-only; failures must not
+  // prevent Google login or mutate owner/horse/entry records.
+  async function refreshWeeklyCapacity(){
+    if(!ready||!db||!sdk)return;
+    const week=currentWeek();
+    try{
+      const cap=await sdk.getDocFromServer(sdk.doc(db,'vs_weekly_registration_counts','w'+week));
+      const n=cap.exists()?Number(cap.data().count):0;
+      if(!Number.isInteger(n)||n<0||n>120)throw Error('週間登録数が不正です');
+      // Ignore an out-of-date async reply that crossed the JST week boundary.
+      if(currentWeek()!==week)return;
+      weeklyRegistered=n;
+      weeklyCheckedIndex=week;
+      renderPublicStatus();updateSubmit();
+    }catch(err){
+      // Insufficient Firestore read permission should NOT disable authentication.
+      if(currentWeek()!==week)return;
+      weeklyRegistered=null;weeklyCheckedIndex=null;
+      console.warn('週間登録枠を取得できません',err);
+      renderPublicStatus();updateSubmit();
+    }
+  }
   async function workerRequest(path,data={},user=auth?.currentUser){
     if(!workerReady())throw Error('公式登録サーバーが利用できません');
     if(!user||!user.providerData?.some(p=>p.providerId===GOOGLE_PROVIDER)||user.isAnonymous)
