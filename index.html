@@ -56,6 +56,19 @@
   #vs-entry-submit{margin:12px 0;width:100%}
   #vs-entry-preview{color:#f2db9c!important;font-weight:700}
   #vs-entry-message{white-space:pre-line}
+  /* V30: scrollable same-day individual G1 booking list; keeps the old entry screen intact. */
+  .vs-today-reservation-panel{margin:15px 0;padding:13px 12px;border:1px solid #b8955188;
+    border-radius:9px;background:#0b221ee8}
+  .vs-today-reservation-panel h3{margin:0 0 7px;color:#ffe3a0;font-size:17px}
+  .vs-today-reservation-panel .small{line-height:1.65;color:#d5dccd}
+  #vs-today-reservation-list{max-height:400px;overflow:auto;overscroll-behavior:contain}
+  .vs-booking-row{display:flex;align-items:center;justify-content:space-between;gap:9px;
+    border-bottom:1px solid #a68c5748;padding:9px 2px;min-height:54px}
+  .vs-booking-meta{min-width:0;flex:1;color:#ffe1a7;font-size:13px;line-height:1.4}
+  .vs-booking-meta small{display:block;font-size:11px;color:#bbcbc1;margin-top:2px}
+  .vs-booking-row button{flex:0 0 auto;min-height:36px;padding:7px 10px;border-radius:7px;
+    border:1px solid #cdb06a;background:#d0a54e;color:#142b25;font-weight:750;font-size:12px}
+  .vs-booking-row button:disabled{opacity:.62;background:#465d53;color:#edf0e8}
   /* Next scheduled G1 and privacy-safe entry counts. Existing race viewing is unchanged. */
   .vs-next-info{margin-top:15px;padding:13px 12px;border-top:1px solid #b8955170;background:#061a18a8;border-radius:8px}
   .vs-next-kicker{color:#cbb277;font-size:11px;letter-spacing:.08em}
@@ -293,7 +306,13 @@
             <p id="vs-owner-horse-lock">登録馬：ログイン後に固定馬を確認します。</p>
             <p id="vs-entry-my-status">出走状況：未確認</p>
           </div>
-          <p>Googleログインでオーナー名と愛馬を保存します。最初の1回だけオーナー名と馬ファイルを登録すると、次回からはログイン後「このレースに登録」ボタンだけで出走申込みできます。馬は通算20戦終了後のみ変更できます。</p>
+          <section class="vs-today-reservation-panel" aria-labelledby="vs-today-reservation-title">
+            <h3 id="vs-today-reservation-title">本日の出走予約（個別）</h3>
+            <p class="small">日本時間の当日開催分です。出たいレースの右側から1レースずつ予約してください。予約締切は発走7分前です。予約済みのGⅠには同じ馬で当日再予約できません。</p>
+            <p id="vs-today-reservation-message" class="small" aria-live="polite">Googleログイン後に予約状況を読み込みます。</p>
+            <div id="vs-today-reservation-list" role="list" aria-label="本日の出走予約一覧">開催予定を読み込み中…</div>
+          </section>
+          <p>Googleログインでオーナー名と愛馬を保存します。初回の1回だけオーナー名と馬ファイルを登録すると、次回からはファイル選択不要です。馬は通算20戦終了後のみ変更できます。</p>
           <div class="vs-entry-auth" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
             <button class="vs-action-btn" id="vs-entry-google" type="button">Googleでログイン</button>
           </div>
@@ -620,7 +639,7 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 <script src="visitor-counter.js?v=20261113-v16" defer></script>
 <script src="owner-ranking.js?v=20261114-v28-traits" defer></script>
 <script src="firebase-config.js" defer></script>
-<script src="registration.js?v=20261114-v28-sex-age-entry" defer></script>
+<script src="registration.js?v=20261114-v30-individual-booking" defer></script>
 <script src="my-arena-stats.js?v=20261114-v28-traits" defer></script>
 <!-- DBF arena return-to-game button. Place immediately before </body>. -->
 <style id="dbf-arena-return-style">

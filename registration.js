@@ -41,6 +41,10 @@
   const entryRace=$('vs-entry-race-name');
   const entryRoster=$('vs-entry-roster');
   const entryDeadline=$('vs-entry-deadline');
+  const bookingList=$('vs-today-reservation-list');
+  const bookingMessage=$('vs-today-reservation-message');
+  let bookedSlots=new Set(),bookedRaceCodes=new Set(),bookingDay='',bookingBusy=false;
+  let bookingsLoaded=false,bookingRenderKey='';
   const ownerLockLabel=$('vs-owner-horse-lock');
   const weeklyCapLabel=$('vs-weekly-registration-cap');
   let publicCatalog=null,publicManifest=null,ownRegistration=null,ownRegistrationId=null;
@@ -84,6 +88,93 @@
   const validAge=age=>Number.isInteger(age)&&age>=2&&age<=8;
   const traits=row=>validSex(row?.sex)&&validAge(row?.age)?
     row.sex+'・'+row.age+'歳':'性別・年齢未確認';
+  const raceCodeFor=async(name)=>{
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(name));
+    return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('').slice(0,24);
+  };
+  const bookingAvailable=()=>!!savedHorse&&savedHorse.appearances<20&&
+    validOwner(reservedOwnerName)&&isGoogle()&&ready&&bookingsLoaded;
+  function renderTodayBookings(){
+    if(!bookingList)return;
+    const now=Date.now(),day=jpDay(now),slotStart=nextSlot();
+    const signature=[day,slotStart,Math.floor(now/30000),
+      publicCatalog?.races?.length||0,bookingsLoaded,bookingBusy,busy,
+      bookedSlots.size,[...bookedSlots].join(','),savedHorse?.horseId||'',
+      savedHorse?.appearances??'',isGoogle()].join('|');
+    if(bookingRenderKey===signature)return;
+    bookingRenderKey=signature;
+    const priorScroll=bookingList.scrollTop;
+    bookingList.replaceChildren();
+    if(!publicCatalog?.races?.length){bookingList.textContent='開催予定を読み込み中です。';return;}
+    if(!isGoogle()){bookingList.textContent='Googleログイン後に予約できます。';return;}
+    if(!savedHorse){bookingList.textContent='先にオーナー名と愛馬を登録してください。';return;}
+    if(!bookingsLoaded){bookingList.textContent='予約情報をサーバーから確認しています。';return;}
+    if(savedHorse.appearances>=20){bookingList.textContent='20戦終了です。新しい馬を登録してください。';return;}
+    let n=0;
+    for(let slot=slotStart;slot<slotStart+96;slot++){
+      const ms=slot*SLOT_MS;
+      if(jpDay(ms)!==day)break;
+      const card=slotCard(slot);
+      if(!card)continue;
+      const row=document.createElement('div');row.className='vs-booking-row';row.setAttribute('role','listitem');
+      const meta=document.createElement('span');meta.className='vs-booking-meta';
+      meta.textContent=jpClock(ms)+'　'+card.name;
+      const sub=document.createElement('small');sub.textContent=card.venue+'・芝'+card.distance+'m'+
+        (card.female?' ／ 牝馬限定':'')+' ／ '+(card.ages==='3'?'3歳':card.ages==='4+'?'4歳以上':card.ages==='3+'?'3歳以上':'2歳');
+      meta.append(sub);
+      const btn=document.createElement('button');btn.type='button';
+      const blocked=raceEligibility(savedHorse,card);
+      const booked=bookedSlots.has(slot);
+      const sameRace=[...bookedSlots].some(s=>slotCard(s)?.name===card.name);
+      const closed=now>=ms-7*60*1000;
+      if(booked)btn.textContent='予約済み';
+      else if(sameRace)btn.textContent='同GⅠ予約済み';
+      else if(blocked)btn.textContent='登録不可';
+      else if(closed)btn.textContent='受付終了';
+      else btn.textContent='出走予約';
+      btn.disabled=booked||sameRace||!!blocked||closed||bookingBusy||busy||!bookingAvailable();
+      btn.title=blocked||'';
+      btn.addEventListener('click',()=>reserveOneSlot(slot,card.name));
+      row.append(meta,btn);bookingList.append(row);n++;
+    }
+    if(!n)bookingList.textContent='本日の予約可能な開催は終了しました。';
+    bookingList.scrollTop=priorScroll;
+  }
+  async function refreshTodayBookings(user=auth?.currentUser){
+    if(!user||!isGoogle())return;
+    const uid=user.uid;
+    try{
+      const result=await workerRequest('/reservations',{},user);
+      if(auth?.currentUser?.uid!==uid)return;
+      const day=jpDay(Date.now());
+      if(result.dateJst!==day||!Array.isArray(result.slots)||
+         !result.slots.every(v=>Number.isSafeInteger(v)))throw Error('予約一覧の応答が不正です');
+      bookedSlots=new Set(result.slots);bookingDay=day;bookingsLoaded=true;
+      if(bookingMessage)bookingMessage.textContent=result.slots.length?
+        '本日の予約済み：'+result.slots.length+'レース ／ 保存済みの愛馬で出走予定です。':
+        '本日の出走予約はまだありません。希望するレースの右側から予約できます。';
+    }catch(err){
+      bookingsLoaded=false;
+      if(bookingMessage)bookingMessage.textContent='予約情報を読み込めません：'+String(err.message||err);
+    }
+    bookingRenderKey='';renderTodayBookings();updateSubmit();
+  }
+  async function reserveOneSlot(slot,raceName){
+    if(!bookingAvailable()||busy||bookingBusy)return;
+    const card=slotCard(slot);
+    if(!card||card.name!==raceName)return;
+    const bad=raceEligibility(savedHorse,card);
+    if(bad){say('出走条件：'+bad);return;}
+    bookingBusy=true;bookingRenderKey='';renderTodayBookings();
+    try{
+      const result=await workerRequest('/reserve',{slot});
+      if(result.slot!==slot)throw Error('予約したレースの確認に失敗しました');
+      bookedSlots.add(slot);bookingsLoaded=true;
+      say(jpDate(slot*SLOT_MS)+' '+raceName+' の出走予約が完了しました。');
+      await refreshTodayBookings();
+    }catch(err){say('出走予約に失敗：'+String(err.message||err));await refreshTodayBookings();}
+    finally{bookingBusy=false;bookingRenderKey='';renderTodayBookings();updateSubmit();}
+  }
   const raceEligibility=(horse,card)=>{
     if(!horse||!card)return 'レース条件を確認しています';
     if(!validSex(horse.sex)||!validAge(horse.age))return '登録馬の性別・年齢を確認できません';
@@ -206,7 +297,7 @@
          !Number.isFinite(Date.parse(catalog.cycleStartsAt))||
          manifest.version!==2||!Array.isArray(manifest.records))
         throw Error('公開データの形式が不正です');
-      publicCatalog=catalog;publicManifest=manifest;publicError='';
+      publicCatalog=catalog;publicManifest=manifest;publicError='';bookingRenderKey='';
     }catch(err){publicError=String(err.message||err);}
     finally{refreshingPublic=false;renderPublicStatus();}
   }
@@ -282,7 +373,7 @@
   }
   renderPublicStatus();
   refreshPublicStatus();
-  setInterval(()=>{renderPublicStatus();updateSubmit();},1000);
+  setInterval(()=>{renderPublicStatus();updateSubmit();renderTodayBookings();},1000);
   setInterval(refreshPublicStatus,30000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshPublicStatus();refreshSharedEntries();}});
   const num=(raw,def,lo,hi)=>{
@@ -365,14 +456,14 @@
     ownerSave.disabled=busy||authPending||!allowed||!validOwner(cleanOwner(ownerInput.value));
     const newHorse=hasOwner&&(!savedHorse||completed);
     submit.textContent=completed?'新しい馬を保存する':'この馬を保存する';
-    submit.disabled=busy||authPending||!newHorse||!chosen||!workerReady();
+    submit.disabled=busy||bookingBusy||authPending||!newHorse||!chosen||!workerReady();
     const needsWeek=savedHorse&&savedHorse.weekIndex!==currentWeek();
     const capFull=weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&needsWeek;
-    const wasApplied=!!ownRegistration||!!savedHorse?.registered;
+    const wasApplied=!!ownRegistration||!!savedHorse?.registered||bookedSlots.has(nextSlot());
     const blocked= savedHorse?raceEligibility(savedHorse,slotCard(nextSlot())):'';
-    raceSubmit.disabled=busy||authPending||!ready||!hasOwner||!savedHorse||completed||
+    raceSubmit.disabled=busy||bookingBusy||authPending||!ready||!hasOwner||!savedHorse||completed||
       !workerReady()||!acceptingNow()||wasApplied||capFull||!!blocked;
-    raceSubmit.textContent=wasApplied?'登録済み':
+    raceSubmit.textContent=wasApplied?'予約・登録済み':
       !acceptingNow()?'受付時間外':
       capFull?'週間枠が満員':blocked?'登録不可':'このレースに登録';
     const hint=$('vs-entry-race-hint');
@@ -451,6 +542,7 @@
         'おかえりなさい。保存済みの「'+savedHorse.horseName+'」で、レース登録ボタンを押すだけです。');
     }
     renderPublicStatus();updateSubmit();
+    await refreshTodayBookings(user);
   }
   // Read only the owner-authenticated live entry. This is a single current
   // race application, not the permanent horse profile. A race consumes it.
@@ -495,6 +587,7 @@
       ownRegistration=null;ownRegistrationId=null;localConfirmed=null;
       lockedHorse=null;lockedCount=null;savedHorse=null;
       reservedOwnerName='';profileLoaded=false;serverChecked=false;chosen=null;
+      bookedSlots=new Set();bookedRaceCodes=new Set();bookingDay='';bookingsLoaded=false;bookingRenderKey='';
       file.value='';preview.textContent='';ownerInput.value='';ownerInput.readOnly=false;
       updateSubmit();renderPublicStatus();
       if(!user){loginStatus.textContent='未ログイン';say('Googleでログインしてください。');return;}
