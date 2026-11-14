@@ -29,20 +29,20 @@
       "starts": 20
     },
     {
+      "horseName": "サンプルホース150",
+      "ownerName": "管理人あおむし",
+      "sex": "牡",
+      "age": 4,
+      "prizeYen": 2060000000,
+      "starts": 12
+    },
+    {
       "horseName": "テイエムオペラオン",
       "ownerName": "",
       "sex": "牡",
       "age": 3,
       "prizeYen": 1900000000,
       "starts": 20
-    },
-    {
-      "horseName": "サンプルホース150",
-      "ownerName": "管理人あおむし",
-      "sex": "牡",
-      "age": 4,
-      "prizeYen": 1890000000,
-      "starts": 11
     },
     {
       "horseName": "キタサンブラッキー",
@@ -64,7 +64,7 @@
       "horseName": "グランアレグリラ",
       "ownerName": "",
       "sex": "牝",
-      "age": 4,
+      "age": 3,
       "prizeYen": 882000000,
       "starts": 20
     },
@@ -112,19 +112,19 @@
     },
     {
       "rank": 4,
+      "horseName": "サンプルホース150",
+      "sex": "牡",
+      "age": 4,
+      "ownerName": "管理人あおむし",
+      "prizeYen": 2060000000
+    },
+    {
+      "rank": 5,
       "horseName": "テイエムオペラオン",
       "sex": "牡",
       "age": 3,
       "ownerName": "",
       "prizeYen": 1900000000
-    },
-    {
-      "rank": 5,
-      "horseName": "サンプルホース150",
-      "sex": "牡",
-      "age": 4,
-      "ownerName": "管理人あおむし",
-      "prizeYen": 1890000000
     },
     {
       "rank": 6,
@@ -146,7 +146,7 @@
       "rank": 8,
       "horseName": "グランアレグリラ",
       "sex": "牝",
-      "age": 4,
+      "age": 3,
       "ownerName": "",
       "prizeYen": 882000000
     },
@@ -192,6 +192,14 @@
     },
     {
       "rank": 14,
+      "horseName": "ヒシアケボーノ",
+      "sex": "牡",
+      "age": 3,
+      "ownerName": "",
+      "prizeYen": 351000000
+    },
+    {
+      "rank": 15,
       "horseName": "ダイワスカーレッタ",
       "sex": "牝",
       "age": 3,
@@ -199,7 +207,7 @@
       "prizeYen": 292000000
     },
     {
-      "rank": 15,
+      "rank": 16,
       "horseName": "ブエナビスター",
       "sex": "牝",
       "age": 3,
@@ -207,7 +215,7 @@
       "prizeYen": 228000000
     },
     {
-      "rank": 16,
+      "rank": 17,
       "horseName": "ラヴズオンリーニャ",
       "sex": "牝",
       "age": 3,
@@ -215,7 +223,7 @@
       "prizeYen": 172500000
     },
     {
-      "rank": 17,
+      "rank": 18,
       "horseName": "エアグルービー",
       "sex": "牝",
       "age": 3,
@@ -223,7 +231,7 @@
       "prizeYen": 171500000
     },
     {
-      "rank": 18,
+      "rank": 19,
       "horseName": "リバティアイラン",
       "sex": "牝",
       "age": 3,
@@ -231,7 +239,7 @@
       "prizeYen": 150000000
     },
     {
-      "rank": 19,
+      "rank": 20,
       "horseName": "アパパネコ",
       "sex": "牝",
       "age": 3,
@@ -239,7 +247,7 @@
       "prizeYen": 135500000
     },
     {
-      "rank": 20,
+      "rank": 21,
       "horseName": "ラッキーライラッキ",
       "sex": "牝",
       "age": 3,
@@ -247,7 +255,7 @@
       "prizeYen": 120000000
     },
     {
-      "rank": 21,
+      "rank": 22,
       "horseName": "ジェンティルドンニ",
       "sex": "牝",
       "age": 3,
@@ -255,7 +263,7 @@
       "prizeYen": 112500000
     },
     {
-      "rank": 22,
+      "rank": 23,
       "horseName": "リスグラシュガー",
       "sex": "牝",
       "age": 3,
@@ -263,7 +271,7 @@
       "prizeYen": 52500000
     },
     {
-      "rank": 23,
+      "rank": 24,
       "horseName": "モーリスコ",
       "sex": "牡",
       "age": 3,
@@ -271,7 +279,7 @@
       "prizeYen": 45000000
     },
     {
-      "rank": 24,
+      "rank": 25,
       "horseName": "コントレイン",
       "sex": "牡",
       "age": 3,
@@ -279,7 +287,7 @@
       "prizeYen": 30000000
     },
     {
-      "rank": 25,
+      "rank": 26,
       "horseName": "ドウデュースト",
       "sex": "牡",
       "age": 3,
@@ -287,7 +295,7 @@
       "prizeYen": 30000000
     },
     {
-      "rank": 26,
+      "rank": 27,
       "horseName": "ダイワメジャック",
       "sex": "牡",
       "age": 3,
@@ -295,7 +303,7 @@
       "prizeYen": 18000000
     },
     {
-      "rank": 27,
+      "rank": 28,
       "horseName": "クロノジェネシア",
       "sex": "牝",
       "age": 3,
@@ -303,7 +311,7 @@
       "prizeYen": 16500000
     },
     {
-      "rank": 28,
+      "rank": 29,
       "horseName": "ソングライオン",
       "sex": "牝",
       "age": 3,
@@ -311,7 +319,7 @@
       "prizeYen": 15000000
     },
     {
-      "rank": 29,
+      "rank": 30,
       "horseName": "メジロドーベリー",
       "sex": "牝",
       "age": 3,
@@ -319,7 +327,7 @@
       "prizeYen": 15000000
     },
     {
-      "rank": 30,
+      "rank": 31,
       "horseName": "クロワデュノワール",
       "sex": "牡",
       "age": 3,
@@ -327,7 +335,7 @@
       "prizeYen": 0
     },
     {
-      "rank": 31,
+      "rank": 32,
       "horseName": "シンボリクリスマス",
       "sex": "牡",
       "age": 3,
@@ -336,6 +344,16 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994086,
+      "raceName": "スプリンターズステークス",
+      "place": 1,
+      "prizeYen": 170000000,
+      "sex": "牡",
+      "age": 4
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
