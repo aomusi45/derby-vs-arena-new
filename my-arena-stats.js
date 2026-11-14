@@ -101,9 +101,9 @@
       const item=document.createElement('div');item.className='vs-my-week-result';
       const race=document.createElement('div');race.className='vs-my-week-result-race';
       race.textContent=fmtTime(row.slot*SLOT_MS)+'　'+row.raceName;
-      const details=document.createElement('div');details.className='vs-my-week-result-detail';
-      details.textContent=id.horseName+traits(row.sex?row:id)+' ／ '+row.place+'着 ／ 獲得賞金 '+yen(row.prizeYen);
-      item.append(race,details);
+      // V31: The personal result list is spoiler-free until the replay is watched.
+      // Show only race date/name and its replay action, never finishing order or prize.
+      item.append(race);
       const replay=manifest?.records?.find(meta=>meta.slot===row.slot&&
         isRetained(meta,Date.now())&&meta.results.some(r=>
           r.ownerName===id.ownerName && r.name===id.horseName));
@@ -139,15 +139,14 @@
       const item=document.createElement('div');item.className='vs-my-race-item';
       const title=document.createElement('div');title.className='vs-my-race-item-title';
       title.textContent=fmtTime(meta.slot*SLOT_MS)+'　'+meta.name;
-      const detail=document.createElement('div');detail.className='vs-my-race-item-detail';
-      detail.textContent=result.name+traits(result.sex?result:id)+' ／ '+result.place+'着 ／ 獲得賞金 '+yen(result.prizeYen);
+      // V31: Keep the legacy results list free of finishing order and prize spoilers.
       const watch=document.createElement('button');watch.type='button';
       watch.className='vs-action-btn vs-my-race-watch';watch.textContent='▶ このレースを見る';
       watch.addEventListener('click',()=>{
         if(window.DBFArchiveLegacy?.open)window.DBFArchiveLegacy.open(meta);
         else alert('リプレイ機能を確認できません。ページを再読み込みしてください。');
       });
-      item.append(title,detail,watch);list.append(item);
+      item.append(title,watch);list.append(item);
     }
   }
   function validBoard(data){
