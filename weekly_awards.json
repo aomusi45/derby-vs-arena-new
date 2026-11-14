@@ -37,19 +37,19 @@
       "starts": 20
     },
     {
+      "horseName": "キタサンブラッキー",
+      "ownerName": "",
+      "sex": "牡",
+      "age": 3,
+      "prizeYen": 1825000000,
+      "starts": 20
+    },
+    {
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
       "sex": "牡",
       "age": 3,
       "prizeYen": 1813000000,
-      "starts": 20
-    },
-    {
-      "horseName": "キタサンブラッキー",
-      "ownerName": "",
-      "sex": "牡",
-      "age": 3,
-      "prizeYen": 1441000000,
       "starts": 20
     },
     {
@@ -120,19 +120,19 @@
     },
     {
       "rank": 5,
+      "horseName": "キタサンブラッキー",
+      "sex": "牡",
+      "age": 3,
+      "ownerName": "",
+      "prizeYen": 1825000000
+    },
+    {
+      "rank": 6,
       "horseName": "シンボリルドルフィ",
       "sex": "牡",
       "age": 3,
       "ownerName": "",
       "prizeYen": 1813000000
-    },
-    {
-      "rank": 6,
-      "horseName": "キタサンブラッキー",
-      "sex": "牡",
-      "age": 3,
-      "ownerName": "",
-      "prizeYen": 1441000000
     },
     {
       "rank": 7,
@@ -256,7 +256,7 @@
     },
     {
       "rank": 22,
-      "horseName": "ドウデュースト",
+      "horseName": "コントレイン",
       "sex": "牡",
       "age": 3,
       "ownerName": "",
@@ -264,6 +264,14 @@
     },
     {
       "rank": 23,
+      "horseName": "ドウデュースト",
+      "sex": "牡",
+      "age": 3,
+      "ownerName": "",
+      "prizeYen": 30000000
+    },
+    {
+      "rank": 24,
       "horseName": "クロノジェネシア",
       "sex": "牝",
       "age": 3,
@@ -271,7 +279,7 @@
       "prizeYen": 16500000
     },
     {
-      "rank": 24,
+      "rank": 25,
       "horseName": "メジロドーベリー",
       "sex": "牝",
       "age": 3,
@@ -279,16 +287,8 @@
       "prizeYen": 15000000
     },
     {
-      "rank": 25,
-      "horseName": "クロワデュノワール",
-      "sex": "牡",
-      "age": 3,
-      "ownerName": "",
-      "prizeYen": 0
-    },
-    {
       "rank": 26,
-      "horseName": "コントレイン",
+      "horseName": "クロワデュノワール",
       "sex": "牡",
       "age": 3,
       "ownerName": "",
