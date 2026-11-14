@@ -246,6 +246,15 @@ def choose(entries: list[dict], card: dict, slot: int, published: list[dict], us
         g1_code = hashlib.sha256(card['name'].encode()).hexdigest()[:24]
         if state['count']>=20 or state.get('g1Counts',{}).get(g1_code,0)>=2:
             continue
+        # V28: validate age and sex again at final drawing, never trust UI/Worker alone.
+        runner=row.get('runner',{})
+        sex, age=runner.get('sex'), runner.get('age')
+        band=card.get('ages')
+        if (card.get('female') and sex!='牝') or type(age) is not int or band not in ('2','3','3+','4+'):
+            continue
+        if not (age==2 if band=='2' else age==3 if band=='3' else
+                age>=3 if band=='3+' else age>=4):
+            continue
         if (ident in used_receipts or
                 timestamp_us(row['updatedAt']) <= used_horse_before.get(row['horseToken'], -1) * 1000):
             continue

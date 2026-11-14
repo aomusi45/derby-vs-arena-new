@@ -82,6 +82,7 @@ def active_names(documents, target_slot=None, token=None):
         if owner in result:
             raise RuntimeError('重複したオーナー名が見つかりました。公開一覧を更新しません')
         entry={'ownerName':owner,'horseName':row['runner']['name'],
+               'sex':row['runner']['sex'],'age':row['runner']['age'],
                'updatedAt':row['updatedAt']}
         horse_key=doc.get('fields',{}).get('horseKey',{}).get('stringValue')
         if horse_key:
@@ -96,7 +97,8 @@ def build_writes(active, public):
     writes=[]
     for owner,entry in active.items():
         existing=public.get(owner)
-        same=bool(existing and all(simple_field(existing,k)==entry[k] for k in ('ownerName','horseName')) and
+        same=bool(existing and all(simple_field(existing,k)==entry[k] for k in ('ownerName','horseName','sex')) and
+            simple_field(existing,'age','integerValue')==str(entry['age']) and
            simple_field(existing,'updatedAt','timestampValue')==entry['updatedAt'])
         if 'appearanceCount' in entry:
             same=same and simple_field(existing,'appearanceCount','integerValue')==str(entry['appearanceCount'])
@@ -106,6 +108,8 @@ def build_writes(active, public):
         fields={
             'ownerName':{'stringValue':entry['ownerName']},
             'horseName':{'stringValue':entry['horseName']},
+            'sex':{'stringValue':entry['sex']},
+            'age':{'integerValue':str(entry['age'])},
             'updatedAt':{'timestampValue':entry['updatedAt']}}
         if 'appearanceCount' in entry:
             fields['appearanceCount']={'integerValue':str(entry['appearanceCount'])}

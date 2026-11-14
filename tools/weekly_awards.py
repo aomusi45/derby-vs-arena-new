@@ -109,8 +109,12 @@ def race_rows(meta):
         identity=make_id(row)
         if identity in seen:raise ValueError('同じ馬が1レースに重複しています')
         seen.add(identity)
+        sex,age=row.get('sex'),row.get('age')
+        # Optional for records made before V28; never invent historic sex/age.
+        traits={'sex':sex,'age':age} if sex in ('牡','牝','セ') and type(age) is int and 2<=age<=8 else {}
         rows.append({'rankingId':identity,'horseName':name,'ownerName':owner,
-                     'isCom':identity.startswith('c_'),'place':place,'prizeYen':row['prizeYen']})
+                     'isCom':identity.startswith('c_'),'place':place,
+                     'prizeYen':row['prizeYen'],**traits})
     return rows
 
 
@@ -202,8 +206,9 @@ def com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts
         if completed>best or (completed==best and tuple(completed_places.values())>tuple(best_places.values())):
             best=completed
             best_places=completed_places.copy()
+    traits={k:row[k] for k in ('sex','age') if k in row}
     data={'horseName':row['horseName'],'ownerName':row['ownerName'],
-          'isCom':True,'weekStart':week,'rankingId':row['rankingId'],
+          **traits,'isCom':True,'weekStart':week,'rankingId':row['rankingId'],
           'starts':20 if blocks else 0,'prizeYen':best,
           'comPrizeVersion':2,'comCompletedBlocks':blocks,
           'comCycleStarts':cycle_starts,
@@ -222,7 +227,10 @@ def commit_race(token,meta):
     slot=meta['slot']
     week=week_start(datetime.fromtimestamp(slot*SLOT_MS/1000,timezone.utc))
     receipt_path=f'vs_weekly_race_receipts/{slot}'
-    digest=hashlib.sha256(json.dumps(rows,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
+    # Preserve the V27 receipt digest. Added public trait metadata must NOT
+    # change a committed race's receipt or double-credit its prize/start.
+    receipt_rows=[{k:v for k,v in row.items() if k not in ('sex','age')} for row in rows]
+    digest=hashlib.sha256(json.dumps(receipt_rows,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
     race_name=meta.get('name')
     if not isinstance(race_name,str) or not race_name or len(race_name)>100:
         raise ValueError('レース名が不正です')
@@ -233,7 +241,8 @@ def commit_race(token,meta):
         return {'fieldPath':'raceResults','appendMissingElements':{'values':[
             {'mapValue':{'fields':fields({
                 'slot':slot,'raceName':race_name,'place':row['place'],
-                'prizeYen':row['prizeYen']})}}
+                'prizeYen':row['prizeYen'],
+                **{k:row[k] for k in ('sex','age') if k in row}})}}
         ]}}
     prior=doc_get(token,receipt_path)
     if prior:
@@ -268,6 +277,7 @@ def commit_race(token,meta):
             writes.append(career)
             continue
         current={'horseName':row['horseName'],'ownerName':row['ownerName'],'isCom':False,
+                 **{k:row[k] for k in ('sex','age') if k in row},
                  'weekStart':week,'rankingId':row['rankingId']}
         writes.append({'update':{'name':BASE+'/'+path,'fields':fields(current)},
             'updateMask':{'fieldPaths':list(current)},
@@ -324,10 +334,13 @@ def ranking(token,week):
                 race_results.append({'slot':int(row['slot']['integerValue']),
                     'raceName':row['raceName']['stringValue'],
                     'place':int(row['place']['integerValue']),
-                    'prizeYen':int(row['prizeYen']['integerValue'])})
+                    'prizeYen':int(row['prizeYen']['integerValue']),
+                    **({'sex':row['sex']['stringValue'],'age':int(row['age']['integerValue'])}
+                       if 'sex' in row and 'age' in row else {})})
             if len(race_results)>20:raise ValueError('登録馬の週間出走記録が20戦を超えています')
+        traits={'sex':f['sex']['stringValue'],'age':int(f['age']['integerValue'])} if 'sex' in f and 'age' in f else {}
         result.append({'horseName':f['horseName']['stringValue'],
-            'ownerName':f['ownerName']['stringValue'],'prizeYen':prizes,
+            'ownerName':f['ownerName']['stringValue'],**traits,'prizeYen':prizes,
             'rankingId':identity,'starts':starts,'places':counts,
             'raceResults':race_results})
     return sorted(result,key=lambda h:(-h['prizeYen'],*[-n for n in h['places']],h['horseName'],h['ownerName'],h['rankingId']))
@@ -441,6 +454,7 @@ def award_previous(token,current_week,now):
     record={'weekStart':past_week,'weekEnd':(monday-timedelta(days=1)).date().isoformat(),
             'generation':n+1,'horseName':winner['horseName'],
             'ownerName':winner['ownerName'],'prizeYen':winner['prizeYen'],
+            **{k:winner[k] for k in ('sex','age') if k in winner},
             'rankingId':winner['rankingId'],**award_calendar(past_week)}
     source_write,status=sealed_champion_source(token,past_week,winner,record)
     record['archiveStatus']=status
@@ -465,6 +479,8 @@ def archive(token):
             for k in ('weekStart','weekEnd','generation','horseName','ownerName','prizeYen')}
         cal=award_calendar(item['weekStart'])
         item.update(cal)
+        if 'sex' in f and 'age' in f:
+            item['sex']=f['sex']['stringValue'];item['age']=int(f['age']['integerValue'])
         item['hasReplayHorse']=f.get('hasReplayHorse',{}).get('booleanValue',False)
         result.append(item)
     return sorted(result,key=lambda r:r['generation'],reverse=True)
@@ -476,6 +492,7 @@ def public_board(token,now):
     # Only PUBLIC owner names and race earnings. Never publish UID, horseKey,
     # encrypted data, private horse statistics or future registrations.
     standings=[{'rank':pos,'horseName':horse['horseName'],
+                **{k:horse[k] for k in ('sex','age') if k in horse},
                 'ownerName':horse['ownerName'],'prizeYen':horse['prizeYen']}
                for pos,horse in enumerate(board,1)]
     # Race results are already published when each race completes. Export
@@ -486,7 +503,7 @@ def public_board(token,now):
     race_results.sort(key=lambda r:(-r['slot'],r['place'],r['horseName']))
     result={'version':1,'timezone':'Asia/Tokyo','weekStart':current,
             'weekEnd':(datetime.fromisoformat(current)+timedelta(days=6)).date().isoformat(),
-            'top10':[{k:v for k,v in row.items() if k in ('horseName','ownerName','prizeYen','starts')}
+            'top10':[{k:v for k,v in row.items() if k in ('horseName','ownerName','sex','age','prizeYen','starts')}
                      for row in board[:10]],
             'standings':standings,
             'raceResults':race_results,

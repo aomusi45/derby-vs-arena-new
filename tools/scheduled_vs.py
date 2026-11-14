@@ -83,7 +83,10 @@ def build_game(card: dict) -> str:
         ),
         (
             "month:calendarMonth,layout:'本',weightRule:'定量',ages:'4+',classType:'vs'};",
-            'month:'+str(card['month'])+',layout:'+json.dumps(card['layout'],ensure_ascii=False)+",weightRule:'定量',ages:'4+',classType:'vs'};"
+            'month:'+str(card['month'])+',layout:'+json.dumps(card['layout'],ensure_ascii=False)+
+            ',weightRule:'+json.dumps(card['weightRule'],ensure_ascii=False)+
+            ',ages:'+json.dumps(card['ages'],ensure_ascii=False)+
+            ',female:'+('true' if card['female'] else 'false')+",classType:'vs'};"
         ),
         (
             "$('courseInfo').textContent=`VS対戦競馬場｜芝${distance}m｜馬場：${going}｜${STARTERS}頭`;",
@@ -109,11 +112,16 @@ def build_game(card: dict) -> str:
     # special-horse gate, fixed race placements, ability data or racing physics.
     injection = r"""const field=(()=>{
       const incoming=Array.isArray(window.__dfOfficialEntries)?window.__dfOfficialEntries:[];
-      const selected=incoming.slice(0,18);
+      const card=currentRace;
+      const ageAllowed=(age)=>Number.isInteger(age)&&(
+        card.ages==='2'?age===2:card.ages==='3'?age===3:
+        card.ages==='3+'?age>=3:card.ages==='4+'?age>=4:false);
+      const selected=incoming.filter(x=>x&&x.runner&&
+        ['牡','牝','セ'].includes(x.runner.sex)&&ageAllowed(x.runner.age)&&
+        (!card.female||x.runner.sex==='牝')).slice(0,18);
       const usedNames=new Set(selected.map(x=>x.runner.name));
       const field=selected.map(x=>({...x.runner,registrationId:x.registrationId,
         ownerName:x.ownerName||'',isCom:false}));
-      const card=currentRace;
       const officialAge=(horse)=>{
         const [debut,last]=registryAgeLimits(horse);
         const age=card.ages==='2'?2:card.ages==='3'?3:
@@ -366,6 +374,15 @@ def metadata_for(record: dict, card: dict, slot: int) -> dict:
             src='legacy-player|'+row['ownerName']+'|'+row['name']
             return 'p_'+hashlib.sha256(src.encode()).hexdigest()[:32]
         return 'c_'+hashlib.sha256(('com|'+row['name']).encode()).hexdigest()[:32]
+    def result_traits(row):
+        no=row.get('no')
+        if type(no) is not int or not 1 <= no <= len(source_field):
+            return {}
+        horse=source_field[no-1]
+        sex,age=horse.get('sex'),horse.get('age')
+        if horse.get('name')!=row.get('name') or sex not in ('牡','牝','セ') or type(age) is not int or not 2<=age<=8:
+            return {}
+        return {'sex':sex,'age':age}
     return {
         'registrations': record.get('registrations', []),
         'horseTokens': record.get('horseTokens', []),
@@ -384,6 +401,7 @@ def metadata_for(record: dict, card: dict, slot: int) -> dict:
             'timeSeconds': row['timeSeconds'], 'margin': row.get('margin', '―'),
             'prizeYen': price_for(row['place'], card),
             'rankingId': ranking_id(row),
+            **result_traits(row),
             **({'ownerName': row['ownerName']} if row.get('ownerName') else {})
         } for row in record['results']]
     }
