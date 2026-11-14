@@ -547,7 +547,7 @@ async def main() -> None:
     registered_at_ms = None
     if os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON', '').strip():
         try:
-            registered = registered_horses.load()
+            registered = registered_horses.load(slots=slots+[int(now_ms//SLOT_MS)+1])
             from horse_appearance_ledger import load_counts
             usage_counts = load_counts()
             for entry in registered:

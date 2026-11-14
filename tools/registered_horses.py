@@ -171,7 +171,47 @@ def _access_token(secret_json: str) -> str:
     return credentials.token
 
 
-def load() -> list[dict]:
+def _decode_reservation_document(document: dict, slot: int) -> dict:
+    """Server-owned reserved slot; never trust a browser-submitted roster."""
+    fields = {k:_firestore_value(v) for k,v in document.get('fields',{}).items()}
+    uid=fields.get('ownerUid')
+    doc_id=document.get('name','').rsplit('/',1)[-1]
+    if not isinstance(uid,str) or not UID_RE.fullmatch(uid) or doc_id != f's{slot}_{uid}':
+        raise ValueError('予約の所有者・IDが不正です')
+    if type(fields.get('slot')) is not int or fields['slot']!=slot:
+        raise ValueError('予約対象の開催枠が不正です')
+    if fields.get('raceCode') is None or not re.fullmatch(r'[a-f0-9]{24}',fields['raceCode']):
+        raise ValueError('予約レースの識別子が不正です')
+    row=normalize(fields)
+    row['reservedSlot']=slot
+    row['reservedRaceCode']=fields['raceCode']
+    # The booking is immutable until the corresponding official heat completes.
+    return row
+
+
+def _load_reservations(token: str, slots: list[int]) -> list[dict]:
+    url=f'https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents:runQuery'
+    rows=[]
+    for slot in sorted(set(slots)):
+        if type(slot) is not int or slot<=0:
+            raise ValueError('予約対象の開催時刻が不正です')
+        query={'structuredQuery':{'from':[{'collectionId':'vs_slot_reservations'}],
+           'where':{'fieldFilter':{'field':{'fieldPath':'slot'},'op':'EQUAL',
+                  'value':{'integerValue':str(slot)}}},'limit':40}}
+        req=Request(url,method='POST',data=json.dumps(query).encode(),headers={
+            'Authorization':'Bearer '+token,'Content-Type':'application/json'})
+        with urlopen(req,timeout=30) as response:
+            records=json.loads(response.read(3_000_000))
+        if not isinstance(records,list):
+            raise ValueError('予約検索の応答が不正です')
+        selected=[item['document'] for item in records if isinstance(item,dict) and 'document' in item]
+        if len(selected)>18:raise ValueError('予約数が18頭を超えています。出走処理を停止しました')
+        for doc in selected:
+            rows.append(_decode_reservation_document(doc,slot))
+    return rows
+
+
+def load(*,slots: list[int] | None = None) -> list[dict]:
     secret_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON', '').strip()
     project = os.getenv('FIREBASE_PROJECT_ID',PROJECT_ID).strip()
     if project != PROJECT_ID:
@@ -204,6 +244,8 @@ def load() -> list[dict]:
             # No silent unfair cutoff of a bigger registered field.
             raise RuntimeError('登録馬が150頭を超えています。Firestore無料枠内に収まる取得方式が必要です')
         break
+    if slots:
+        rows.extend(_load_reservations(token, slots))
     return rows
 
 
@@ -244,6 +286,8 @@ def choose(entries: list[dict], card: dict, slot: int, published: list[dict], us
             if usage is None: continue
             state={'count':0,'g1Counts':{}}
         g1_code = hashlib.sha256(card['name'].encode()).hexdigest()[:24]
+        if row.get('reservedSlot') is not None and row.get('reservedRaceCode')!=g1_code:
+            continue
         if state['count']>=20 or state.get('g1Counts',{}).get(g1_code,0)>=2:
             continue
         # V28: validate age and sex again at final drawing, never trust UI/Worker alone.
@@ -255,7 +299,12 @@ def choose(entries: list[dict], card: dict, slot: int, published: list[dict], us
         if not (age==2 if band=='2' else age==3 if band=='3' else
                 age>=3 if band=='3+' else age>=4):
             continue
-        if (ident in used_receipts or
+        if ident in used_receipts:
+            continue
+        # Old horse-token cutoff prevents stale NEXT-slot applications from
+        # replaying. An immutable V30 reservation is bound to a DIFFERENT
+        # exact slot, so a previous completed race must not cancel it.
+        if (row.get('reservedSlot') is None and
                 timestamp_us(row['updatedAt']) <= used_horse_before.get(row['horseToken'], -1) * 1000):
             continue
         try:
@@ -263,15 +312,26 @@ def choose(entries: list[dict], card: dict, slot: int, published: list[dict], us
             # Registered horses expire at Sunday 23:59 JST even at 0 starts.
             if row['weekIndex'] != jst_week_index(slot_start_ms):
                 continue
-            # Registration during slot N belongs to the NEXT slot N+1 only.
-            # Previously this tested only the upper bound, letting stale horses
-            # race again in all subsequent slots when consumption was delayed.
             submitted_us = timestamp_us(row['updatedAt'])
-            if not ((slot_start_ms - 900_000) * 1000 <= submitted_us < slot_start_ms * 1000):
-                continue
+            reserved_slot=row.get('reservedSlot')
+            if reserved_slot is None:
+                # Legacy immediate registration belongs only to NEXT heat.
+                if not ((slot_start_ms - 900_000) * 1000 <= submitted_us < slot_start_ms * 1000):
+                    continue
+            else:
+                # V30: guaranteed fixed slot, accepted before the seven-minute
+                # cutoff and during that slot's Japanese calendar day.
+                if reserved_slot!=slot or not (submitted_us <= (slot_start_ms-420_000)*1000):
+                    continue
+                jst_day=lambda ms:(datetime.fromtimestamp((ms+9*3600_000)/1000, timezone.utc).date())
+                if jst_day(submitted_us//1000)!=jst_day(slot_start_ms):
+                    continue
         except (ValueError, TypeError, AttributeError):
             continue
         eligible_by_horse.setdefault(row['horseToken'], row)
     eligible = list(eligible_by_horse.values())
     random.Random(slot).shuffle(eligible)
+    # Reservations hold seats ahead of any legacy registrations that were
+    # not counted in the booking quota; never silently drop an accepted seat.
+    eligible.sort(key=lambda row: 0 if row.get('reservedSlot')==slot else 1)
     return eligible[:18]
