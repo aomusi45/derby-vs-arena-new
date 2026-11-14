@@ -80,14 +80,30 @@
   };
   const nextRecorded=slot=>publicManifest?.records?.find(row=>row?.intervalMinutes===15&&row.slot===slot)||null;
   const validAppearances=count=>Number.isSafeInteger(count)&&count>=0&&count<=20;
-  const horseWithCount=row=>String(row.horseName||'不明')+'（'+
+  const validSex=sex=>['牡','牝','セ'].includes(sex);
+  const validAge=age=>Number.isInteger(age)&&age>=2&&age<=8;
+  const traits=row=>validSex(row?.sex)&&validAge(row?.age)?
+    row.sex+'・'+row.age+'歳':'性別・年齢未確認';
+  const raceEligibility=(horse,card)=>{
+    if(!horse||!card)return 'レース条件を確認しています';
+    if(!validSex(horse.sex)||!validAge(horse.age))return '登録馬の性別・年齢を確認できません';
+    if(card.female===true&&horse.sex!=='牝')return '牝馬限定レースのため牡馬・セン馬は登録できません';
+    const band=card.ages;
+    if(!['2','3','3+','4+'].includes(band)||typeof card.female!=='boolean')
+      return 'レース条件を確認できません';
+    const pass=band==='2'?horse.age===2:band==='3'?horse.age===3:
+      band==='3+'?horse.age>=3:horse.age>=4;
+    return pass?'':(band==='2'?'2歳限定':band==='3'?'3歳限定':
+      band==='3+'?'3歳以上':'4歳以上')+'のレースです';
+  };
+  const horseWithCount=row=>String(row.horseName||'不明')+'（'+traits(row)+'）'+'（'+
     (validAppearances(row.appearanceCount)?row.appearanceCount+'/20回':'出走回数確認中')+'）';
   function renderEntryRoster(rows){
     if(!entryRoster)return;
     entryRoster.replaceChildren();
     if(!rows?.length){entryRoster.textContent='登録済み馬はありません（または集計待ちです）。';return;}
     const head=document.createElement('div');head.className='vs-entry-row vs-entry-row-head';
-    for(const label of ['馬名','オーナー名']){const cell=document.createElement('span');cell.textContent=label;head.append(cell);}
+    for(const label of ['馬名（性別・年齢／出走回数）','オーナー名']){const cell=document.createElement('span');cell.textContent=label;head.append(cell);}
     entryRoster.append(head);
     for(const row of rows){
       const item=document.createElement('div');item.className='vs-entry-row';
@@ -114,7 +130,7 @@
     const activeLock=lockedHorse;
     if(ownerLockLabel){
       ownerLockLabel.textContent=!activeLock?'登録馬：未登録':
-        '保存済みの愛馬：'+activeLock.horseName+'（'+
+        '保存済みの愛馬：'+activeLock.horseName+'（'+traits(activeLock)+'／'+
           (lockedCount===null?'出走履歴確認中':lockedCount+'/20戦')+
           '）。20戦終了後に新しい馬を登録できます。';
     }
@@ -122,10 +138,10 @@
       weeklyCapLabel.textContent='今週の登録枠：'+
         (weeklyCheckedIndex===currentWeek()&&Number.isInteger(weeklyRegistered)
           ?weeklyRegistered+' / 120頭':'確認中 / 120頭')+
-        '（1頭につき1週間のみ・再登録不可）';
+        '（愛馬は通算20戦まで継続登録）';
     }
     if(persisted)persisted.textContent=ownForCurrentSlot()
-      ?'登録済み：'+String(ownRegistration.horseName||'不明')+' ／ オーナー：'+String(ownRegistration.ownerName||'不明')+'（差し替え不可）'
+      ?'登録済み：'+String(ownRegistration.horseName||'不明')+'（'+traits(ownRegistration.roster||{})+'） ／ オーナー：'+String(ownRegistration.ownerName||'不明')+'（差し替え不可）'
       :(ownRegistration?'前回の登録はこの開催の対象外です。結果確定後のサーバー整理を確認中です。'
       :(!card?'受付状況を確認中':(!acceptingNow()?'現在は出走登録の受付時間外です。':'')));
     if(entryDeadline)entryDeadline.textContent=!card?'受付終了まで ――':
@@ -145,13 +161,15 @@
     const publishedRows=shared===null?rows:shared;
     // The public roster comes from the server. Only this user's verified
     // registration may be shown early; never replace another owner's record.
-    let displayed=publishedRows?publishedRows.map(row=>({horseName:row.horseName,ownerName:row.ownerName,appearanceCount:row.appearanceCount})):[];
+    let displayed=publishedRows?publishedRows.map(row=>({
+      horseName:row.horseName,ownerName:row.ownerName,appearanceCount:row.appearanceCount,
+      sex:row.sex,age:row.age})):[];
     const local=localConfirmed?.slot===slot&&localConfirmed?.uid===auth?.currentUser?.uid
       ?localConfirmed:null;
     if(local){
       const existing=displayed.findIndex(row=>row.ownerName===local.ownerName);
       const ownRow={horseName:local.horseName,ownerName:local.ownerName,
-        appearanceCount:local.appearanceCount};
+        appearanceCount:local.appearanceCount,sex:local.sex,age:local.age};
       if(existing>=0){
         // Do not discard a server-published count during the own-device overlay.
         if(!validAppearances(ownRow.appearanceCount)&&
@@ -201,6 +219,7 @@
           d.ownerName===doc.id&&d.ownerName.length<=96&&d.horseName.length<=60)
         rows.push({ownerName:d.ownerName,horseName:d.horseName,
           appearanceCount:validAppearances(d.appearanceCount)?d.appearanceCount:null,
+          sex:validSex(d.sex)?d.sex:null,age:validAge(d.age)?d.age:null,
           slot:assignedSlot(d.updatedAt)});
     });
     rows.sort((a,b)=>a.ownerName.localeCompare(b.ownerName,'ja'));
@@ -236,6 +255,7 @@
     if(docData?.horseName)lastRegistrationName=String(docData.horseName);
     localConfirmed=docData?{slot:assignedSlot(docData.updatedAt),uid:user.uid,
       horseName:String(docData.horseName||''),ownerName:String(docData.ownerName||''),
+      sex:docData.roster?.sex,age:docData.roster?.age,
       appearanceCount:validAppearances(confirmedCount)?confirmedCount:null}:null;
     if(docData?.ownerName && !reservedOwnerName && !ownerInput.value)ownerInput.value=cleanOwner(docData.ownerName);
     updateSubmit();renderPublicStatus();
@@ -289,11 +309,13 @@
     }
     const context=snapshot.raceContext||{}, horse=snapshot.horse||{};
     const going=context.goingAptitude||{};
-    const age=num(snapshot.age,4,2,8);
+    const age=Number(snapshot.age);
+    if(!validAge(age)||!validSex(snapshot.sex))
+      throw Error('馬の性別・年齢がありません。ゲームからVS馬データを書き出し直してください。');
     const growth=['持続','早熟','普通','晩成'].includes(snapshot.growth)?snapshot.growth:
       (['持続','早熟','普通','晩成'].includes(horse.growth)?horse.growth:'普通');
     const runner={
-      name,sex:['牡','牝','セ'].includes(snapshot.sex)?snapshot.sex:'牡',
+      name,sex:snapshot.sex,
       coatType:String(snapshot.coatType||'鹿毛').slice(0,16),age,growth,
       tactic:['逃げ','先行','差し','追込'].includes(context.tactic)?context.tactic:'先行',
       speed:stats.sp,sta:stats.sta,kick:stats.kick,early:stats.early,
@@ -337,7 +359,8 @@
     if(profileCard)profileCard.hidden=!hasOwner;
     if(savedOwnerText)savedOwnerText.textContent=hasOwner?reservedOwnerName:'未登録';
     if(savedHorseText)savedHorseText.textContent=!savedHorse?'まだ馬が登録されていません':
-      savedHorse.horseName+'（'+savedHorse.appearances+'/20戦）'+(completed?'・登録終了':'');
+      savedHorse.horseName+'（'+traits(savedHorse)+'／'+savedHorse.appearances+'/20戦）'+
+      (completed?'・登録終了':'');
     ownerInput.readOnly=hasOwner;
     ownerSave.disabled=busy||authPending||!allowed||!validOwner(cleanOwner(ownerInput.value));
     const newHorse=hasOwner&&(!savedHorse||completed);
@@ -346,11 +369,18 @@
     const needsWeek=savedHorse&&savedHorse.weekIndex!==currentWeek();
     const capFull=weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&needsWeek;
     const wasApplied=!!ownRegistration||!!savedHorse?.registered;
+    const blocked= savedHorse?raceEligibility(savedHorse,slotCard(nextSlot())):'';
     raceSubmit.disabled=busy||authPending||!ready||!hasOwner||!savedHorse||completed||
-      !workerReady()||!acceptingNow()||wasApplied||capFull;
-    raceSubmit.textContent=wasApplied?'今回のレースに登録済み':
-      !acceptingNow()?'受付時間外（次回受付をお待ちください）':
-      capFull?'今週の120人枠は満員です':'このレースに登録';
+      !workerReady()||!acceptingNow()||wasApplied||capFull||!!blocked;
+    raceSubmit.textContent=wasApplied?'登録済み':
+      !acceptingNow()?'受付時間外':
+      capFull?'週間枠が満員':blocked?'登録不可':'このレースに登録';
+    const hint=$('vs-entry-race-hint');
+    if(hint)hint.textContent=!savedHorse?'':blocked?
+      '出走できません：'+blocked:(slotCard(nextSlot())?.female?'牝馬限定 ／ ':'')+
+      (slotCard(nextSlot())?.ages==='3'?'3歳限定':
+       slotCard(nextSlot())?.ages==='4+'?'4歳以上':
+       slotCard(nextSlot())?.ages==='3+'?'3歳以上':'');
     google.disabled=!ready||authPending||busy;
     google.textContent=authPending?'Google認証中…':(isGoogle()?'Googleログイン済み':'Googleでログイン');
   }
@@ -405,9 +435,11 @@
     profileLoaded=true;serverChecked=true;
     savedHorse=result.horseName?{
       horseName:String(result.horseName),horseId:String(result.horseId||''),
+      sex:result.horseSex,age:result.horseAge,
       appearances:count,weekIndex:result.weekIndex,registered:!!result.registered}:null;
     lockedHorse=savedHorse?{
-      horseId:savedHorse.horseId,horseName:savedHorse.horseName,weekIndex:savedHorse.weekIndex}:null;
+      horseId:savedHorse.horseId,horseName:savedHorse.horseName,
+      sex:savedHorse.sex,age:savedHorse.age,weekIndex:savedHorse.weekIndex}:null;
     lockedCount=count;
     if(ownerHint)ownerHint.textContent=reservedOwnerName?
       'オーナー名はGoogleアカウントに保存済みです。変更できません。':
@@ -567,7 +599,7 @@
       }else{
         if(parsed?.format==='derby-fantasy-vs-locked')throw Error('旧式ファイルです。新しいゲームから書き出してください。');
         chosen=normalize(parsed);
-        preview.textContent='登録予定の馬：'+chosen.name+' ／ '+chosen.runner.age+'歳';
+        preview.textContent='登録予定の馬：'+chosen.name+' ／ '+traits(chosen.runner);
       }
       say('この馬を保存すると、20戦終了まで変更できません。');
     }catch(err){if(serial===selectionSerial)say('馬データを読み込めません：'+String(err.message||err));}
@@ -588,6 +620,8 @@
   });
   raceSubmit.addEventListener('click',async()=>{
     if(!isGoogle()||busy||!savedHorse||savedHorse.appearances>=20||!acceptingNow())return;
+    const blocked=raceEligibility(savedHorse,slotCard(nextSlot()));
+    if(blocked){say('このレースには登録できません：'+blocked);updateSubmit();return;}
     busy=true;updateSubmit();say('保存済みの愛馬でレースへの申込みを処理中…');
     try{
       const result=await workerRequest('/enter');
@@ -603,7 +637,8 @@
   window.DBFMyArenaIdentity=Object.freeze({snapshot(){
     if(!isGoogle()||!profileLoaded||!validOwner(reservedOwnerName))return null;
     return {ownerName:reservedOwnerName,
-      horseName:savedHorse?.horseName||'',weekIndex:currentWeek()};
+      horseName:savedHorse?.horseName||'',
+      sex:savedHorse?.sex||'',age:savedHorse?.age??null,weekIndex:currentWeek()};
   }});
   window.VSEntry=Object.freeze({normalize});
   init().catch(err=>{ready=false;updateSubmit();say('Firebase初期化エラー：'+String(err.message||err));});

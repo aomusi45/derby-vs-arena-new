@@ -69,6 +69,12 @@
   .vs-entry-schedule-label{font-size:12px!important;color:#d6c18a!important;margin:2px 0 4px!important}
   #vs-entry-race-name{font-size:20px;color:#ffe5a0}
   #vs-entry-deadline{color:#f8dda2;font-weight:750;font-variant-numeric:tabular-nums;font-size:15px;margin:7px 0 12px}
+  .vs-entry-race-line{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .vs-entry-race-line #vs-entry-race-name{min-width:0;flex:1 1 140px}
+  .vs-entry-race-line #vs-race-apply{flex:0 1 auto}
+  .vs-entry-race-line #vs-entry-race-submit{width:auto!important;min-height:38px;
+    margin:0!important;padding:8px 11px!important;font-size:12px!important;white-space:normal}
+  .vs-entry-race-line #vs-race-apply[hidden]{display:none!important}
   .vs-entry-roster{margin:12px 0 0;max-height:230px;overflow-y:auto;font-size:12px;color:#d8e3d9}
   .vs-entry-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:7px 4px;border-bottom:1px solid #b8955135;overflow-wrap:anywhere}
   .vs-entry-row-head{font-weight:700;color:#e4c986}
@@ -270,11 +276,17 @@
           <span class="status" id="vs-entry-state">登録馬受付</span>
           <div class="vs-entry-summary" aria-label="登録頭数と次回の出走状況">
             <p class="vs-entry-schedule-label">出走受付中のレース</p>
-            <strong id="vs-entry-race-name">レース名を確認中…</strong>
+            <div class="vs-entry-race-line">
+              <strong id="vs-entry-race-name">レース名を確認中…</strong>
+              <div id="vs-race-apply" hidden>
+                <button class="vs-action-btn" id="vs-entry-race-submit" type="button" disabled>このレースに登録</button>
+              </div>
+            </div>
+            <p id="vs-entry-race-hint" class="small" aria-live="polite"></p>
             <p id="vs-entry-deadline" class="vs-entry-deadline" aria-live="off">受付終了まで ――</p>
             <strong id="vs-weekly-registration-cap">今週の登録枠：確認中 / 120頭</strong>
             <strong id="vs-entry-total">登録総数：集計中</strong>
-            <div id="vs-entry-roster" class="vs-entry-roster" aria-label="登録済みの馬名とオーナー名">登録馬を集計中です。</div>
+            <div id="vs-entry-roster" class="vs-entry-roster" aria-label="登録済みの馬名・性別・年齢とオーナー名">登録馬を集計中です。</div>
             <p id="vs-entry-updated">登録頭数はGitHub Actionsの最終集計時点の数字です。</p>
             <p id="vs-entry-next-candidates">次回GⅠの登録馬候補：確認中／最大18頭</p>
             <p id="vs-entry-myhorse">自分の登録馬：ログイン後に確認できます。</p>
@@ -304,9 +316,6 @@
             <p class="small">暗号化馬データの復号は公式サーバーで行い、能力を固定して保存します。以前のパスワード式ファイルは新しいゲームから書き出し直してください。</p>
             <p id="vs-entry-preview" aria-live="polite"></p>
             <button class="vs-action-btn" id="vs-entry-submit" type="button" disabled>この馬を保存する</button>
-          </div>
-          <div id="vs-race-apply" hidden>
-            <button class="vs-action-btn" id="vs-entry-race-submit" type="button" disabled style="width:100%;margin-top:14px">このレースに登録</button>
           </div>
           <p id="vs-entry-persisted" aria-live="polite"></p>
           <p id="vs-entry-message" role="status" aria-live="polite">登録受付サービスの接続状況を確認しています。</p>
@@ -609,10 +618,10 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 </script>
 <script src="site.js" defer></script>
 <script src="visitor-counter.js?v=20261113-v16" defer></script>
-<script src="owner-ranking.js?v=20261113-v19" defer></script>
+<script src="owner-ranking.js?v=20261114-v28-traits" defer></script>
 <script src="firebase-config.js" defer></script>
-<script src="registration.js?v=20261114-owner-horse-v27-google-signin" defer></script>
-<script src="my-arena-stats.js?v=20261113-myhorse-2" defer></script>
+<script src="registration.js?v=20261114-v28-sex-age-entry" defer></script>
+<script src="my-arena-stats.js?v=20261114-v28-traits" defer></script>
 <!-- DBF arena return-to-game button. Place immediately before </body>. -->
 <style id="dbf-arena-return-style">
   #dbf-return-to-game[hidden]{display:none!important}

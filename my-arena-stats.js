@@ -11,6 +11,8 @@
   if(!horse||!prize||!rank||!note||!weekResults||!button||!list)return;
   const SLOT_MS=900000,DAY_MS=86400000,DELAY_MS=30000;
   const yen=n=>new Intl.NumberFormat('ja-JP').format(n)+'円';
+  const traits=row=>['牡','牝','セ'].includes(row?.sex)&&
+    Number.isInteger(row?.age)&&row.age>=2&&row.age<=8?'（'+row.sex+'・'+row.age+'歳）':'';
   const fmtTime=ms=>new Intl.DateTimeFormat('ja-JP',{
     timeZone:'Asia/Tokyo',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'
   }).format(new Date(ms));
@@ -41,7 +43,7 @@
       return;
     }
     button.disabled=false;
-    horse.textContent=id.horseName||'今週の登録馬なし';
+    horse.textContent=id.horseName?id.horseName+traits(id):'今週の登録馬なし';
     if(!id.horseName){
       prize.textContent='―';rank.textContent='―';
       note.textContent='今週の新しい登録馬が決まると成績が表示されます。';
@@ -100,7 +102,7 @@
       const race=document.createElement('div');race.className='vs-my-week-result-race';
       race.textContent=fmtTime(row.slot*SLOT_MS)+'　'+row.raceName;
       const details=document.createElement('div');details.className='vs-my-week-result-detail';
-      details.textContent=row.place+'着 ／ 獲得賞金 '+yen(row.prizeYen);
+      details.textContent=id.horseName+traits(row.sex?row:id)+' ／ '+row.place+'着 ／ 獲得賞金 '+yen(row.prizeYen);
       item.append(race,details);
       const replay=manifest?.records?.find(meta=>meta.slot===row.slot&&
         isRetained(meta,Date.now())&&meta.results.some(r=>
@@ -138,7 +140,7 @@
       const title=document.createElement('div');title.className='vs-my-race-item-title';
       title.textContent=fmtTime(meta.slot*SLOT_MS)+'　'+meta.name;
       const detail=document.createElement('div');detail.className='vs-my-race-item-detail';
-      detail.textContent=result.name+' ／ '+result.place+'着 ／ 獲得賞金 '+yen(result.prizeYen);
+      detail.textContent=result.name+traits(result.sex?result:id)+' ／ '+result.place+'着 ／ 獲得賞金 '+yen(result.prizeYen);
       const watch=document.createElement('button');watch.type='button';
       watch.className='vs-action-btn vs-my-race-watch';watch.textContent='▶ このレースを見る';
       watch.addEventListener('click',()=>{

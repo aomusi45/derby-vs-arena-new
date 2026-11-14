@@ -8,6 +8,8 @@
   if(!body||!archive||!description||!more)return;
   let data=null,visible=20,fetching=false;
   const money=n=>new Intl.NumberFormat('ja-JP').format(n)+'円';
+  const horseTitle=h=>h.horseName+( ['牡','牝','セ'].includes(h.sex)&&
+    Number.isInteger(h.age)&&h.age>=2&&h.age<=8 ? '（'+h.sex+'・'+h.age+'歳）' : '');
   const weekKey=()=>{
     const formatted=new Intl.DateTimeFormat('en-CA',{
       timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
@@ -35,7 +37,7 @@
       }
       data.top10.slice(0,10).forEach((h,i)=>{
         const tr=document.createElement('tr');
-        cell(tr,(i+1)+'位');cell(tr,h.horseName);
+        cell(tr,(i+1)+'位');cell(tr,horseTitle(h));
         cell(tr,h.ownerName||'COM');
         // The authoritative weekly_awards.json field is updated only after a
         // race is committed. Never infer the start count from award money.
@@ -50,7 +52,7 @@
     rows.slice(0,visible).forEach(x=>{
       const item=document.createElement('div');item.className='vs-award-row';
       const title=document.createElement('strong');
-      title.textContent='第'+x.generation+'代 年度代表馬　'+x.horseName;
+      title.textContent='第'+x.generation+'代 年度代表馬　'+horseTitle(x);
       const detail=document.createElement('div');detail.className='meta';
       detail.textContent='オーナー：'+(x.ownerName||'COM')+' ／ 週間賞金：'+money(x.prizeYen)+' ／ '+(x.awardWeekLabel||'受賞週')+'（'+x.weekStart+'～'+x.weekEnd+'）'+(x.hasReplayHorse?' ／ 受賞馬データ保存済':'');
       item.append(title,detail);archive.append(item);
