@@ -7,354 +7,361 @@
     {
       "horseName": "ディープインパルス",
       "ownerName": "",
-      "sex": "牡",
-      "age": 3,
       "prizeYen": 4940000000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "sex": "牝",
-      "age": 3,
       "prizeYen": 3577500000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "イクイノマックス",
       "ownerName": "",
-      "sex": "牡",
-      "age": 3,
       "prizeYen": 2946000000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
-      "sex": "牡",
-      "age": 3,
       "prizeYen": 2338500000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "サンプルホース150",
       "ownerName": "管理人あおむし",
-      "sex": "牡",
-      "age": 4,
       "prizeYen": 2185000000,
-      "starts": 14
+      "starts": 14,
+      "raceResults": [
+        {
+          "slot": 1994053,
+          "raceName": "天皇賞（秋）",
+          "place": 2,
+          "prizeYen": 120000000
+        },
+        {
+          "slot": 1994055,
+          "raceName": "マイルチャンピオンシップ",
+          "place": 1,
+          "prizeYen": 180000000
+        },
+        {
+          "slot": 1994056,
+          "raceName": "ジャパンカップ",
+          "place": 2,
+          "prizeYen": 200000000
+        },
+        {
+          "slot": 1994057,
+          "raceName": "有馬記念",
+          "place": 3,
+          "prizeYen": 125000000
+        },
+        {
+          "slot": 1994058,
+          "raceName": "大阪杯",
+          "place": 1,
+          "prizeYen": 300000000
+        },
+        {
+          "slot": 1994061,
+          "raceName": "天皇賞（春）",
+          "place": 1,
+          "prizeYen": 300000000
+        },
+        {
+          "slot": 1994066,
+          "raceName": "安田記念",
+          "place": 1,
+          "prizeYen": 180000000
+        },
+        {
+          "slot": 1994067,
+          "raceName": "宝塚記念",
+          "place": 2,
+          "prizeYen": 120000000
+        },
+        {
+          "slot": 1994068,
+          "raceName": "スプリンターズステークス",
+          "place": 1,
+          "prizeYen": 170000000
+        },
+        {
+          "slot": 1994079,
+          "raceName": "天皇賞（春）",
+          "place": 2,
+          "prizeYen": 120000000
+        },
+        {
+          "slot": 1994085,
+          "raceName": "宝塚記念",
+          "place": 3,
+          "prizeYen": 75000000
+        },
+        {
+          "slot": 1994086,
+          "raceName": "スプリンターズステークス",
+          "place": 1,
+          "prizeYen": 170000000
+        },
+        {
+          "slot": 1994093,
+          "raceName": "有馬記念",
+          "place": 4,
+          "prizeYen": 75000000
+        },
+        {
+          "slot": 1994110,
+          "raceName": "ジャパンカップ",
+          "place": 5,
+          "prizeYen": 50000000
+        }
+      ]
     },
     {
       "horseName": "テイエムオペラオン",
       "ownerName": "",
-      "sex": "牡",
-      "age": 3,
       "prizeYen": 1900000000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "キタサンブラッキー",
       "ownerName": "",
-      "sex": "牡",
-      "age": 3,
       "prizeYen": 1825000000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "グランアレグリラ",
       "ownerName": "",
-      "sex": "牝",
-      "age": 3,
       "prizeYen": 882000000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "ナリタブライワン",
       "ownerName": "",
-      "sex": "牡",
-      "age": 3,
       "prizeYen": 620000000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "スペシャルウインク",
       "ownerName": "",
-      "sex": "牡",
-      "age": 3,
       "prizeYen": 545000000,
-      "starts": 20
+      "starts": 20,
+      "raceResults": []
     }
   ],
   "standings": [
     {
       "rank": 1,
       "horseName": "ディープインパルス",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 4940000000
     },
     {
       "rank": 2,
       "horseName": "アーモンドアイス",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 3577500000
     },
     {
       "rank": 3,
       "horseName": "イクイノマックス",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 2946000000
     },
     {
       "rank": 4,
       "horseName": "シンボリルドルフィ",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 2338500000
     },
     {
       "rank": 5,
       "horseName": "サンプルホース150",
-      "sex": "牡",
-      "age": 4,
       "ownerName": "管理人あおむし",
       "prizeYen": 2185000000
     },
     {
       "rank": 6,
       "horseName": "テイエムオペラオン",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 1900000000
     },
     {
       "rank": 7,
       "horseName": "キタサンブラッキー",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 1825000000
     },
     {
       "rank": 8,
       "horseName": "グランアレグリラ",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 882000000
     },
     {
       "rank": 9,
       "horseName": "ナリタブライワン",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 620000000
     },
     {
       "rank": 10,
       "horseName": "スペシャルウインク",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 545000000
     },
     {
       "rank": 11,
       "horseName": "ウオッカナ",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 522000000
     },
     {
       "rank": 12,
       "horseName": "グラスパンダー",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 438000000
     },
     {
       "rank": 13,
       "horseName": "オルフェーブル",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 398000000
     },
     {
       "rank": 14,
       "horseName": "ヒシアケボーノ",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 351000000
     },
     {
       "rank": 15,
       "horseName": "マイネルラブリー",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 292000000
     },
     {
       "rank": 16,
       "horseName": "ダイワスカーレッタ",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 292000000
     },
     {
       "rank": 17,
       "horseName": "ロードカナリア",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 266000000
     },
     {
       "rank": 18,
       "horseName": "ブエナビスター",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 228000000
     },
     {
       "rank": 19,
       "horseName": "ラヴズオンリーニャ",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 172500000
     },
     {
       "rank": 20,
       "horseName": "エアグルービー",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 171500000
     },
     {
       "rank": 21,
       "horseName": "リバティアイラン",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 150000000
     },
     {
       "rank": 22,
       "horseName": "アパパネコ",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 135500000
     },
     {
       "rank": 23,
       "horseName": "ジェンティルドンニ",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 131500000
     },
     {
       "rank": 24,
       "horseName": "ラッキーライラッキ",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 120000000
     },
     {
       "rank": 25,
       "horseName": "リスグラシュガー",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 52500000
     },
     {
       "rank": 26,
       "horseName": "モーリスコ",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 45000000
     },
     {
       "rank": 27,
       "horseName": "コントレイン",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 30000000
     },
     {
       "rank": 28,
       "horseName": "ドウデュースト",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 30000000
     },
     {
       "rank": 29,
       "horseName": "メジロドーベリー",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 22500000
     },
     {
       "rank": 30,
       "horseName": "ダイワメジャック",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 18000000
     },
     {
       "rank": 31,
       "horseName": "クロノジェネシア",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 16500000
     },
     {
       "rank": 32,
       "horseName": "ソングライオン",
-      "sex": "牝",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 15000000
     },
     {
       "rank": 33,
       "horseName": "クロワデュノワール",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 0
     },
     {
       "rank": 34,
       "horseName": "シンボリクリスマス",
-      "sex": "牡",
-      "age": 3,
       "ownerName": "",
       "prizeYen": 0
     }
@@ -366,9 +373,7 @@
       "slot": 1994110,
       "raceName": "ジャパンカップ",
       "place": 5,
-      "prizeYen": 50000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 50000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -376,9 +381,7 @@
       "slot": 1994093,
       "raceName": "有馬記念",
       "place": 4,
-      "prizeYen": 75000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 75000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -386,9 +389,7 @@
       "slot": 1994086,
       "raceName": "スプリンターズステークス",
       "place": 1,
-      "prizeYen": 170000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 170000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -396,9 +397,7 @@
       "slot": 1994085,
       "raceName": "宝塚記念",
       "place": 3,
-      "prizeYen": 75000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 75000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -406,9 +405,7 @@
       "slot": 1994079,
       "raceName": "天皇賞（春）",
       "place": 2,
-      "prizeYen": 120000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 120000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -416,9 +413,7 @@
       "slot": 1994068,
       "raceName": "スプリンターズステークス",
       "place": 1,
-      "prizeYen": 170000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 170000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -426,9 +421,7 @@
       "slot": 1994067,
       "raceName": "宝塚記念",
       "place": 2,
-      "prizeYen": 120000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 120000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -436,9 +429,7 @@
       "slot": 1994066,
       "raceName": "安田記念",
       "place": 1,
-      "prizeYen": 180000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 180000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -446,9 +437,7 @@
       "slot": 1994061,
       "raceName": "天皇賞（春）",
       "place": 1,
-      "prizeYen": 300000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 300000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -456,9 +445,7 @@
       "slot": 1994058,
       "raceName": "大阪杯",
       "place": 1,
-      "prizeYen": 300000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 300000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -466,9 +453,7 @@
       "slot": 1994057,
       "raceName": "有馬記念",
       "place": 3,
-      "prizeYen": 125000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 125000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -476,9 +461,7 @@
       "slot": 1994056,
       "raceName": "ジャパンカップ",
       "place": 2,
-      "prizeYen": 200000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 200000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -486,9 +469,7 @@
       "slot": 1994055,
       "raceName": "マイルチャンピオンシップ",
       "place": 1,
-      "prizeYen": 180000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 180000000
     },
     {
       "ownerName": "管理人あおむし",
@@ -496,9 +477,7 @@
       "slot": 1994053,
       "raceName": "天皇賞（秋）",
       "place": 2,
-      "prizeYen": 120000000,
-      "sex": "牡",
-      "age": 4
+      "prizeYen": 120000000
     }
   ],
   "awards": []
