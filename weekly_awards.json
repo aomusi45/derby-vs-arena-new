@@ -57,8 +57,8 @@
       "ownerName": "管理人あおむし",
       "sex": "牡",
       "age": 4,
-      "prizeYen": 1525000000,
-      "starts": 8
+      "prizeYen": 1695000000,
+      "starts": 9
     },
     {
       "horseName": "グランアレグリラ",
@@ -140,7 +140,7 @@
       "sex": "牡",
       "age": 4,
       "ownerName": "管理人あおむし",
-      "prizeYen": 1525000000
+      "prizeYen": 1695000000
     },
     {
       "rank": 8,
@@ -306,7 +306,7 @@
       "rank": 28,
       "horseName": "ソングライオン",
       "sex": "牝",
-      "age": 4,
+      "age": 3,
       "ownerName": "",
       "prizeYen": 15000000
     },
@@ -336,6 +336,16 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994068,
+      "raceName": "スプリンターズステークス",
+      "place": 1,
+      "prizeYen": 170000000,
+      "sex": "牡",
+      "age": 4
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
