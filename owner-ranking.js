@@ -1,4 +1,6 @@
-/* Persistent weekly TOP10 + archived champions; no private identifiers on the site. */
+/* V32: weekly TOP10 and historical representative: expandable official race history.
+ * Read-only display from weekly_awards.json; results/replay screens are untouched.
+ */
 (()=>{
   'use strict';
   const body=document.getElementById('vs-ranking-body');
@@ -6,21 +8,72 @@
   const archive=document.getElementById('vs-awards-list');
   const more=document.getElementById('vs-awards-more');
   if(!body||!archive||!description||!more)return;
-  let data=null,visible=20,fetching=false;
+  let data=null,visible=20,fetching=false,openWeekly='',openAward='';
   const money=n=>new Intl.NumberFormat('ja-JP').format(n)+'円';
-  const horseTitle=h=>h.horseName+( ['牡','牝','セ'].includes(h.sex)&&
-    Number.isInteger(h.age)&&h.age>=2&&h.age<=8 ? '（'+h.sex+'・'+h.age+'歳）' : '');
+  const SLOT_MS=900000;
+  const fmtSlot=slot=>new Intl.DateTimeFormat('ja-JP',{
+    timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',
+    hour:'2-digit',minute:'2-digit',hour12:false
+  }).format(new Date(slot*SLOT_MS));
   const weekKey=()=>{
     const formatted=new Intl.DateTimeFormat('en-CA',{
       timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'
     }).format(new Date());
     const d=new Date(formatted+'T00:00:00Z');
-    const shift=(d.getUTCDay()+6)%7;
-    d.setUTCDate(d.getUTCDate()-shift);
+    d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+6)%7);
     return d.toISOString().slice(0,10);
   };
   function cell(row,value){
-    const td=document.createElement('td');td.textContent=value;row.append(td);
+    const td=document.createElement('td');td.textContent=value;row.append(td);return td;
+  }
+  function validHistory(rows){
+    return Array.isArray(rows)&&rows.length<=20&&rows.every(r=>
+      r&&Number.isSafeInteger(r.slot)&&r.slot>=0&&
+      typeof r.raceName==='string'&&r.raceName.length>0&&r.raceName.length<=100&&
+      Number.isInteger(r.place)&&r.place>=1&&r.place<=18&&
+      Number.isSafeInteger(r.prizeYen)&&r.prizeYen>=0);
+  }
+  function historyFor(h){
+    // New export is per-horse: prevents crossing different COM 20-start blocks.
+    if(validHistory(h.raceResults))return h.raceResults.slice().sort((a,b)=>a.slot-b.slot);
+    // Compatibility with V31: the public player weekly results already exist.
+    if(h.ownerName&&Array.isArray(data?.raceResults))
+      return data.raceResults.filter(r=>r&&r.ownerName===h.ownerName&&
+        r.horseName===h.horseName&&validHistory([r])).sort((a,b)=>a.slot-b.slot).slice(0,20);
+    return [];
+  }
+  function historyContent(h){
+    const box=document.createElement('div');box.className='vs-history-content';
+    const history=historyFor(h);
+    if(!history.length){
+      const note=document.createElement('p');note.className='vs-history-note';
+      note.textContent='この馬のレース別戦歴はまだ保存されていません。';
+      box.append(note);return box;
+    }
+    if(Number.isSafeInteger(h.starts)&&h.starts>history.length){
+      const note=document.createElement('p');note.className='vs-history-note';
+      note.textContent='保存されている'+history.length+'戦分を表示しています（全'+h.starts+'戦）。過去の未保存分は表示できません。';
+      box.append(note);
+    }
+    const header=document.createElement('div');header.className='vs-history-head';
+    header.textContent='開催日時 ／ レース名 ／ 着順 ／ 獲得賞金';box.append(header);
+    for(const r of history){
+      const row=document.createElement('div');row.className='vs-history-race';
+      const main=document.createElement('div');main.className='vs-history-race-name';
+      main.textContent=fmtSlot(r.slot)+'　'+r.raceName;
+      const result=document.createElement('div');result.className='vs-history-race-result';
+      result.textContent=r.place+'着　'+money(r.prizeYen);
+      row.append(main,result);box.append(row);
+    }
+    return box;
+  }
+  function makeToggle(label,isOpen,onClick){
+    const btn=document.createElement('button');btn.type='button';btn.className='vs-history-toggle';
+    btn.setAttribute('aria-expanded',String(isOpen));
+    const name=document.createElement('span');name.textContent=label;
+    const symbol=document.createElement('span');symbol.className='vs-history-chevron';
+    symbol.textContent=isOpen?'▲':'▼';symbol.setAttribute('aria-hidden','true');
+    btn.append(name,symbol);btn.addEventListener('click',onClick);return btn;
   }
   function render(){
     if(!data)return;
@@ -36,26 +89,40 @@
         tr.firstChild.colSpan=5;body.append(tr);
       }
       data.top10.slice(0,10).forEach((h,i)=>{
+        const key=[data.weekStart,i,h.horseName,h.ownerName].join('\u0000');
+        const active=openWeekly===key;
         const tr=document.createElement('tr');
-        cell(tr,(i+1)+'位');cell(tr,horseTitle(h));
+        cell(tr,(i+1)+'位');
+        const horse=cell(tr,'');
+        horse.append(makeToggle(h.horseName,active,()=>{openWeekly=active?'':key;render();}));
         cell(tr,h.ownerName||'COM');
-        // The authoritative weekly_awards.json field is updated only after a
-        // race is committed. Never infer the start count from award money.
         cell(tr,Number.isSafeInteger(h.starts)&&h.starts>=0?h.starts+'戦終了':'—');
         cell(tr,money(h.prizeYen));
         body.append(tr);
+        if(active){
+          const detail=document.createElement('tr');detail.className='vs-history-detail-row';
+          const td=cell(detail,'');td.colSpan=5;
+          td.append(historyContent(h));body.append(detail);
+        }
       });
     }
     archive.replaceChildren();
     const rows=data.awards||[];
     if(!rows.length){archive.textContent='歴代年度代表馬はまだ決定していません。';}
     rows.slice(0,visible).forEach(x=>{
+      const key=String(x.generation);
+      const active=openAward===key;
       const item=document.createElement('div');item.className='vs-award-row';
-      const title=document.createElement('strong');
-      title.textContent='第'+x.generation+'代 年度代表馬　'+horseTitle(x);
+      const title=makeToggle('第'+x.generation+'代 年度代表馬　'+x.horseName,active,()=>{
+        openAward=active?'':key;render();
+      });
       const detail=document.createElement('div');detail.className='meta';
-      detail.textContent='オーナー：'+(x.ownerName||'COM')+' ／ 週間賞金：'+money(x.prizeYen)+' ／ '+(x.awardWeekLabel||'受賞週')+'（'+x.weekStart+'～'+x.weekEnd+'）'+(x.hasReplayHorse?' ／ 受賞馬データ保存済':'');
-      item.append(title,detail);archive.append(item);
+      detail.textContent='オーナー：'+(x.ownerName||'COM')+' ／ 週間賞金：'+money(x.prizeYen)+' ／ '+
+        (x.awardWeekLabel||'受賞週')+'（'+x.weekStart+'～'+x.weekEnd+'）'+
+        (x.hasReplayHorse?' ／ 受賞馬データ保存済':'');
+      item.append(title,detail);
+      if(active)item.append(historyContent(x));
+      archive.append(item);
     });
     more.hidden=rows.length<=visible;
   }
@@ -72,7 +139,10 @@
          next.top10.length>10||next.awards.length>20000||
          !next.top10.every(r=>typeof r.horseName==='string'&&typeof r.ownerName==='string'&&
            Number.isSafeInteger(r.prizeYen)&&r.prizeYen>=0&&
-           (r.starts===undefined||(Number.isSafeInteger(r.starts)&&r.starts>=0))))
+           (r.starts===undefined||(Number.isSafeInteger(r.starts)&&r.starts>=0))&&
+           (r.raceResults===undefined||validHistory(r.raceResults)))||
+         !next.awards.every(r=>r&&typeof r.horseName==='string'&&
+           (r.raceResults===undefined||validHistory(r.raceResults))))
         throw Error('賞金集計の形式が不正です');
       data=next;render();
     }catch(error){

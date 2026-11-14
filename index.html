@@ -48,6 +48,26 @@
 .vs-award-row .meta{color:#bcd1c4;font-size:12px;line-height:1.7}
 #vs-awards-more{margin:14px 0 0}
 #vs-awards-more[hidden]{display:none!important}
+/* V32: responsive expandable race history within weekly TOP10 and champions. */
+.vs-history-toggle{display:inline-flex;align-items:center;justify-content:space-between;
+  text-align:left;gap:8px;width:100%;min-height:44px;background:transparent;border:0;
+  padding:5px 2px;color:#ffe2a1;font:inherit;font-weight:750;cursor:pointer}
+.vs-history-toggle:focus-visible{outline:2px solid #ffdf86;outline-offset:2px;border-radius:3px}
+.vs-history-chevron{flex:none;color:#f5d789;font-size:10px}
+.vs-history-detail-row>td{padding:6px 8px 13px!important;background:#071b18!important}
+.vs-history-content{margin:9px 0 0;padding:10px 12px;border:1px solid #bd985b70;
+  border-radius:9px;background:#081e1b;color:#ebf1e8;font-size:12px;text-align:left}
+.vs-history-head{font-size:11px;color:#d2b77b;margin-bottom:7px}
+.vs-history-race{display:flex;justify-content:space-between;align-items:baseline;
+  gap:10px;border-top:1px solid #b8955138;padding:10px 0;line-height:1.6}
+.vs-history-race-name{flex:1;min-width:0;overflow-wrap:anywhere}
+.vs-history-race-result{flex:none;text-align:right;color:#ffe2a0;font-variant-numeric:tabular-nums}
+.vs-history-note{color:#d7cda9;line-height:1.7;margin:3px 0 9px}
+.vs-award-row .vs-history-toggle{font-size:15px;color:#ffe4a0}
+.vs-award-row .vs-history-content{margin-top:10px}
+@media(max-width:520px){.vs-history-race{flex-direction:column;gap:2px}
+  .vs-history-race-result{align-self:flex-end}.vs-history-content{padding:9px 10px}
+  .vs-ranking-grid td:nth-child(1){width:auto}.vs-history-toggle{min-width:85px}}
 @media(max-width:520px){.vs-ranking-grid{font-size:11px}.vs-ranking-grid th,.vs-ranking-grid td{padding:9px 3px;overflow-wrap:anywhere}}
   [hidden]{display:none!important}
   #vs-entry-file{display:block;width:100%;padding:10px 0;color:#f1e1b6;font-size:13px}
@@ -637,7 +657,7 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 </script>
 <script src="site.js" defer></script>
 <script src="visitor-counter.js?v=20261113-v16" defer></script>
-<script src="owner-ranking.js?v=20261114-v28-traits" defer></script>
+<script src="owner-ranking.js?v=20261115-v32-history-accordion" defer></script>
 <script src="firebase-config.js" defer></script>
 <script src="registration.js?v=20261114-v30-individual-booking" defer></script>
 <script src="my-arena-stats.js?v=20261114-v31-no-results-spoilers" defer></script>
