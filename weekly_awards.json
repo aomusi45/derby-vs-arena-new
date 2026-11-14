@@ -61,6 +61,14 @@
       "starts": 20
     },
     {
+      "horseName": "サンプルホース150",
+      "ownerName": "管理人あおむし",
+      "sex": "牡",
+      "age": 4,
+      "prizeYen": 625000000,
+      "starts": 4
+    },
+    {
       "horseName": "スペシャルウインク",
       "ownerName": "",
       "sex": "牡",
@@ -75,14 +83,6 @@
       "age": 3,
       "prizeYen": 522000000,
       "starts": 20
-    },
-    {
-      "horseName": "サンプルホース150",
-      "ownerName": "管理人あおむし",
-      "sex": "牡",
-      "age": 4,
-      "prizeYen": 500000000,
-      "starts": 3
     }
   ],
   "standings": [
@@ -144,6 +144,14 @@
     },
     {
       "rank": 8,
+      "horseName": "サンプルホース150",
+      "sex": "牡",
+      "age": 4,
+      "ownerName": "管理人あおむし",
+      "prizeYen": 625000000
+    },
+    {
+      "rank": 9,
       "horseName": "スペシャルウインク",
       "sex": "牡",
       "age": 3,
@@ -151,20 +159,12 @@
       "prizeYen": 545000000
     },
     {
-      "rank": 9,
+      "rank": 10,
       "horseName": "ウオッカナ",
       "sex": "牝",
       "age": 3,
       "ownerName": "",
       "prizeYen": 522000000
-    },
-    {
-      "rank": 10,
-      "horseName": "サンプルホース150",
-      "sex": "牡",
-      "age": 4,
-      "ownerName": "管理人あおむし",
-      "prizeYen": 500000000
     },
     {
       "rank": 11,
@@ -312,6 +312,16 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994057,
+      "raceName": "有馬記念",
+      "place": 3,
+      "prizeYen": 125000000,
+      "sex": "牡",
+      "age": 4
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
