@@ -41,8 +41,8 @@
       "ownerName": "管理人あおむし",
       "sex": "牡",
       "age": 4,
-      "prizeYen": 2060000000,
-      "starts": 12
+      "prizeYen": 2135000000,
+      "starts": 13
     },
     {
       "horseName": "テイエムオペラオン",
@@ -124,7 +124,7 @@
       "sex": "牡",
       "age": 4,
       "ownerName": "管理人あおむし",
-      "prizeYen": 2060000000
+      "prizeYen": 2135000000
     },
     {
       "rank": 6,
@@ -344,6 +344,16 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994093,
+      "raceName": "有馬記念",
+      "place": 4,
+      "prizeYen": 75000000,
+      "sex": "牡",
+      "age": 4
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
