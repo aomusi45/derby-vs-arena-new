@@ -494,31 +494,43 @@
     try{
       const provider=new sdk.GoogleAuthProvider();
       provider.setCustomParameters({prompt:'select_account'});
-      if(auth.currentUser?.isAnonymous){
-        // Preserve existing anonymous UID/horse if this account was not yet linked.
-        try{await sdk.linkWithPopup(auth.currentUser,provider);}
-        catch(err){
-          if(err?.code==='auth/credential-already-in-use'||err?.code==='auth/email-already-in-use'){
-            say('そのGoogleアカウントは登録済みです。ゲストの馬は自動移行できないため、続行する前に旧データの控えを確認してください。');
-            throw err;
-          }
-          throw err;
-        }
-      }else await sdk.signInWithPopup(auth,provider);
+      // V27: This is a Google-only site. Sign in to the existing Google UID
+      // even if a stale anonymous Firebase session remains in this browser.
+      // Never call linkWithPopup here: an already-linked Google credential
+      // cannot be linked to a *different* anonymous UID.
+      try{
+        await sdk.signInWithPopup(auth,provider);
+      }catch(err){
+        if(err?.code!=='auth/credential-already-in-use')throw err;
+        // Defensive recovery for SDKs that return the Google credential
+        // with an already-in-use error. No anonymous data is moved or erased.
+        const credential=sdk.GoogleAuthProvider.credentialFromError(err);
+        if(!credential)throw err;
+        await sdk.signInWithCredential(auth,credential);
+      }
+      // onAuthStateChanged loads the owner's existing server profile. Avoid
+      // a second concurrent profile fetch here that could mask a real error.
       loginStatus.textContent='Googleログイン済み';
-      if(isGoogle())await loadProfile(auth.currentUser,true);
     }catch(err){
       const code=String(err?.code||'unknown');
       const hints={
         'auth/popup-blocked':'ポップアップを許可してください。',
         'auth/popup-closed-by-user':'Googleログインがキャンセルされました。',
+        'auth/cancelled-popup-request':'別のログイン処理と重なりました。再度お試しください。',
         'auth/unauthorized-domain':'Firebase承認済みドメインに aomusi45.github.io が必要です。',
         'auth/operation-not-allowed':'FirebaseでGoogle認証を有効にしてください。',
+        'auth/operation-not-supported-in-this-environment':'Chromeの通常タブで公式サイトを開いてください。',
         'auth/network-request-failed':'通信状況を確認してください。',
-        'auth/credential-already-in-use':'Googleアカウントが別ユーザーで使用中です。運営者にご相談ください。'
+        'auth/credential-already-in-use':'Googleアカウントを通常ログインで開けませんでした。画面のエラーコードを運営者へ知らせてください。',
+        'auth/account-exists-with-different-credential':'このメールアドレスは別のログイン方法に登録されています。運営者へご相談ください。'
       };
       say('Googleログインに失敗：'+(hints[code]||'通常のChromeなどで開いて再試行してください。')+' ['+code+']');
-    }finally{authPending=false;updateSubmit();}
+    }finally{
+      // Always leave the "認証中…" state, including errors from a popup.
+      authPending=false;
+      loginStatus.textContent=isGoogle()?'Googleログイン済み':'未ログイン';
+      updateSubmit();
+    }
   });
   ownerInput.addEventListener('input',updateSubmit);
   ownerSave.addEventListener('click',async()=>{
