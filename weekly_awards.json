@@ -37,20 +37,20 @@
       "starts": 20
     },
     {
+      "horseName": "サンプルホース150",
+      "ownerName": "管理人あおむし",
+      "sex": "牡",
+      "age": 4,
+      "prizeYen": 1890000000,
+      "starts": 11
+    },
+    {
       "horseName": "キタサンブラッキー",
       "ownerName": "",
       "sex": "牡",
       "age": 3,
       "prizeYen": 1825000000,
       "starts": 20
-    },
-    {
-      "horseName": "サンプルホース150",
-      "ownerName": "管理人あおむし",
-      "sex": "牡",
-      "age": 4,
-      "prizeYen": 1815000000,
-      "starts": 10
     },
     {
       "horseName": "シンボリルドルフィ",
@@ -120,19 +120,19 @@
     },
     {
       "rank": 5,
+      "horseName": "サンプルホース150",
+      "sex": "牡",
+      "age": 4,
+      "ownerName": "管理人あおむし",
+      "prizeYen": 1890000000
+    },
+    {
+      "rank": 6,
       "horseName": "キタサンブラッキー",
       "sex": "牡",
       "age": 3,
       "ownerName": "",
       "prizeYen": 1825000000
-    },
-    {
-      "rank": 6,
-      "horseName": "サンプルホース150",
-      "sex": "牡",
-      "age": 4,
-      "ownerName": "管理人あおむし",
-      "prizeYen": 1815000000
     },
     {
       "rank": 7,
@@ -336,6 +336,16 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994085,
+      "raceName": "宝塚記念",
+      "place": 3,
+      "prizeYen": 75000000,
+      "sex": "牡",
+      "age": 4
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
