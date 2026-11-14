@@ -1,0 +1,49 @@
+name: DBF VS Owner and Horse Reset (manual only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'まず preview で件数確認。削除は delete を選択'
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - delete
+      confirmation:
+        description: 'delete時は DELETE_ALL_OWNER_AND_HORSE_REGISTRATIONS と入力'
+        required: false
+        type: string
+
+# Match scheduled races to prevent race processing during this reset.
+concurrency:
+  group: official-vs-races-and-pages
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  reset-owners:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Firebase Admin dependencies
+        run: python -m pip install 'google-cloud-firestore>=2.18,<3'
+      - name: Print preview or perform owner data reset
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          RESET_MODE: ${{ inputs.mode }}
+          RESET_CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$RESET_MODE" = "delete" ]; then
+            python tools/reset_owner_horses_once.py --mode delete --confirm "$RESET_CONFIRMATION"
+          else
+            python tools/reset_owner_horses_once.py --mode preview
+          fi
