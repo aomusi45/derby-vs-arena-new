@@ -77,12 +77,12 @@
       "starts": 20
     },
     {
-      "horseName": "オルフェーブル",
-      "ownerName": "",
+      "horseName": "サンプルホース150",
+      "ownerName": "管理人あおむし",
       "sex": "牡",
-      "age": 3,
-      "prizeYen": 398000000,
-      "starts": 20
+      "age": 4,
+      "prizeYen": 500000000,
+      "starts": 3
     }
   ],
   "standings": [
@@ -160,6 +160,14 @@
     },
     {
       "rank": 10,
+      "horseName": "サンプルホース150",
+      "sex": "牡",
+      "age": 4,
+      "ownerName": "管理人あおむし",
+      "prizeYen": 500000000
+    },
+    {
+      "rank": 11,
       "horseName": "オルフェーブル",
       "sex": "牡",
       "age": 3,
@@ -167,7 +175,7 @@
       "prizeYen": 398000000
     },
     {
-      "rank": 11,
+      "rank": 12,
       "horseName": "ナリタブライワン",
       "sex": "牡",
       "age": 3,
@@ -175,20 +183,12 @@
       "prizeYen": 377000000
     },
     {
-      "rank": 12,
+      "rank": 13,
       "horseName": "グラスパンダー",
       "sex": "牡",
       "age": 3,
       "ownerName": "",
       "prizeYen": 374500000
-    },
-    {
-      "rank": 13,
-      "horseName": "サンプルホース150",
-      "sex": "牡",
-      "age": 4,
-      "ownerName": "管理人あおむし",
-      "prizeYen": 300000000
     },
     {
       "rank": 14,
@@ -312,6 +312,16 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994056,
+      "raceName": "ジャパンカップ",
+      "place": 2,
+      "prizeYen": 200000000,
+      "sex": "牡",
+      "age": 4
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
