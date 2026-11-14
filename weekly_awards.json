@@ -69,19 +69,19 @@
       "starts": 20
     },
     {
+      "horseName": "ナリタブライワン",
+      "ownerName": "",
+      "sex": "牡",
+      "age": 3,
+      "prizeYen": 620000000,
+      "starts": 20
+    },
+    {
       "horseName": "スペシャルウインク",
       "ownerName": "",
       "sex": "牡",
       "age": 4,
       "prizeYen": 545000000,
-      "starts": 20
-    },
-    {
-      "horseName": "ウオッカナ",
-      "ownerName": "",
-      "sex": "牝",
-      "age": 3,
-      "prizeYen": 522000000,
       "starts": 20
     }
   ],
@@ -152,6 +152,14 @@
     },
     {
       "rank": 9,
+      "horseName": "ナリタブライワン",
+      "sex": "牡",
+      "age": 3,
+      "ownerName": "",
+      "prizeYen": 620000000
+    },
+    {
+      "rank": 10,
       "horseName": "スペシャルウインク",
       "sex": "牡",
       "age": 4,
@@ -159,7 +167,7 @@
       "prizeYen": 545000000
     },
     {
-      "rank": 10,
+      "rank": 11,
       "horseName": "ウオッカナ",
       "sex": "牝",
       "age": 3,
@@ -167,7 +175,7 @@
       "prizeYen": 522000000
     },
     {
-      "rank": 11,
+      "rank": 12,
       "horseName": "グラスパンダー",
       "sex": "牡",
       "age": 3,
@@ -175,20 +183,12 @@
       "prizeYen": 438000000
     },
     {
-      "rank": 12,
+      "rank": 13,
       "horseName": "オルフェーブル",
       "sex": "牡",
       "age": 3,
       "ownerName": "",
       "prizeYen": 398000000
-    },
-    {
-      "rank": 13,
-      "horseName": "ナリタブライワン",
-      "sex": "牡",
-      "age": 3,
-      "ownerName": "",
-      "prizeYen": 377000000
     },
     {
       "rank": 14,
