@@ -312,14 +312,6 @@
     },
     {
       "rank": 29,
-      "horseName": "メジロドーベリー",
-      "sex": "牝",
-      "age": 3,
-      "ownerName": "",
-      "prizeYen": 22500000
-    },
-    {
-      "rank": 30,
       "horseName": "ダイワメジャック",
       "sex": "牡",
       "age": 3,
@@ -327,7 +319,7 @@
       "prizeYen": 18000000
     },
     {
-      "rank": 31,
+      "rank": 30,
       "horseName": "クロノジェネシア",
       "sex": "牝",
       "age": 3,
@@ -335,8 +327,16 @@
       "prizeYen": 16500000
     },
     {
-      "rank": 32,
+      "rank": 31,
       "horseName": "ソングライオン",
+      "sex": "牝",
+      "age": 3,
+      "ownerName": "",
+      "prizeYen": 15000000
+    },
+    {
+      "rank": 32,
+      "horseName": "メジロドーベリー",
       "sex": "牝",
       "age": 3,
       "ownerName": "",
