@@ -1,19 +1,19 @@
 /* Firebase VS horse registration. UI code is isolated from the race viewer.
-   Login may be Google or anonymous; one account has one immutable active horse.
+   Google-only login; owner name and horse roster stay bound to UID until 20 starts.
    The website NEVER receives or stores service-account credentials. */
 (()=>{
   'use strict';
   const $=id=>document.getElementById(id);
   const file=$('vs-entry-file'),submit=$('vs-entry-submit'),message=$('vs-entry-message');
   const preview=$('vs-entry-preview'),loginStatus=$('vs-entry-login-status');
-  const google=$('vs-entry-google'),guest=$('vs-entry-guest');
+  const google=$('vs-entry-google');
   const ownerInput=$('vs-entry-ownername'),ownerHint=$('vs-entry-owner-status');
-  if(!file||!submit||!message||!preview||!loginStatus||!google||!guest||!ownerInput)return;
+  if(!file||!submit||!message||!preview||!loginStatus||!google||!ownerInput)return;
   const cleanOwner=value=>typeof value==='string' ? value.trim().replace(/[\u0000-\u001f\u007f]/g,'') : '';
   const validOwner=value=>value.length>=1 && [...value].length<=24 && !/[\u0000-\u001f\u007f]/.test(value);
   const cfg=window.VS_FIREBASE_CONFIG;
   let auth=null,db=null, sdk=null,chosen=null,busy=false,ready=false;
-  let authPending=false,googleSwitchExisting=false,authPersistence='local';
+  let authPending=false,authPersistence='local';
   let selectionSerial=0;
   let reservedOwnerName='',profileLoaded=false;
   let lockedHorse=null,lockedCount=null,weeklyRegistered=null,weeklyCheckedIndex=null;
@@ -111,12 +111,12 @@
     // Recording starts at :08/:23/:38/:53, seven minutes before each race.
     // Applications arriving after the server snapshot cannot enter this heat.
     const closingMs=slotMs-7*60*1000;
-    const activeLock=lockedHorse?.weekIndex===currentWeek()?lockedHorse:null;
+    const activeLock=lockedHorse;
     if(ownerLockLabel){
-      ownerLockLabel.textContent=!activeLock?'今週の登録馬：未登録（週に1頭・変更不可）':
-        '今週の登録馬：'+activeLock.horseName+'（'+
+      ownerLockLabel.textContent=!activeLock?'登録馬：未登録':
+        '保存済みの愛馬：'+activeLock.horseName+'（'+
           (lockedCount===null?'出走履歴確認中':lockedCount+'/20戦')+
-          '）。日曜日で参加終了、翌週の再登録は禁止です。';
+          '）。20戦終了後に新しい馬を登録できます。';
     }
     if(weeklyCapLabel){
       weeklyCapLabel.textContent='今週の登録枠：'+
@@ -124,8 +124,6 @@
           ?weeklyRegistered+' / 120頭':'確認中 / 120頭')+
         '（1頭につき1週間のみ・再登録不可）';
     }
-    if(registrationForm)registrationForm.hidden=!card||!acceptingNow()||!!ownRegistration||
-      (weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&!activeLock);
     if(persisted)persisted.textContent=ownForCurrentSlot()
       ?'登録済み：'+String(ownRegistration.horseName||'不明')+' ／ オーナー：'+String(ownRegistration.ownerName||'不明')+'（差し替え不可）'
       :(ownRegistration?'前回の登録はこの開催の対象外です。結果確定後のサーバー整理を確認中です。'
@@ -318,371 +316,259 @@
     const jsonOwner=ownerCandidates.map(cleanOwner).find(validOwner)||'';
     return {horseId,name,runner,jsonOwner,originalSnapshot:snapshot};
   }
-  const updateSubmit=()=>{
-    const activeLock=lockedHorse?.weekIndex===currentWeek()?lockedHorse:null;
-    const wrongHorse=!!activeLock && !!chosen&&!chosen.sealed&&
-      chosen.horseId!==activeLock.horseId;
-    const exhausted=!!activeLock&&lockedCount===20;
-    const fullWeek=weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&!activeLock;
-    submit.textContent=ownRegistration ? '登録済み（変更不可）' :
-      wrongHorse?'今週は別の馬に変更できません' :
-      exhausted?'この馬は20戦終了です' :
-      fullWeek?'今週の120頭枠は満員です':'この馬を公式VSに登録する';
-    submit.disabled=busy||!ready||!profileLoaded||!workerReady()||!!ownRegistration||!acceptingNow()||
-      wrongHorse||exhausted||fullWeek||authPending||!chosen||!auth?.currentUser||
-      (!chosen.sealed&&!validOwner(cleanOwner(ownerInput.value)));};
-  ownerInput.addEventListener('input',updateSubmit);
-  async function refreshWeeklyCapacity(){
-    if(!ready||!db||!sdk)return;
-    const week=currentWeek();
-    try{
-      const cap=await sdk.getDocFromServer(sdk.doc(db,'vs_weekly_registration_counts','w'+week));
-      const n=cap.exists()?Number(cap.data().count):0;
-      if(!Number.isInteger(n)||n<0||n>120)throw Error('週間登録数が不正です');
-      if(currentWeek()!==week)return;
-      weeklyRegistered=n;
-      weeklyCheckedIndex=week;
-      renderPublicStatus();updateSubmit();
-    }catch(err){
-      weeklyRegistered=null;weeklyCheckedIndex=null;
-      console.warn('週間登録枠を取得できません',err);
-      renderPublicStatus();
-    }
+  // V24 stage UI. Status is read from the authenticated Worker, never from
+  // browser storage; same Google UID works across devices without re-upload.
+  const ownerSetup=$('vs-owner-setup'),ownerSave=$('vs-owner-save');
+  const raceApply=$('vs-race-apply'),raceSubmit=$('vs-entry-race-submit');
+  const profileCard=$('vs-entry-profile'),savedOwnerText=$('vs-saved-owner');
+  const savedHorseText=$('vs-saved-horse');
+  let serverChecked=false,savedHorse=null,loadSeq=0;
+  const GOOGLE_PROVIDER='google.com';
+  const isGoogle=()=>!!auth?.currentUser&&!auth.currentUser.isAnonymous&&
+    auth.currentUser.providerData?.some(p=>p.providerId===GOOGLE_PROVIDER);
+  const countValid=n=>Number.isInteger(n)&&n>=0&&n<=20;
+  function showStages(){
+    const allowed=!!isGoogle()&&profileLoaded&&serverChecked;
+    const hasOwner=allowed&&validOwner(reservedOwnerName);
+    const completed=!!savedHorse&&savedHorse.appearances===20;
+    if(ownerSetup)ownerSetup.hidden=!allowed||hasOwner;
+    if(registrationForm)registrationForm.hidden=!hasOwner||!!savedHorse&&(!completed||savedHorse.registered);
+    if(raceApply)raceApply.hidden=!hasOwner||!savedHorse||completed;
+    if(profileCard)profileCard.hidden=!hasOwner;
+    if(savedOwnerText)savedOwnerText.textContent=hasOwner?reservedOwnerName:'未登録';
+    if(savedHorseText)savedHorseText.textContent=!savedHorse?'まだ馬が登録されていません':
+      savedHorse.horseName+'（'+savedHorse.appearances+'/20戦）'+(completed?'・登録終了':'');
+    ownerInput.readOnly=hasOwner;
+    ownerSave.disabled=busy||authPending||!allowed||!validOwner(cleanOwner(ownerInput.value));
+    const newHorse=hasOwner&&(!savedHorse||completed);
+    submit.textContent=completed?'新しい馬を保存する':'この馬を保存する';
+    submit.disabled=busy||authPending||!newHorse||!chosen||!workerReady();
+    const needsWeek=savedHorse&&savedHorse.weekIndex!==currentWeek();
+    const capFull=weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&needsWeek;
+    const wasApplied=!!ownRegistration||!!savedHorse?.registered;
+    raceSubmit.disabled=busy||authPending||!ready||!hasOwner||!savedHorse||completed||
+      !workerReady()||!acceptingNow()||wasApplied||capFull;
+    raceSubmit.textContent=wasApplied?'今回のレースに登録済み':
+      !acceptingNow()?'受付時間外（次回受付をお待ちください）':
+      capFull?'今週の120人枠は満員です':'このレースに登録';
+    google.disabled=!ready||authPending||busy;
+    google.textContent=authPending?'Google認証中…':(isGoogle()?'Googleログイン済み':'Googleでログイン');
   }
-  async function refreshHorseLock(user){
-    const week=currentWeek();
-    const snapshot=await sdk.getDocFromServer(sdk.doc(db,'vs_owner_horse_locks',user.uid));
-    if(auth?.currentUser?.uid!==user.uid)return;
-    if(!snapshot.exists()){
-      lockedHorse=null;lockedCount=null;
-    }else{
-      const state=snapshot.data();
-      if(typeof state.horseId!=='string'||typeof state.horseKey!=='string'||
-         !/^[a-f0-9]{64}$/.test(state.horseKey))throw Error('登録馬データが不正です');
-      lockedHorse={horseId:state.horseId,horseName:state.horseName,weekIndex:state.weekIndex};
-      if(state.weekIndex===week){
-        const usage=await sdk.getDocFromServer(sdk.doc(db,'vs_horse_usage',state.horseKey));
-        if(auth?.currentUser?.uid!==user.uid)return;
-        const n=usage.exists()?Number(usage.data().count):0;
-        if(!validAppearances(n))throw Error('出走回数が不正です');
-        lockedCount=n;
-      }else lockedCount=null;
+  const updateSubmit=showStages;
+  async function workerRequest(path,data={},user=auth?.currentUser){
+    if(!workerReady())throw Error('公式登録サーバーが利用できません');
+    if(!user||!user.providerData?.some(p=>p.providerId===GOOGLE_PROVIDER)||user.isAnonymous)
+      throw Error('Googleアカウントでログインしてください');
+    const token=await sdk.getIdToken(user);
+    const r=await fetch(SECURE_REGISTER_URL.replace(/\/+$/,'')+path,{
+      method:'POST',mode:'cors',cache:'no-store',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify(data)});
+    let result;
+    try{result=await r.json();}catch(_){throw Error('登録サーバーの応答を読み込めません');}
+    if(!r.ok||!result?.ok)throw Error(String(result?.error||'サーバーで登録できませんでした'));
+    return result;
+  }
+  async function loadProfile(user,displayNotice=true){
+    const seq=++loadSeq;
+    const result=await workerRequest('/profile',{},user);
+    if(seq!==loadSeq||auth?.currentUser?.uid!==user.uid)return;
+    const count=result.horseName?Number(result.appearances):null;
+    if(result.horseName&&!countValid(count))throw Error('保存済みの出走回数が不正です');
+    reservedOwnerName=cleanOwner(result.ownerName||'');
+    if(reservedOwnerName&&!validOwner(reservedOwnerName))throw Error('登録済みオーナー名が不正です');
+    ownerInput.value=reservedOwnerName||ownerInput.value;
+    profileLoaded=true;serverChecked=true;
+    savedHorse=result.horseName?{
+      horseName:String(result.horseName),horseId:String(result.horseId||''),
+      appearances:count,weekIndex:result.weekIndex,registered:!!result.registered}:null;
+    lockedHorse=savedHorse?{
+      horseId:savedHorse.horseId,horseName:savedHorse.horseName,weekIndex:savedHorse.weekIndex}:null;
+    lockedCount=count;
+    if(ownerHint)ownerHint.textContent=reservedOwnerName?
+      'オーナー名はGoogleアカウントに保存済みです。変更できません。':
+      '最初の一度だけ登録してください。同じ名前は他の人が使えません。';
+    if(displayNotice){
+      say(!reservedOwnerName?'初回設定：オーナー名を登録してください。':
+        !savedHorse?'初回設定：愛馬のVS登録ファイルを1回だけ選んで保存してください。':
+        count>=20?'20戦を完走しました。別の新しい馬を登録できます。':
+        'おかえりなさい。保存済みの「'+savedHorse.horseName+'」で、レース登録ボタンを押すだけです。');
     }
-    updateSubmit();renderPublicStatus();
+    renderPublicStatus();updateSubmit();
+  }
+  // Read only the owner-authenticated live entry. This is a single current
+  // race application, not the permanent horse profile. A race consumes it.
+  async function refreshOwnRegistration(user=auth?.currentUser){
+    if(!ready||!user||busy||!isGoogle())return;
+    try{
+      const doc=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
+      if(auth?.currentUser?.uid!==user.uid)return;
+      if(doc.exists()){
+        if(!ownRegistration||ownRegistration.updatedAt?.toMillis?.()!==doc.data().updatedAt?.toMillis?.())
+          await updateOwnFromDocument(user,doc.data());
+      }else if(ownRegistration){
+        ownRegistration=null;ownRegistrationId=null;localConfirmed=null;
+        renderPublicStatus();
+      }
+      await loadProfile(user,false);
+    }catch(err){console.warn('登録状況を確認できません',err);}
   }
   async function init(){
     if(!cfg||cfg.projectId!=='derby-vs-arena'||!cfg.apiKey){
-      say('Firebaseの公開設定が見つかりません。登録機能は停止中です。');return;
+      say('Firebaseの公開設定が見つかりません');return;
     }
-    // Module imports are async. Failure here cannot block the existing site.js.
     const base='https://www.gstatic.com/firebasejs/13.2.0/';
-    const [appSdk, authSdk, fsSdk]=await Promise.all([
+    const [appSdk,authSdk,fsSdk]=await Promise.all([
       import(base+'firebase-app.js'),import(base+'firebase-auth.js'),
       import(base+'firebase-firestore.js')]);
     sdk={...authSdk,...fsSdk};
-    const app=appSdk.getApps().find(a=>a.options.projectId===cfg.projectId) ||
+    const app=appSdk.getApps().find(a=>a.options.projectId===cfg.projectId)||
       appSdk.initializeApp(cfg,'vs-arena-registration');
     auth=authSdk.getAuth(app);
-    // Keep Google login available when this browser refuses long-term storage.
-    // Never offer guest account creation without durable local persistence:
-    // a transient guest UID would irreversibly lose access to its horse/owner.
-    try{
-      await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);
-    }catch(localError){
-      console.warn('Googleログイン用の永続保存が利用できません',localError);
-      try{
-        await authSdk.setPersistence(auth,authSdk.browserSessionPersistence);
-        authPersistence='session';
-      }catch(sessionError){
-        console.warn('セッション保存も利用できません',sessionError);
-        await authSdk.setPersistence(auth,authSdk.inMemoryPersistence);
-        authPersistence='memory';
-      }
+    try{await authSdk.setPersistence(auth,authSdk.browserLocalPersistence);}catch(_){
+      try{await authSdk.setPersistence(auth,authSdk.browserSessionPersistence);authPersistence='session';}
+      catch(_){await authSdk.setPersistence(auth,authSdk.inMemoryPersistence);authPersistence='memory';}
     }
     db=fsSdk.getFirestore(app);ready=true;
-    refreshAuthButtons();
-    refreshWeeklyCapacity();
-    setInterval(refreshWeeklyCapacity,30000);
-    // Live Firestore listener: other devices update as soon as the mirror changes.
-    fsSdk.onSnapshot(fsSdk.collection(db,'vs_public_entries'),
-      snapshot=>{try{applySharedSnapshot(snapshot);}catch(err){console.warn(err);}},
-      err=>{sharedEntriesError=String(err.code||err.message||err);console.warn('公開一覧の監視に失敗',err);});
-    refreshSharedEntries();
+    fsSdk.onSnapshot(fsSdk.collection(db,'vs_public_entries'),snapshot=>{
+      try{applySharedSnapshot(snapshot);}catch(err){console.warn(err);}
+    },err=>{sharedEntriesError=String(err.code||err.message||err);console.warn(err);});
+    refreshSharedEntries();refreshWeeklyCapacity();
     authSdk.onAuthStateChanged(auth,async user=>{
+      const seq=++loadSeq;
       ownRegistration=null;ownRegistrationId=null;localConfirmed=null;
-      lockedHorse=null;lockedCount=null;
-      reservedOwnerName='';profileLoaded=false;
-      ownerInput.readOnly=false;
-      if(ownerHint)ownerHint.textContent='ログインするとオーナー名の取得状況を確認します。';
+      lockedHorse=null;lockedCount=null;savedHorse=null;
+      reservedOwnerName='';profileLoaded=false;serverChecked=false;chosen=null;
+      file.value='';preview.textContent='';ownerInput.value='';ownerInput.readOnly=false;
       updateSubmit();renderPublicStatus();
-      if(!user){
-        loginStatus.textContent='未ログイン'+(authPersistence==='local'?'':'（このブラウザではGoogleログインのみ）');
-        say(authPersistence==='local'?'Googleまたはゲストでログインして馬を登録してください。':
-          'このブラウザではログイン情報を永続保存できません。ゲスト登録は保護のため停止し、Googleログインのみ利用できます。');
-        refreshAuthButtons();
-        return;
-      }
-      googleSwitchExisting=false;
-      loginStatus.textContent=user.isAnonymous?'ゲストでログイン済み：登録可能':
-        (user.providerData?.some(p=>p.providerId==='google.com')?'Googleログイン済み：登録可能':'ログイン済み：登録可能');
-      refreshAuthButtons();
+      if(!user){loginStatus.textContent='未ログイン';say('Googleでログインしてください。');return;}
+      if(!user.providerData?.some(p=>p.providerId===GOOGLE_PROVIDER)||user.isAnonymous){
+        loginStatus.textContent='Google連携待ち';say('ゲスト登録は終了しました。Googleでログインしてください。');return;}
+      loginStatus.textContent='Googleログイン済み';
       try{
-        // Unlike vs_entries, this profile survives after a horse has raced.
-        const profile=await fsSdk.getDocFromServer(fsSdk.doc(db,'vs_owner_profiles',user.uid));
-        if(auth?.currentUser?.uid!==user.uid)return;
-        if(profile.exists()){
-          reservedOwnerName=cleanOwner(profile.data().ownerName);
-          if(!validOwner(reservedOwnerName))throw Error('保存済みのオーナー名が不正です');
-          ownerInput.value=reservedOwnerName;
-          ownerInput.readOnly=true;
-          if(ownerHint)ownerHint.textContent='取得済みの専用オーナー名です。出走後も保持され、変更できません。';
-        }else{
-          ownerInput.readOnly=false;
-          if(ownerHint)ownerHint.textContent='最初の登録でオーナー名を取得します。ほかのユーザーと同じ名前は使えません。';
-        }
-        profileLoaded=true;updateSubmit();
-        await refreshHorseLock(user);
-        const snap=await fsSdk.getDocFromServer(fsSdk.doc(db,'vs_entries',user.uid));
-        if(auth.currentUser?.uid!==user.uid)return;
-        if(snap.exists()){
-          say('現在の登録馬：'+String(snap.data().horseName||'不明')+'。1回出走後に登録解除されます。');
-          if(snap.data().ownerName && !reservedOwnerName && !ownerInput.value)
-            ownerInput.value=cleanOwner(snap.data().ownerName);
-          await updateOwnFromDocument(user,snap.data());
-        }else{
-          say(acceptingNow()?'登録受付中。ゲームのVS登録馬ファイルを選んでください。':'現在は受付時間外です。次の受付開始までお待ちください。');
-        }
+        await loadProfile(user,true);
+        if(seq===loadSeq-1||auth?.currentUser?.uid===user.uid)
+          await refreshOwnRegistration(user);
       }catch(err){
-        profileLoaded=false;updateSubmit();
-        say('オーナー名・登録状態を確認できません：'+String(err.code||err.message||err));
+        if(auth?.currentUser?.uid!==user.uid)return;
+        serverChecked=false;profileLoaded=false;
+        say('オーナー・登録馬の読み込みに失敗：'+String(err.message||err)+'。Cloudflareの新しいWorkerが公開済みか確認してください。');
+        updateSubmit();
       }
     });
-    say('ログイン後、VS登録馬ファイルを選んで登録できます。');
-    setInterval(refreshOwnRegistration,30000);
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshOwnRegistration();});
-  }
-  async function refreshOwnRegistration(){
-    const user=auth?.currentUser;
-    if(!user||busy||!ready)return;
-    try{
-      await refreshHorseLock(user);
-      const snap=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
-      if(auth?.currentUser?.uid!==user.uid)return;
-      if(snap.exists()){
-        if(!ownRegistration || ownRegistration.updatedAt?.toMillis?.()!==snap.data().updatedAt?.toMillis?.())
-          await updateOwnFromDocument(user,snap.data());
-      }else if(ownRegistration){
-        const racedName=String(ownRegistration.horseName||'登録馬');
-        ownRegistration=null;ownRegistrationId=null;renderPublicStatus();
-        say(racedName+'の開催申込みは終了しました。同じ週なら同じ馬で次のGⅠへ申込みできます。翌週の再登録はできません。');
-      }
-    }catch(err){console.warn('登録状態の更新に失敗',err);}
-  }
-  // Google login on GitHub Pages: popup works without a cross-site redirect
-  // helper. Do NOT silently switch guest UIDs: owner profiles and horse locks
-  // are bound to Firebase UID, so first try to link the Google credential.
-  const googleLabel=google.textContent;
-  function refreshAuthButtons(){
-    google.disabled=!ready||authPending||busy;
-    guest.disabled=!ready||authPending||busy||authPersistence!=='local';
-    google.textContent=authPending?'Google認証中…':
-      (googleSwitchExisting?'既存Googleアカウントに切替':googleLabel);
-  }
-  function authFailureMessage(err){
-    const code=typeof err?.code==='string'?err.code:'unknown';
-    const remedies={
-      'auth/popup-blocked':'ブラウザが認証画面をブロックしました。ポップアップを許可し、公式サイトをChromeやSafariで直接開いてからもう一度押してください。',
-      'auth/popup-closed-by-user':'Googleのログイン画面が閉じられました。アカウントの選択を最後まで完了してください。',
-      'auth/cancelled-popup-request':'ログイン画面が重複しました。もう一度Googleログインを押してください。',
-      'auth/unauthorized-domain':'Firebase管理者設定で aomusi45.github.io を「Authentication → 設定 → 承認済みドメイン」に追加してください。',
-      'auth/operation-not-allowed':'Firebase管理者設定で「Authentication → ログイン方法 → Google」を有効にしてください。',
-      'auth/network-request-failed':'通信に失敗しました。接続状況を確認してからもう一度お試しください。',
-      'auth/web-storage-unsupported':'ブラウザの保存機能が使えません。シークレットモードを解除し、通常のChromeやSafariで開いてください。',
-      'auth/operation-not-supported-in-this-environment':'GoogleログインはHTTPSの通常のブラウザで開いてください。アプリ内ブラウザでは利用できない場合があります。',
-      'auth/account-exists-with-different-credential':'このメールアドレスは別のログイン方式で登録されています。管理者へご相談ください。'
-    };
-    return (remedies[code]||'認証に失敗しました。通常のChromeなどで公式サイトを直接開き直してください。')+' ['+code+']';
+    setInterval(()=>{refreshWeeklyCapacity();refreshOwnRegistration();},30000);
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden){refreshOwnRegistration();refreshSharedEntries();}
+    });
+    updateSubmit();
+    say('Googleログイン後、保存済みのオーナー名と馬を読み込みます。');
   }
   google.addEventListener('click',async()=>{
-    if(!ready){say('Googleログインの初期化中です。少ししてからもう一度押してください。');return;}
-    if(busy||authPending)return;
-    const switching=googleSwitchExisting;
-    // Must call the popup API directly from the click gesture (no await first).
-    authPending=true;refreshAuthButtons();updateSubmit();
-    loginStatus.textContent='Google認証画面を開いています…';
-    say(switching?'既存のGoogleアカウントへ切り替えます。ゲストでの登録データは移行されません。':
-      'Googleアカウントの選択画面でログインを完了してください。');
+    if(!ready||busy||authPending)return;
+    if(isGoogle()){say('すでにGoogleログイン済みです。');return;}
+    authPending=true;loginStatus.textContent='Google認証中…';updateSubmit();
     try{
       const provider=new sdk.GoogleAuthProvider();
       provider.setCustomParameters({prompt:'select_account'});
-      const linkGuest=!!auth.currentUser?.isAnonymous&&!switching;
-      const result=await (linkGuest?
-        sdk.linkWithPopup(auth.currentUser,provider):sdk.signInWithPopup(auth,provider));
-      googleSwitchExisting=false;
-      loginStatus.textContent='Googleログイン済み：登録可能';
-      say(linkGuest?'ゲストの登録情報を保ったままGoogleアカウントを連携しました。':
-        'Googleログインが完了しました。登録馬やオーナー名を確認しています。');
-      // onAuthStateChanged may not fire when linking: UID is unchanged.
-      if(result.user?.uid===auth.currentUser?.uid&&linkGuest){
-        updateSubmit();renderPublicStatus();
-      }
+      if(auth.currentUser?.isAnonymous){
+        // Preserve existing anonymous UID/horse if this account was not yet linked.
+        try{await sdk.linkWithPopup(auth.currentUser,provider);}
+        catch(err){
+          if(err?.code==='auth/credential-already-in-use'||err?.code==='auth/email-already-in-use'){
+            say('そのGoogleアカウントは登録済みです。ゲストの馬は自動移行できないため、続行する前に旧データの控えを確認してください。');
+            throw err;
+          }
+          throw err;
+        }
+      }else await sdk.signInWithPopup(auth,provider);
+      loginStatus.textContent='Googleログイン済み';
+      if(isGoogle())await loadProfile(auth.currentUser,true);
     }catch(err){
-      const code=String(err?.code||'');
-      if(!switching&&auth.currentUser?.isAnonymous&&
-         (code==='auth/credential-already-in-use'||code==='auth/email-already-in-use')){
-        // Never replace the guest UID automatically. A subsequent explicit
-        // click can open the already-existing Google account instead.
-        googleSwitchExisting=true;
-        loginStatus.textContent='ゲストでログイン中（Google未連携）';
-        say('そのGoogleアカウントはすでに登録済みです。ゲストの馬・オーナーは自動移行されません。既存のGoogleアカウントを使うなら「既存Googleアカウントに切替」を押してください。');
-      }else{
-        loginStatus.textContent=auth.currentUser?.isAnonymous?'ゲストでログイン中':
-          (auth.currentUser?'ログイン済み':'未ログイン');
-        say('Googleログインに失敗：'+authFailureMessage(err));
-      }
-    }finally{
-      authPending=false;refreshAuthButtons();updateSubmit();
-    }
+      const code=String(err?.code||'unknown');
+      const hints={
+        'auth/popup-blocked':'ポップアップを許可してください。',
+        'auth/popup-closed-by-user':'Googleログインがキャンセルされました。',
+        'auth/unauthorized-domain':'Firebase承認済みドメインに aomusi45.github.io が必要です。',
+        'auth/operation-not-allowed':'FirebaseでGoogle認証を有効にしてください。',
+        'auth/network-request-failed':'通信状況を確認してください。',
+        'auth/credential-already-in-use':'Googleアカウントが別ユーザーで使用中です。運営者にご相談ください。'
+      };
+      say('Googleログインに失敗：'+(hints[code]||'通常のChromeなどで開いて再試行してください。')+' ['+code+']');
+    }finally{authPending=false;updateSubmit();}
   });
-  guest.addEventListener('click',async()=>{
-    if(!ready||busy||authPending)return;
-    if(authPersistence!=='local'){
-      say('このブラウザは保存機能が制限されているため、ゲスト登録を停止しています。Googleでログインしてください。');return;
-    }
-    if(auth.currentUser&&!auth.currentUser.isAnonymous){
-      say('Googleログイン済みです。ゲストへ切り替えるとオーナー・登録馬を引き継げないため、切り替えを停止しました。');return;
-    }
-    authPending=true;refreshAuthButtons();updateSubmit();
-    try{await sdk.signInAnonymously(auth);}
-    catch(err){say('ゲストログインに失敗：'+String(err.code||err.message||err));}
-    finally{authPending=false;refreshAuthButtons();updateSubmit();}
+  ownerInput.addEventListener('input',updateSubmit);
+  ownerSave.addEventListener('click',async()=>{
+    if(!isGoogle()||busy||authPending||reservedOwnerName||!profileLoaded)return;
+    const ownerName=cleanOwner(ownerInput.value);
+    if(!validOwner(ownerName)){say('オーナー名は1〜24文字で入力してください。');return;}
+    busy=true;updateSubmit();say('Googleアカウントへオーナー名を保存中…');
+    try{
+      await workerRequest('/owner',{ownerName});
+      await loadProfile(auth.currentUser,true);
+    }catch(err){say('オーナー名を登録できません：'+String(err.message||err));}
+    finally{busy=false;updateSubmit();}
   });
-  // New encrypted VS files: the browser cannot decrypt them, by design.
-  // Only the private-key Worker can decrypt and persist the normalized roster.
   const SEALED_FORMAT='derby-fantasy-vs-sealed';
   const SEALED_KEY_ID='dbf-vs-20261110-k1';
-  function validSealed(raw){
-    return raw && raw.format===SEALED_FORMAT && raw.version===2 &&
-      raw.keyId===SEALED_KEY_ID && raw.keyWrap==='RSA-OAEP-SHA256' &&
-      raw.cipher==='AES-256-GCM' &&
-      typeof raw.wrappedKey==='string' && raw.wrappedKey.length<1024 &&
-      typeof raw.iv==='string' && raw.iv.length<80 &&
-      typeof raw.data==='string' && raw.data.length<1600000;
-  }
-  function applyParsedHorse(data,serial){
-    if(serial!==selectionSerial)return;
-    chosen=normalize(data);
-    if(reservedOwnerName)ownerInput.value=reservedOwnerName;
-    else if(chosen.jsonOwner)ownerInput.value=chosen.jsonOwner;
-    else if(!ownerInput.value && auth?.currentUser?.displayName){
-      const publicName=cleanOwner(auth.currentUser.displayName);
-      if(validOwner(publicName))ownerInput.value=publicName;
-    }
-    preview.textContent='登録予定：'+chosen.name+' ／ '+chosen.runner.age+'歳 ／ 装備反映後の7能力';
-    say(ownRegistration ? '登録済みの馬は変更できません。出走完了まで登録は固定です。' :
-      (auth?.currentUser?'「この馬を公式VSに登録する」を押してください。':'ログインしてから登録してください。'));
-    updateSubmit();
-  }
+  function validSealed(raw){return raw&&raw.format===SEALED_FORMAT&&raw.version===2&&
+    raw.keyId===SEALED_KEY_ID&&raw.keyWrap==='RSA-OAEP-SHA256'&&
+    raw.cipher==='AES-256-GCM'&&typeof raw.wrappedKey==='string'&&raw.wrappedKey.length<1024&&
+    typeof raw.iv==='string'&&raw.iv.length<80&&typeof raw.data==='string'&&raw.data.length<1600000;}
   file.addEventListener('change',async()=>{
-    const serial=++selectionSerial;
-    chosen=null; preview.textContent=''; updateSubmit();
+    const serial=++selectionSerial;chosen=null;preview.textContent='';updateSubmit();
     const f=file.files?.[0];if(!f)return;
     if(f.size>1048576||f.size===0||!(/\.(json|dbfvs)$/i.test(f.name))){
-      say('1MB以下の .dbfvs または .json を選択してください。');return;
+      say('1MB以下のVS登録馬ファイルを選んでください。');return;
     }
     try{
-      const raw=await f.text();
-      if(serial!==selectionSerial)return;
+      const raw=await f.text();if(serial!==selectionSerial)return;
       const parsed=JSON.parse(raw);
-      // New DBF game exports use .dbfvs.json; also support legacy .dbfvs.
-      // Detect sealed payloads by format as well, not only by filename.
-      const sealedFile=/\.dbfvs(?:\.json)?$/i.test(f.name) || parsed?.format===SEALED_FORMAT;
+      const sealedFile=/\.dbfvs(?:\.json)?$/i.test(f.name)||parsed?.format===SEALED_FORMAT;
       if(sealedFile){
-        if(!validSealed(parsed))throw Error('旧式または非対応の暗号化VSデータです。新しいDBFゲームから書き出し直してください。');
+        if(!validSealed(parsed))throw Error('非対応の暗号化データです。新しいゲームから書き出し直してください。');
         chosen={sealed:true,envelope:parsed};
-        preview.textContent='自動暗号化VS馬：'+f.name+'（馬名・能力は登録サーバーで確認）';
-        say(workerReady()?'パスワード不要です。「この馬を公式VSに登録する」を押してください。':
-          '管理者による暗号化登録サーバーの設定がまだ終わっていません。');
+        preview.textContent='暗号化VS馬ファイル：'+f.name+'（登録サーバーで検証します）';
       }else{
-        if(parsed?.format==='derby-fantasy-vs-locked')
-          throw Error('旧式の暗号化VSデータです。新しいDBFゲームから書き出し直してください。');
-        applyParsedHorse(parsed,serial);
+        if(parsed?.format==='derby-fantasy-vs-locked')throw Error('旧式ファイルです。新しいゲームから書き出してください。');
+        chosen=normalize(parsed);
+        preview.textContent='登録予定の馬：'+chosen.name+' ／ '+chosen.runner.age+'歳';
       }
-    }catch(err){if(serial===selectionSerial)say('読み込めません：'+String(err.message||err));}
+      say('この馬を保存すると、20戦終了まで変更できません。');
+    }catch(err){if(serial===selectionSerial)say('馬データを読み込めません：'+String(err.message||err));}
     updateSubmit();
   });
   submit.addEventListener('click',async()=>{
-    if(!ready||!chosen||!auth.currentUser||busy||authPending||ownRegistration)return;
-    if(!acceptingNow()){say('受付時間外のため登録できません。');renderPublicStatus();return;}
-    const ownerName=cleanOwner(ownerInput.value);
-    if(ownerName&&!validOwner(ownerName)){say('公開するオーナー名は1〜24文字にしてください。');return;}
-    if(!chosen.sealed&&!validOwner(ownerName)){say('公開するオーナー名を1〜24文字で入力してください。');return;}
-    busy=true;updateSubmit();say('公式VS登録処理中…');
+    if(!isGoogle()||busy||!chosen||!reservedOwnerName||!profileLoaded)return;
+    if(savedHorse&&savedHorse.appearances!==20){say('20戦終了まで新しい馬に変更できません。');return;}
+    busy=true;updateSubmit();say('愛馬の能力を公式サーバーに保存しています…');
     try{
-      const user=auth.currentUser;
-      let horseName,horseId,publicOwner;
-      if(!workerReady())throw Error('公式登録サーバーの設定が必要です。');
-      if(ownRegistration)throw Error('登録済みの馬は出走まで変更できません。');
-      if(!acceptingNow())throw Error('受付時間外のため登録できません。');
-      // Registration is immutable until a published, completed race consumes it.
-      const existingSnap=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
-      if(existingSnap.exists()){
-        const oldHorse=String(existingSnap.data().horseName||'登録済み馬');
-        throw Error('「'+oldHorse+'」は登録済みです。出走まで差し替え・再登録できません。');
-      }
-      const token=await sdk.getIdToken(user);
-      // All registration paths now use the server's atomic owner-name claim.
-      // Never send a password or private key to the server.
-      const response=await fetch(SECURE_REGISTER_URL.replace(/\/+$/,'')+
-        (chosen.sealed?'/register':'/register-json'),{
-        method:'POST',mode:'cors',cache:'no-store',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-        body:JSON.stringify(chosen.sealed?
-          {envelope:chosen.envelope,ownerName}:
-          {snapshot:chosen.originalSnapshot,ownerName})
-      });
-      let result;
-      try{result=await response.json();}
-      catch(_){throw Error('登録サーバーからの応答が不正です。');}
-      if(!response.ok||!result.ok){
-        const errorTag=typeof result.code==='string' ? ' ['+result.code+']' : '';
-        throw Error((result.error||'登録に失敗しました。')+errorTag);
-      }
-      horseName=result.horseName;horseId=result.horseId;publicOwner=result.ownerName;
-      // Verify what Firestore actually committed, never claim success early.
-      const stored=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
-      if(!stored.exists()||stored.data().horseId!==horseId)
-        throw Error('登録情報を読み戻せませんでした。');
-      reservedOwnerName=publicOwner;
-      profileLoaded=true;ownerInput.value=publicOwner;ownerInput.readOnly=true;
-      if(ownerHint)ownerHint.textContent='専用オーナー名として取得済み。出走後も保存されます。';
-      say('登録完了：'+horseName+'（オーナー：'+publicOwner+'）。今週はこの馬1頭で参加し、日曜日で終了します。');
-      preview.textContent='※ 週に最大120頭。馬は1週間限定で登録し、翌週は20戦未満でも永久に再登録できません。同一GⅠ通算2回・週内最大20戦。';
-      localConfirmed={slot:nextSlot(),uid:user.uid,horseName:String(stored.data().horseName||horseName),
-        ownerName:String(stored.data().ownerName||publicOwner),
-        appearanceCount:validAppearances(result.appearances)?result.appearances:null};
-      await updateOwnFromDocument(user,stored.data(),result.appearances);
-      await refreshHorseLock(user);
-      await refreshWeeklyCapacity();
-      await refreshSharedEntries();
-      renderPublicStatus();
-    }catch(err){say('登録に失敗：'+String(err.code||err.message||err));}
+      const result=await workerRequest(chosen.sealed?'/horse/save':'/horse/save-json',
+        chosen.sealed?{envelope:chosen.envelope}:{snapshot:chosen.originalSnapshot});
+      await loadProfile(auth.currentUser,false);
+      chosen=null;file.value='';preview.textContent='';
+      say('愛馬「'+result.horseName+'」を保存しました。次からファイル選択は不要です。受付時間になったら「このレースに登録」を押してください。');
+    }catch(err){say('登録馬を保存できません：'+String(err.message||err));}
     finally{busy=false;updateSubmit();}
   });
-  // Display-only identity for the personal results panel. Never used for access control.
-  // The name is sourced from the server-verified immutable owner profile.
-  window.DBFMyArenaIdentity=Object.freeze({
-    snapshot(){
-      if(!auth?.currentUser || !profileLoaded || !validOwner(reservedOwnerName))return null;
-      const week=currentWeek();
-      const active=lockedHorse?.weekIndex===week?lockedHorse:null;
-      return {ownerName:reservedOwnerName,
-        horseName:active&&typeof active.horseName==='string'?active.horseName:'',
-        weekIndex:week};
-    }
+  raceSubmit.addEventListener('click',async()=>{
+    if(!isGoogle()||busy||!savedHorse||savedHorse.appearances>=20||!acceptingNow())return;
+    busy=true;updateSubmit();say('保存済みの愛馬でレースへの申込みを処理中…');
+    try{
+      const result=await workerRequest('/enter');
+      const doc=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',auth.currentUser.uid));
+      if(!doc.exists()||doc.data().horseName!==result.horseName)
+        throw Error('サーバーで申込みの確認ができません。少ししてから状態を再確認してください。');
+      await updateOwnFromDocument(auth.currentUser,doc.data(),result.appearances);
+      await loadProfile(auth.currentUser,false);await refreshSharedEntries();
+      say('レース登録完了：'+result.horseName+'（'+result.appearances+'/20戦終了）。レース結果の確定後、次のレースに登録できます。');
+    }catch(err){say('レースへの登録を確認できません：'+String(err.message||err));}
+    finally{busy=false;updateSubmit();}
   });
+  window.DBFMyArenaIdentity=Object.freeze({snapshot(){
+    if(!isGoogle()||!profileLoaded||!validOwner(reservedOwnerName))return null;
+    return {ownerName:reservedOwnerName,
+      horseName:savedHorse?.horseName||'',weekIndex:currentWeek()};
+  }});
   window.VSEntry=Object.freeze({normalize});
-  init().catch(err=>{
-    ready=false;refreshAuthButtons();updateSubmit();say('Firebaseに接続できません：'+String(err.code||err.message||err));
-  });
+  init().catch(err=>{ready=false;updateSubmit();say('Firebase初期化エラー：'+String(err.message||err));});
 })();
