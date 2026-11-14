@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Repair the JST-week registration quota from immutable first-entry records.
+"""Repair the JST-week registration quota from persistent owner-to-horse enrollment records.
 
-One owner may register only one horse per week. Subsequent entries into other
-G1 races are *not* additional horses. This job never touches an owner's horse,
+One owner can register one active horse at a time, keeping it until 20 starts.
+Subsequent race applications do not consume new weekly owner slots. This job never touches an owner's horse,
 entry, starts, prize money, or permanent registration history.
 
 A single conditional Firestore write avoids overwriting a concurrent admission.
@@ -32,38 +32,36 @@ def jst_week(ms: int) -> int:
 
 
 def owner_count(rows: list[dict], week_index: int) -> tuple[int, int]:
-    """Count unique weekly owners, NOT race applications or document count.
+    """Count persistent per-Google-owner horse locks enrolled this week.
 
-    Two records for the same owner in one week are evidence of a bad earlier
-    writer; retain both immutable records but charge only one weekly slot.
+    One owner still consumes one weekly slot if switching to a second horse
+    only after 20 completed starts. Never count per-race registration writes.
     """
-    owners: dict[str, str] = {}
+    owners: set[str] = set()
     duplicate = 0
     for doc in rows:
         if not isinstance(doc, dict) or not isinstance(doc.get('name'), str):
-            raise ValueError('永久登録履歴の形式が不正です')
-        fields = doc.get('fields')
-        if not isinstance(fields, dict):
-            raise ValueError('永久登録履歴にフィールドがありません')
-        uid = fields.get('ownerUid', {}).get('stringValue')
-        key = fields.get('horseKey', {}).get('stringValue')
-        week_raw = fields.get('weekIndex', {}).get('integerValue')
-        if not isinstance(uid, str) or not UID_RE.fullmatch(uid):
-            raise ValueError('永久登録履歴に不正なオーナーIDがあります')
-        if not isinstance(key, str) or not KEY_RE.fullmatch(key):
-            raise ValueError('永久登録履歴に不正な馬IDがあります')
-        if doc['name'].rsplit('/', 1)[-1] != key:
-            raise ValueError('永久登録履歴の識別子が一致しません')
+            raise ValueError('保存済み登録馬の形式が不正です')
+        f = doc.get('fields')
+        if not isinstance(f, dict):
+            raise ValueError('保存済み登録馬の内容が不正です')
+        uid = f.get('ownerUid', {}).get('stringValue')
+        key = f.get('horseKey', {}).get('stringValue')
+        week_raw = f.get('weekIndex', {}).get('integerValue')
+        if not isinstance(uid, str) or not UID_RE.fullmatch(uid) or not isinstance(key,str) or not KEY_RE.fullmatch(key):
+            raise ValueError('登録者IDまたは馬の識別番号が不正です')
+        if doc['name'].rsplit('/', 1)[-1] != uid:
+            raise ValueError('登録者と保存済みデータが一致しません')
         try:
             stored_week = int(week_raw)
         except (ValueError, TypeError):
-            raise ValueError('永久登録履歴に登録週がありません') from None
+            raise ValueError('保存済みの登録週が不正です') from None
         if stored_week != week_index:
-            raise ValueError('指定週以外の永久登録履歴が返されました')
+            raise ValueError('別の週の登録馬が混入しています')
         if uid in owners:
             duplicate += 1
         else:
-            owners[uid] = key
+            owners.add(uid)
     return len(owners), duplicate
 
 
@@ -90,7 +88,10 @@ def quota_doc(token: str, week_index: int):
 def registered_this_week(token: str, week_index: int) -> list[dict]:
     # Filter at Firestore so all historic permanent records aren't downloaded.
     query = {'structuredQuery': {
-        'from': [{'collectionId': 'vs_ever_registered_horses'}],
+        'from': [{'collectionId': 'vs_owner_horse_locks'}],
+        # A frozen roster can contain large confidential horse details;
+        # projection keeps this reconciliation to three small metadata fields.
+        'select': {'fields': [{'fieldPath': f} for f in ('ownerUid','horseKey','weekIndex')]},
         'where': {'fieldFilter': {
             'field': {'fieldPath': 'weekIndex'},
             'op': 'EQUAL', 'value': {'integerValue': str(week_index)}

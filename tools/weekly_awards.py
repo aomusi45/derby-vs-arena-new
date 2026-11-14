@@ -347,7 +347,14 @@ def sealed_champion_source(token,week,winner,record):
     identity=winner['rankingId']
     if not identity.startswith('p_'):
         return None,'com'
-    stage=doc_get(token,'vs_weekly_candidate_payloads/'+identity)
+    # V24 may enroll the same frozen horse in several different JST weeks.
+    # Each week has a separate immutable source document; keep the V19
+    # one-week identity fallback for previously registered horses.
+    week_idx=registered_horses.jst_week_index(int(
+        datetime.fromisoformat(week).replace(tzinfo=JST).timestamp()*1000))
+    stage=doc_get(token,'vs_weekly_candidate_payloads/'+identity+'_'+str(week_idx))
+    if stage is None:
+        stage=doc_get(token,'vs_weekly_candidate_payloads/'+identity)
     if stage is None:
         # Old registrations made before this feature have no original file.
         # The official prize winner is still awarded, but falsely claiming the
