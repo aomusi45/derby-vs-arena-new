@@ -51,10 +51,39 @@ def as_value(v):
     if isinstance(v,int) and not isinstance(v,bool):return {'integerValue':str(v)}
     if isinstance(v,float) and math.isfinite(v):return {'doubleValue':v}
     if isinstance(v,dict):return {'mapValue':{'fields':{k:as_value(x) for k,x in v.items()}}}
+    if isinstance(v,list):return {'arrayValue':{'values':[as_value(x) for x in v]}}
     raise ValueError('invalid firestore value')
 
 
 def fields(d):return {k:as_value(v) for k,v in d.items()}
+
+
+def read_history(value):
+    """Decode published result fields only; missing historical data stays missing."""
+    if value is None:return []
+    if not isinstance(value,dict) or not isinstance(value.get('arrayValue'),dict):
+        raise ValueError('保存された戦歴の形式が不正です')
+    values=value['arrayValue'].get('values',[])
+    if not isinstance(values,list) or len(values)>20:
+        raise ValueError('戦歴は20戦までです')
+    rows=[]
+    for item in values:
+        f=item.get('mapValue',{}).get('fields',{})
+        if not isinstance(f,dict):raise ValueError('戦歴データが不正です')
+        try:
+            slot=int(f['slot']['integerValue'])
+            name=f['raceName']['stringValue']
+            place=int(f['place']['integerValue'])
+            prize=int(f['prizeYen']['integerValue'])
+        except (KeyError,TypeError,ValueError) as exc:
+            raise ValueError('戦歴データの項目が不正です') from exc
+        if (slot<0 or not isinstance(name,str) or not 0<len(name)<=100 or
+                not 1<=place<=18 or prize<0):
+            raise ValueError('戦歴データの値が不正です')
+        rows.append({'slot':slot,'raceName':name,'place':place,'prizeYen':prize})
+    if len({r['slot'] for r in rows})!=len(rows):
+        raise ValueError('同じ開催枠の戦歴が重複しています')
+    return sorted(rows,key=lambda r:r['slot'])
 
 
 def request(token,url,body=None):
@@ -109,16 +138,12 @@ def race_rows(meta):
         identity=make_id(row)
         if identity in seen:raise ValueError('同じ馬が1レースに重複しています')
         seen.add(identity)
-        sex,age=row.get('sex'),row.get('age')
-        # Optional for records made before V28; never invent historic sex/age.
-        traits={'sex':sex,'age':age} if sex in ('牡','牝','セ') and type(age) is int and 2<=age<=8 else {}
         rows.append({'rankingId':identity,'horseName':name,'ownerName':owner,
-                     'isCom':identity.startswith('c_'),'place':place,
-                     'prizeYen':row['prizeYen'],**traits})
+                     'isCom':identity.startswith('c_'),'place':place,'prizeYen':row['prizeYen']})
     return rows
 
 
-def update_com(token,row,slot):
+def update_com(token,row,slot,race_name):
     """Advance one COM's persistent 20-start cycle, independent of JST weeks.
 
     The caller atomically commits this write with its weekly-board update and
@@ -140,6 +165,8 @@ def update_com(token,row,slot):
         places={f'p{i}':int(maps.get(f'p{i}',{}).get('integerValue','0')) for i in range(1,6)}
         if not 0<=count<20 or earned<0 or total<count or any(n<0 for n in places.values()):
             raise ValueError('COM馬の20戦区切りの記録が不正です')
+        history=read_history(raw.get('cycleRaceResults'))
+        if len(history)>count:raise ValueError('COM馬の戦歴件数が出走数を超えています')
         extra={}
     else:
         # Old builds did not preserve prize for the unfinished lifetime block.
@@ -150,27 +177,34 @@ def update_com(token,row,slot):
         count=earned=0
         total=old_count
         places={f'p{i}':0 for i in range(1,6)}
+        history=[]
         extra={'legacyStartsAtCom20Migration':old_count}
     count+=1
+    history.append({'slot':slot,'raceName':race_name,
+                    'place':row['place'],'prizeYen':row['prizeYen']})
+    if len(history)>20:raise ValueError('COM馬の20戦内訳が上限を超えました')
     earned+=row['prizeYen']
     if 1<=row['place']<=5:
         places[f'p{row["place"]}']+=1
     completed=earned if count==20 else None
     completed_places=places.copy() if completed is not None else None
+    completed_results=history.copy() if completed is not None else None
     if completed is not None:
+        history=[]
         count=earned=0
         places={f'p{i}':0 for i in range(1,6)}
     data={'horseName':row['horseName'],'comCycleVersion':2,
           'count':count,'cyclePrizeYen':earned,'cyclePlaces':places,
-          'totalStarts':total+1,'lastSlot':slot,**extra}
+          'totalStarts':total+1,'lastSlot':slot,
+          'cycleRaceResults':history,**extra}
     write={'update':{'name':BASE+'/'+path,'fields':fields(data)},
            'updateMask':{'fieldPaths':list(data)+[
                'cyclePrize','lastCompletedCyclePrize']},
            'currentDocument':{'updateTime':previous['updateTime']} if previous else {'exists':False}}
-    return write,completed,completed_places,count
+    return write,completed,completed_places,count,completed_results
 
 
-def com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts):
+def com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts,completed_results):
     """Only completed 20-start blocks may earn COM ranking money.
 
     Per-week best completed block wins; active partial blocks stay out of the
@@ -197,6 +231,7 @@ def com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts
         best=old_sum if old_starts==20 else 0
         blocks=1 if old_starts==20 else 0
         best_places={f'p{i}':0 for i in range(1,6)}
+    best_results=read_history(f.get('comBest20RaceResults'))
     if blocks<0 or any(n<0 for n in best_places.values()):
         raise ValueError('COM馬の完成ブロック情報が不正です')
     if completed is not None:
@@ -206,13 +241,14 @@ def com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts
         if completed>best or (completed==best and tuple(completed_places.values())>tuple(best_places.values())):
             best=completed
             best_places=completed_places.copy()
-    traits={k:row[k] for k in ('sex','age') if k in row}
+            best_results=completed_results.copy() if completed_results is not None else []
     data={'horseName':row['horseName'],'ownerName':row['ownerName'],
-          **traits,'isCom':True,'weekStart':week,'rankingId':row['rankingId'],
+          'isCom':True,'weekStart':week,'rankingId':row['rankingId'],
           'starts':20 if blocks else 0,'prizeYen':best,
           'comPrizeVersion':2,'comCompletedBlocks':blocks,
           'comCycleStarts':cycle_starts,
-          'comBest20PrizeYen':best,'comBest20Places':best_places}
+          'comBest20PrizeYen':best,'comBest20Places':best_places,
+          'comBest20RaceResults':best_results}
     # Old partial-block fields are intentionally deleted, not used for ranking.
     old_fields=['comBlockStarts','comBlockPrizeYen','comLegacyStarts',
                 'comLegacyTotalYen','comLegacyIncomplete']
@@ -227,10 +263,7 @@ def commit_race(token,meta):
     slot=meta['slot']
     week=week_start(datetime.fromtimestamp(slot*SLOT_MS/1000,timezone.utc))
     receipt_path=f'vs_weekly_race_receipts/{slot}'
-    # Preserve the V27 receipt digest. Added public trait metadata must NOT
-    # change a committed race's receipt or double-credit its prize/start.
-    receipt_rows=[{k:v for k,v in row.items() if k not in ('sex','age')} for row in rows]
-    digest=hashlib.sha256(json.dumps(receipt_rows,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
+    digest=hashlib.sha256(json.dumps(rows,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
     race_name=meta.get('name')
     if not isinstance(race_name,str) or not race_name or len(race_name)>100:
         raise ValueError('レース名が不正です')
@@ -241,8 +274,7 @@ def commit_race(token,meta):
         return {'fieldPath':'raceResults','appendMissingElements':{'values':[
             {'mapValue':{'fields':fields({
                 'slot':slot,'raceName':race_name,'place':row['place'],
-                'prizeYen':row['prizeYen'],
-                **{k:row[k] for k in ('sex','age') if k in row}})}}
+                'prizeYen':row['prizeYen']})}}
         ]}}
     prior=doc_get(token,receipt_path)
     if prior:
@@ -272,12 +304,11 @@ def commit_race(token,meta):
         if row['isCom']:
             # The previous implementation always incremented prizeYen here,
             # which displayed lifetime-within-week totals after 20 starts.
-            career,completed,completed_places,cycle_starts=update_com(token,row,slot)
-            writes.append(com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts))
+            career,completed,completed_places,cycle_starts,completed_results=update_com(token,row,slot,race_name)
+            writes.append(com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts,completed_results))
             writes.append(career)
             continue
         current={'horseName':row['horseName'],'ownerName':row['ownerName'],'isCom':False,
-                 **{k:row[k] for k in ('sex','age') if k in row},
                  'weekStart':week,'rankingId':row['rankingId']}
         writes.append({'update':{'name':BASE+'/'+path,'fields':fields(current)},
             'updateMask':{'fieldPaths':list(current)},
@@ -326,21 +357,11 @@ def ranking(token,week):
         if prizes<0 or starts<0:raise ValueError('週間賞金の数値が不正です')
         counts=[int(p.get('p'+str(i),{}).get('integerValue','0')) for i in range(1,6)]
         if any(n<0 for n in counts):raise ValueError('着順記録の数値が不正です')
-        race_results=[]
-        if not com:
-            # Preserve registered horses' existing weekly result history.
-            for value in f.get('raceResults',{}).get('arrayValue',{}).get('values',[]):
-                row=value.get('mapValue',{}).get('fields',{})
-                race_results.append({'slot':int(row['slot']['integerValue']),
-                    'raceName':row['raceName']['stringValue'],
-                    'place':int(row['place']['integerValue']),
-                    'prizeYen':int(row['prizeYen']['integerValue']),
-                    **({'sex':row['sex']['stringValue'],'age':int(row['age']['integerValue'])}
-                       if 'sex' in row and 'age' in row else {})})
-            if len(race_results)>20:raise ValueError('登録馬の週間出走記録が20戦を超えています')
-        traits={'sex':f['sex']['stringValue'],'age':int(f['age']['integerValue'])} if 'sex' in f and 'age' in f else {}
+        # COM: best completed 20-start block only. Player: this week's official starts.
+        # Older blocks without a saved per-race breakdown remain intentionally partial.
+        race_results=read_history(f.get('comBest20RaceResults' if com else 'raceResults'))
         result.append({'horseName':f['horseName']['stringValue'],
-            'ownerName':f['ownerName']['stringValue'],**traits,'prizeYen':prizes,
+            'ownerName':f['ownerName']['stringValue'],'prizeYen':prizes,
             'rankingId':identity,'starts':starts,'places':counts,
             'raceResults':race_results})
     return sorted(result,key=lambda h:(-h['prizeYen'],*[-n for n in h['places']],h['horseName'],h['ownerName'],h['rankingId']))
@@ -360,14 +381,7 @@ def sealed_champion_source(token,week,winner,record):
     identity=winner['rankingId']
     if not identity.startswith('p_'):
         return None,'com'
-    # V24 may enroll the same frozen horse in several different JST weeks.
-    # Each week has a separate immutable source document; keep the V19
-    # one-week identity fallback for previously registered horses.
-    week_idx=registered_horses.jst_week_index(int(
-        datetime.fromisoformat(week).replace(tzinfo=JST).timestamp()*1000))
-    stage=doc_get(token,'vs_weekly_candidate_payloads/'+identity+'_'+str(week_idx))
-    if stage is None:
-        stage=doc_get(token,'vs_weekly_candidate_payloads/'+identity)
+    stage=doc_get(token,'vs_weekly_candidate_payloads/'+identity)
     if stage is None:
         # Old registrations made before this feature have no original file.
         # The official prize winner is still awarded, but falsely claiming the
@@ -454,8 +468,8 @@ def award_previous(token,current_week,now):
     record={'weekStart':past_week,'weekEnd':(monday-timedelta(days=1)).date().isoformat(),
             'generation':n+1,'horseName':winner['horseName'],
             'ownerName':winner['ownerName'],'prizeYen':winner['prizeYen'],
-            **{k:winner[k] for k in ('sex','age') if k in winner},
-            'rankingId':winner['rankingId'],**award_calendar(past_week)}
+            'rankingId':winner['rankingId'],
+            'raceResults':winner['raceResults'],**award_calendar(past_week)}
     source_write,status=sealed_champion_source(token,past_week,winner,record)
     record['archiveStatus']=status
     record['hasReplayHorse']=status=='encrypted'
@@ -479,9 +493,8 @@ def archive(token):
             for k in ('weekStart','weekEnd','generation','horseName','ownerName','prizeYen')}
         cal=award_calendar(item['weekStart'])
         item.update(cal)
-        if 'sex' in f and 'age' in f:
-            item['sex']=f['sex']['stringValue'];item['age']=int(f['age']['integerValue'])
         item['hasReplayHorse']=f.get('hasReplayHorse',{}).get('booleanValue',False)
+        item['raceResults']=read_history(f.get('raceResults'))
         result.append(item)
     return sorted(result,key=lambda r:r['generation'],reverse=True)
 
@@ -492,7 +505,6 @@ def public_board(token,now):
     # Only PUBLIC owner names and race earnings. Never publish UID, horseKey,
     # encrypted data, private horse statistics or future registrations.
     standings=[{'rank':pos,'horseName':horse['horseName'],
-                **{k:horse[k] for k in ('sex','age') if k in horse},
                 'ownerName':horse['ownerName'],'prizeYen':horse['prizeYen']}
                for pos,horse in enumerate(board,1)]
     # Race results are already published when each race completes. Export
@@ -503,7 +515,7 @@ def public_board(token,now):
     race_results.sort(key=lambda r:(-r['slot'],r['place'],r['horseName']))
     result={'version':1,'timezone':'Asia/Tokyo','weekStart':current,
             'weekEnd':(datetime.fromisoformat(current)+timedelta(days=6)).date().isoformat(),
-            'top10':[{k:v for k,v in row.items() if k in ('horseName','ownerName','sex','age','prizeYen','starts')}
+            'top10':[{k:v for k,v in row.items() if k in ('horseName','ownerName','prizeYen','starts','raceResults')}
                      for row in board[:10]],
             'standings':standings,
             'raceResults':race_results,
