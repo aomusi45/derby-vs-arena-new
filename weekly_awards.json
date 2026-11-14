@@ -184,6 +184,14 @@
     },
     {
       "rank": 13,
+      "horseName": "サンプルホース150",
+      "sex": "牡",
+      "age": 4,
+      "ownerName": "管理人あおむし",
+      "prizeYen": 300000000
+    },
+    {
+      "rank": 14,
       "horseName": "ダイワスカーレッタ",
       "sex": "牝",
       "age": 3,
@@ -191,7 +199,7 @@
       "prizeYen": 292000000
     },
     {
-      "rank": 14,
+      "rank": 15,
       "horseName": "ブエナビスター",
       "sex": "牝",
       "age": 3,
@@ -199,7 +207,7 @@
       "prizeYen": 199000000
     },
     {
-      "rank": 15,
+      "rank": 16,
       "horseName": "ラヴズオンリーニャ",
       "sex": "牝",
       "age": 3,
@@ -207,7 +215,7 @@
       "prizeYen": 172500000
     },
     {
-      "rank": 16,
+      "rank": 17,
       "horseName": "エアグルービー",
       "sex": "牝",
       "age": 3,
@@ -215,20 +223,12 @@
       "prizeYen": 171500000
     },
     {
-      "rank": 17,
+      "rank": 18,
       "horseName": "リバティアイラン",
       "sex": "牝",
       "age": 3,
       "ownerName": "",
       "prizeYen": 150000000
-    },
-    {
-      "rank": 18,
-      "horseName": "サンプルホース150",
-      "sex": "牡",
-      "age": 4,
-      "ownerName": "管理人あおむし",
-      "prizeYen": 120000000
     },
     {
       "rank": 19,
@@ -312,6 +312,16 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994055,
+      "raceName": "マイルチャンピオンシップ",
+      "place": 1,
+      "prizeYen": 180000000,
+      "sex": "牡",
+      "age": 4
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
