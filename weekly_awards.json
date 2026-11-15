@@ -35,8 +35,8 @@
     {
       "horseName": "サンプルホース150",
       "ownerName": "管理人あおむし",
-      "prizeYen": 2185000000,
-      "starts": 14,
+      "prizeYen": 2305000000,
+      "starts": 15,
       "raceResults": [
         {
           "slot": 1994053,
@@ -121,6 +121,17 @@
           "raceName": "ジャパンカップ",
           "place": 5,
           "prizeYen": 50000000
+        },
+        {
+          "slot": 1994125,
+          "raceName": "天皇賞（秋）",
+          "place": 2,
+          "prizeYen": 120000000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "サンプルホース150",
+          "firstOwnerName": "",
+          "secondOwnerName": "管理人あおむし",
+          "firstSecondMargin": "2 1/2馬身"
         }
       ]
     },
@@ -189,7 +200,7 @@
       "rank": 5,
       "horseName": "サンプルホース150",
       "ownerName": "管理人あおむし",
-      "prizeYen": 2185000000
+      "prizeYen": 2305000000
     },
     {
       "rank": 6,
@@ -373,6 +384,19 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994125,
+      "raceName": "天皇賞（秋）",
+      "place": 2,
+      "prizeYen": 120000000,
+      "firstHorseName": "アーモンドアイス",
+      "secondHorseName": "サンプルホース150",
+      "firstOwnerName": "",
+      "secondOwnerName": "管理人あおむし",
+      "firstSecondMargin": "2 1/2馬身"
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
