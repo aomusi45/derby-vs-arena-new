@@ -80,10 +80,58 @@ def read_history(value):
         if (slot<0 or not isinstance(name,str) or not 0<len(name)<=100 or
                 not 1<=place<=18 or prize<0):
             raise ValueError('戦歴データの値が不正です')
-        rows.append({'slot':slot,'raceName':name,'place':place,'prizeYen':prize})
+        record={'slot':slot,'raceName':name,'place':place,'prizeYen':prize}
+        # V33 public top-two details; absent older fields are not manufactured.
+        for key,limit in (('firstHorseName',60),('secondHorseName',60),
+                          ('firstOwnerName',24),('secondOwnerName',24),
+                          ('firstSecondMargin',40)):
+            item_value=f.get(key)
+            if item_value is None:continue
+            text_value=item_value.get('stringValue') if isinstance(item_value,dict) else None
+            if not isinstance(text_value,str) or len(text_value)>limit:
+                raise ValueError('戦歴の1・2着情報が不正です')
+            if key.endswith('HorseName') and not text_value:
+                raise ValueError('戦歴の馬名が空です')
+            record[key]=text_value
+        rows.append(record)
     if len({r['slot'] for r in rows})!=len(rows):
         raise ValueError('同じ開催枠の戦歴が重複しています')
     return sorted(rows,key=lambda r:r['slot'])
+
+
+def top_two_public_result(meta):
+    """Public 1st/2nd context from actual official results (2nd margin = gap).
+
+    Never infer missing names, owners, or margins from time differences.
+    An empty, explicitly recorded owner name means a COM horse.
+    """
+    results=meta.get('results',[])
+    if not isinstance(results,list) or len(results)<2:return {}
+    first,second=results[:2]
+    if not isinstance(first,dict) or not isinstance(second,dict):return {}
+    if first.get('place')!=1 or second.get('place')!=2:return {}
+    data={}
+    for prefix,row in (('first',first),('second',second)):
+        name=row.get('name')
+        if isinstance(name,str) and 0<len(name)<=60:
+            data[prefix+'HorseName']=name
+        # Explicit empty-string owner is a known COM horse; missing key is unknown.
+        owner=row.get('ownerName')
+        if owner is None and str(row.get('rankingId','')).startswith('c_'):
+            owner=''  # COM identity is explicit in the finalized ranking ID.
+        if isinstance(owner,str) and len(owner)<=24:
+            data[prefix+'OwnerName']=owner
+    margin=second.get('margin')  # First row has the winner's placeholder '―'.
+    if isinstance(margin,str):
+        margin=margin.strip()
+        if margin and margin not in ('―','—','-') and len(margin)<=40:
+            data['firstSecondMargin']=margin
+    return data
+
+
+def race_history_entry(slot,race_name,row,top_two):
+    return {'slot':slot,'raceName':race_name,'place':row['place'],
+            'prizeYen':row['prizeYen'],**top_two}
 
 
 def request(token,url,body=None):
@@ -143,7 +191,7 @@ def race_rows(meta):
     return rows
 
 
-def update_com(token,row,slot,race_name):
+def update_com(token,row,slot,race_name,top_two):
     """Advance one COM's persistent 20-start cycle, independent of JST weeks.
 
     The caller atomically commits this write with its weekly-board update and
@@ -180,8 +228,7 @@ def update_com(token,row,slot,race_name):
         history=[]
         extra={'legacyStartsAtCom20Migration':old_count}
     count+=1
-    history.append({'slot':slot,'raceName':race_name,
-                    'place':row['place'],'prizeYen':row['prizeYen']})
+    history.append(race_history_entry(slot,race_name,row,top_two))
     if len(history)>20:raise ValueError('COM馬の20戦内訳が上限を超えました')
     earned+=row['prizeYen']
     if 1<=row['place']<=5:
@@ -267,14 +314,13 @@ def commit_race(token,meta):
     race_name=meta.get('name')
     if not isinstance(race_name,str) or not race_name or len(race_name)>100:
         raise ValueError('レース名が不正です')
+    top_two=top_two_public_result(meta)
     def result_transform(row):
         # Firestore's arrayUnion keeps race results attached to each weekly
         # player-horse document already loaded for the weekly standings.
         # COM race results are not needed for a player's personal history.
         return {'fieldPath':'raceResults','appendMissingElements':{'values':[
-            {'mapValue':{'fields':fields({
-                'slot':slot,'raceName':race_name,'place':row['place'],
-                'prizeYen':row['prizeYen']})}}
+            {'mapValue':{'fields':fields(race_history_entry(slot,race_name,row,top_two))}}
         ]}}
     prior=doc_get(token,receipt_path)
     if prior:
@@ -304,7 +350,7 @@ def commit_race(token,meta):
         if row['isCom']:
             # The previous implementation always incremented prizeYen here,
             # which displayed lifetime-within-week totals after 20 starts.
-            career,completed,completed_places,cycle_starts,completed_results=update_com(token,row,slot,race_name)
+            career,completed,completed_places,cycle_starts,completed_results=update_com(token,row,slot,race_name,top_two)
             writes.append(com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts,completed_results))
             writes.append(career)
             continue
