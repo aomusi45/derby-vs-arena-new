@@ -26,17 +26,10 @@
       "raceResults": []
     },
     {
-      "horseName": "シンボリルドルフィ",
-      "ownerName": "",
-      "prizeYen": 2338500000,
-      "starts": 20,
-      "raceResults": []
-    },
-    {
       "horseName": "サンプルホース150",
       "ownerName": "管理人あおむし",
-      "prizeYen": 2305000000,
-      "starts": 15,
+      "prizeYen": 2485000000,
+      "starts": 16,
       "raceResults": [
         {
           "slot": 1994053,
@@ -132,8 +125,26 @@
           "firstOwnerName": "",
           "secondOwnerName": "管理人あおむし",
           "firstSecondMargin": "2 1/2馬身"
+        },
+        {
+          "slot": 1994156,
+          "raceName": "安田記念",
+          "place": 1,
+          "prizeYen": 180000000,
+          "firstHorseName": "サンプルホース150",
+          "secondHorseName": "アーモンドアイス",
+          "firstOwnerName": "管理人あおむし",
+          "secondOwnerName": "",
+          "firstSecondMargin": "5 1/2馬身"
         }
       ]
+    },
+    {
+      "horseName": "シンボリルドルフィ",
+      "ownerName": "",
+      "prizeYen": 2338500000,
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "テイエムオペラオン",
@@ -432,15 +443,15 @@
     },
     {
       "rank": 4,
-      "horseName": "シンボリルドルフィ",
-      "ownerName": "",
-      "prizeYen": 2338500000
+      "horseName": "サンプルホース150",
+      "ownerName": "管理人あおむし",
+      "prizeYen": 2485000000
     },
     {
       "rank": 5,
-      "horseName": "サンプルホース150",
-      "ownerName": "管理人あおむし",
-      "prizeYen": 2305000000
+      "horseName": "シンボリルドルフィ",
+      "ownerName": "",
+      "prizeYen": 2338500000
     },
     {
       "rank": 6,
@@ -624,6 +635,19 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994156,
+      "raceName": "安田記念",
+      "place": 1,
+      "prizeYen": 180000000,
+      "firstHorseName": "サンプルホース150",
+      "secondHorseName": "アーモンドアイス",
+      "firstOwnerName": "管理人あおむし",
+      "secondOwnerName": "",
+      "firstSecondMargin": "5 1/2馬身"
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
