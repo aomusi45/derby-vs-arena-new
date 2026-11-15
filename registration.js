@@ -49,6 +49,7 @@
   const weeklyCapLabel=$('vs-weekly-registration-cap');
   let publicCatalog=null,publicManifest=null,ownRegistration=null,ownRegistrationId=null;
   let sharedEntries=null,sharedEntriesError='',sharedEntriesLoading=false;
+  let serverSlotRoster=null,slotRosterBusy=false,slotRosterError='';
   let publicError='',refreshingPublic=false,lastRegistrationName='';
   // Show this browser's server-confirmed registration before the next public snapshot.
   let localConfirmed=null;
@@ -92,6 +93,10 @@
     const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(name));
     return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('').slice(0,24);
   };
+  const bookedSameG1=(slot)=>{
+    const card=slotCard(slot);
+    return !!card&&[...bookedSlots].some(other=>slotCard(other)?.name===card.name);
+  };
   const bookingAvailable=()=>!!savedHorse&&savedHorse.appearances<20&&
     validOwner(reservedOwnerName)&&isGoogle()&&ready&&bookingsLoaded;
   function renderTodayBookings(){
@@ -125,7 +130,7 @@
       const btn=document.createElement('button');btn.type='button';
       const blocked=raceEligibility(savedHorse,card);
       const booked=bookedSlots.has(slot);
-      const sameRace=[...bookedSlots].some(s=>slotCard(s)?.name===card.name);
+      const sameRace=bookedSameG1(slot);
       const closed=now>=ms-7*60*1000;
       if(booked)btn.textContent='予約済み';
       else if(sameRace)btn.textContent='同GⅠ予約済み';
@@ -171,7 +176,7 @@
       if(result.slot!==slot)throw Error('予約したレースの確認に失敗しました');
       bookedSlots.add(slot);bookingsLoaded=true;
       say(jpDate(slot*SLOT_MS)+' '+raceName+' の出走予約が完了しました。');
-      await refreshTodayBookings();
+      await refreshTodayBookings();await refreshSlotRoster();
     }catch(err){say('出走予約に失敗：'+String(err.message||err));await refreshTodayBookings();}
     finally{bookingBusy=false;bookingRenderKey='';renderTodayBookings();updateSubmit();}
   }
@@ -203,6 +208,24 @@
       }
       entryRoster.append(item);
     }
+  }
+  async function refreshSlotRoster(){
+    if(slotRosterBusy||document.hidden)return;
+    const slot=nextSlot();
+    slotRosterBusy=true;
+    try{
+      const r=await fetch(SECURE_REGISTER_URL+'/slot-roster?slot='+slot,{cache:'no-store'});
+      if(!r.ok)throw Error('HTTP '+r.status);
+      const data=await r.json();
+      if(!data?.ok||data.slot!==slot||!Array.isArray(data.entries)||data.entries.length>18||
+         !data.entries.every(v=>typeof v.horseName==='string'&&typeof v.ownerName==='string'&&
+           validSex(v.sex)&&validAge(v.age)))throw Error('サーバーの出走馬一覧が不正です');
+      if(nextSlot()!==slot)return;
+      serverSlotRoster={slot,entries:data.entries};slotRosterError='';
+    }catch(err){
+      slotRosterError=String(err.message||err);
+      console.warn('予約馬の公開出走一覧を取得できません',slotRosterError);
+    }finally{slotRosterBusy=false;renderPublicStatus();}
   }
   function renderPublicStatus(){
     const slot=nextSlot(),slotMs=slot*SLOT_MS;
@@ -249,12 +272,21 @@
     // Public Firestore mirror is authoritative across devices. The GitHub
     // snapshot is used only as a fallback when mirror reads fail.
     const shared=Array.isArray(sharedEntries)?sharedEntries.filter(row=>row.slot===slot):null;
-    const publishedRows=shared===null?rows:shared;
-    // The public roster comes from the server. Only this user's verified
-    // registration may be shown early; never replace another owner's record.
-    let displayed=publishedRows?publishedRows.map(row=>({
-      horseName:row.horseName,ownerName:row.ownerName,appearanceCount:row.appearanceCount,
-      sex:row.sex,age:row.age})):[];
+    const reserved=serverSlotRoster?.slot===slot?serverSlotRoster.entries:null;
+    // Bookings and immediate applications both have a server-owned slot document.
+    // Merge older public mirrors only as a fallback. Never use a local candidate.
+    const rosterSources=[...(reserved?[reserved]:[]),...(shared?[shared]:[]),...(rows?[rows]:[])];
+    const byOwner=new Map();
+    for(const source of rosterSources){
+      for(const row of source){
+        if(typeof row.ownerName!=='string'||typeof row.horseName!=='string'||
+           byOwner.has(row.ownerName))continue;
+        byOwner.set(row.ownerName,{horseName:row.horseName,ownerName:row.ownerName,
+          appearanceCount:row.appearanceCount,sex:row.sex,age:row.age});
+      }
+    }
+    const displayed=[...byOwner.values()].slice(0,18);
+    const publishedRows=rosterSources.length>0;
     const local=localConfirmed?.slot===slot&&localConfirmed?.uid===auth?.currentUser?.uid
       ?localConfirmed:null;
     if(local){
@@ -271,7 +303,7 @@
       else if(displayed.length<18)displayed.push(ownRow);
     }
     if(totalLabel){
-      const count=shared!==null?displayed.length:(valid?Math.max(summary.nextCandidateCount,displayed.length):
+      const count=publishedRows?displayed.length:(valid?Math.max(summary.nextCandidateCount,displayed.length):
         (local?displayed.length:null));
       totalLabel.textContent='18頭中 '+(count===null?'―':Math.min(18,count))+'頭登録済み'+
         (local?'（自分の登録は反映済み）':'');
@@ -372,10 +404,13 @@
     }
   }
   renderPublicStatus();
-  refreshPublicStatus();
+  refreshPublicStatus();refreshSlotRoster();
   setInterval(()=>{renderPublicStatus();updateSubmit();renderTodayBookings();},1000);
+  setInterval(refreshSlotRoster,20000);
+  // Reconcile bookings made on other devices and at the JST midnight rollover.
+  setInterval(()=>{if(isGoogle()&&!bookingBusy&&!busy)refreshTodayBookings();},30000);
   setInterval(refreshPublicStatus,30000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshPublicStatus();refreshSharedEntries();}});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshPublicStatus();refreshSharedEntries();refreshSlotRoster();}});
   const num=(raw,def,lo,hi)=>{
     if(raw===null||raw===undefined||raw==='')return def;
     const n=Number(raw);
@@ -459,11 +494,12 @@
     submit.disabled=busy||bookingBusy||authPending||!newHorse||!chosen||!workerReady();
     const needsWeek=savedHorse&&savedHorse.weekIndex!==currentWeek();
     const capFull=weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&needsWeek;
-    const wasApplied=!!ownRegistration||!!savedHorse?.registered||bookedSlots.has(nextSlot());
+    const sameG1Applied=bookingsLoaded&&bookedSameG1(nextSlot());
+    const wasApplied=!!ownRegistration||!!savedHorse?.registered||bookedSlots.has(nextSlot())||sameG1Applied;
     const blocked= savedHorse?raceEligibility(savedHorse,slotCard(nextSlot())):'';
     raceSubmit.disabled=busy||bookingBusy||authPending||!ready||!hasOwner||!savedHorse||completed||
-      !workerReady()||!acceptingNow()||wasApplied||capFull||!!blocked;
-    raceSubmit.textContent=wasApplied?'予約・登録済み':
+      !workerReady()||!bookingsLoaded||!acceptingNow()||wasApplied||capFull||!!blocked;
+    raceSubmit.textContent=!bookingsLoaded?'予約状況を確認中':sameG1Applied?'同GⅠは本日登録済み':wasApplied?'予約・登録済み':
       !acceptingNow()?'受付時間外':
       capFull?'週間枠が満員':blocked?'登録不可':'このレースに登録';
     const hint=$('vs-entry-race-hint');
@@ -713,6 +749,8 @@
   });
   raceSubmit.addEventListener('click',async()=>{
     if(!isGoogle()||busy||!savedHorse||savedHorse.appearances>=20||!acceptingNow())return;
+    if(!bookingsLoaded){say('当日の予約記録を確認中です。再度お試しください。');return;}
+    if(bookedSameG1(nextSlot())){say('このGⅠは本日すでに予約・登録済みです。開催時刻を変えても再登録できません。');updateSubmit();return;}
     const blocked=raceEligibility(savedHorse,slotCard(nextSlot()));
     if(blocked){say('このレースには登録できません：'+blocked);updateSubmit();return;}
     busy=true;updateSubmit();say('保存済みの愛馬でレースへの申込みを処理中…');
@@ -722,7 +760,7 @@
       if(!doc.exists()||doc.data().horseName!==result.horseName)
         throw Error('サーバーで申込みの確認ができません。少ししてから状態を再確認してください。');
       await updateOwnFromDocument(auth.currentUser,doc.data(),result.appearances);
-      await loadProfile(auth.currentUser,false);await refreshSharedEntries();
+      await loadProfile(auth.currentUser,false);await refreshSharedEntries();await refreshSlotRoster();
       say('レース登録完了：'+result.horseName+'（'+result.appearances+'/20戦終了）。レース結果の確定後、次のレースに登録できます。');
     }catch(err){say('レースへの登録を確認できません：'+String(err.message||err));}
     finally{busy=false;updateSubmit();}
