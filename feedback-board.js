@@ -19,10 +19,20 @@
   const identity=$('dbf-feedback-auth');
   if(!list||!form||!msg||!login||!more)return;
   let auth=null,authSdk=null,currentUser=null,posts=[],pageToken=null,loading=false,posting=false;
-  let lastRequest=0,queuedReset=false;
+  let lastRequest=0,queuedReset=false,authInitBusy=false,authInitError='';
+  const REQUEST_TIMEOUT_MS=12000;
+  function limited(promise,ms,message){
+    let timer;
+    return Promise.race([Promise.resolve(promise),new Promise((_,reject)=>{
+      timer=setTimeout(()=>reject(Error(message)),ms);
+    })]).finally(()=>clearTimeout(timer));
+  }
   const say=(value,error=false)=>{msg.textContent=value;msg.style.color=error?'#ffc5b8':'#d9e8d6';};
-  const googleUser=()=>currentUser&&!currentUser.isAnonymous&&
-    currentUser.providerData?.some(p=>p.providerId==='google.com')?currentUser:null;
+  const googleUser=()=>{
+    const user=auth?.currentUser||currentUser;
+    return user&&!user.isAnonymous&&
+      user.providerData?.some(p=>p.providerId==='google.com')?user:null;
+  };
   const node=(tag,klass,content)=>{
     const el=document.createElement(tag);
     if(klass)el.className=klass;
@@ -30,26 +40,50 @@
     return el;
   };
   async function request(path,method='GET',data){
+    const isPublicList=method==='GET'&&path.startsWith('/board/list');
     const user=googleUser();
+    if(!isPublicList&&!user)throw Error('投稿・返信にはGoogleログインが必要です。');
     const headers=new Headers();
-    if(user)headers.set('Authorization','Bearer '+await user.getIdToken());
+    if(user){
+      try{
+        const token=await limited(user.getIdToken(),7000,
+          'Google認証が時間切れです。再ログインしてお試しください。');
+        headers.set('Authorization','Bearer '+token);
+      }catch(err){
+        // The public list must remain readable even if the auth token hangs.
+        if(!isPublicList)throw err;
+      }
+    }
     if(data!==undefined)headers.set('Content-Type','application/json');
-    let res;
-    try{res=await fetch(endpoint+path,{method,headers,
-      ...(data!==undefined?{body:JSON.stringify(data)}:{}),cache:'no-store'});}
-    catch(_){throw Error('掲示板サーバーに接続できません');}
-    let payload;
-    try{payload=await res.json();}catch(_){throw Error('掲示板サーバーの応答が不正です');}
-    if(!res.ok||payload.ok===false)throw Error(String(payload.error||'通信エラー（'+res.status+'）'));
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),REQUEST_TIMEOUT_MS);
+    let res,payload;
+    try{
+      res=await fetch(endpoint+path,{method,headers,signal:controller.signal,
+        ...(data!==undefined?{body:JSON.stringify(data)}:{}),cache:'no-store'});
+      payload=await res.json();
+    }catch(err){
+      if(controller.signal.aborted)throw Error(method==='POST'
+        ?'送信の確認が時間切れです。重複投稿を避けるため一覧を更新してご確認ください。'
+        :'掲示板の通信が時間切れです。「投稿を更新」で再試行できます。');
+      throw Error('掲示板サーバーに接続できません。通信環境またはCloudflareの公開状態を確認してください。');
+    }finally{clearTimeout(timer);}
+    if(!res.ok||payload?.ok===false)
+      throw Error(String(payload?.error||'通信エラー（HTTP '+res.status+'）'));
     return payload;
   }
   function controls(){
     const ok=!!googleUser();
-    identity.textContent=ok?'Googleログイン済み：投稿・返信できます':'閲覧は誰でも可能です。投稿・返信にはGoogleログインが必要です。';
+    identity.textContent=ok?'Googleログイン済み：投稿・返信できます':
+      authInitBusy?'Googleログイン機能を準備中です。投稿内容は先に入力できます。':
+      authInitError?'Googleログインの準備に失敗しました。下のログインボタンで再試行してください。':
+      '閲覧・投稿内容の入力はできます。送信にはGoogleログインが必要です。';
     login.hidden=ok;
-    show.disabled=!ok;
+    // Never prevent the editor from opening just because Firebase is still loading.
+    show.disabled=posting;
     const send=/** @type {HTMLButtonElement} */(form.querySelector('button[type="submit"]'));
-    send.disabled=!ok||posting;
+    send.disabled=posting;
+    send.title=ok?'': '送信するには「Googleでログインして投稿」を押してください';
   }
   function button(label,action,cls='dbf-feedback-small'){
     const b=node('button',cls,label);b.type='button';b.addEventListener('click',action);return b;
@@ -83,7 +117,7 @@
       b.disabled=true;
       try{
         await request('/board/reply','POST',{postId:post.id,body:message});
-        say('返信を投稿しました。');await load(true);
+        await load(true);say('返信を投稿しました。');
       }catch(err){say(String(err.message||err),true);b.disabled=false;}
     });
     container.append(f);
@@ -160,29 +194,35 @@
       pageToken=typeof data.nextPageToken==='string'&&data.nextPageToken?data.nextPageToken:null;
       render();say('投稿を表示しています。');
     }catch(err){say(String(err.message||err),true);
-      if(reset&&!posts.length)list.textContent='掲示板を読み込めません。';
+      if(reset&&!posts.length)list.textContent='掲示板を読み込めません。「投稿を更新」で再試行できます。';
     }finally{
       loading=false;refresh.disabled=false;more.disabled=false;
       if(queuedReset){queuedReset=false;load(true);}
     }
   }
-  show.addEventListener('click',()=>{editor.hidden=false;show.hidden=true;title.focus();});
+  show.addEventListener('click',()=>{
+    editor.hidden=false;show.hidden=true;title.focus();
+    if(!googleUser())say('投稿内容を入力できます。送信するにはGoogleログインしてください。');
+  });
   cancel.addEventListener('click',()=>{editor.hidden=true;show.hidden=false;form.reset();});
   refresh.addEventListener('click',()=>load(true));
   more.addEventListener('click',()=>load(false));
-  // The board can sign in directly, even if the horse-registration UI has
-  // not initialized. Both UIs reuse the same named Firebase app/auth session.
+  // Independent board sign-in; a stuck auth initializer may be retried by the user.
   login.addEventListener('click',async()=>{
     if(googleUser())return;
-    if(!auth||!authSdk){
-      say('Googleログインの準備ができません。ページを再読み込みしてください。',true);return;
-    }
     login.disabled=true;
     try{
+      if(!auth||!authSdk)await initAuth();
+      if(!auth||!authSdk){
+        say('ログイン機能の準備ができません。通信を確認し、もう一度ログインボタンを押してください。',true);
+        return;
+      }
       const provider=new authSdk.GoogleAuthProvider();
       provider.setCustomParameters({prompt:'select_account'});
-      await authSdk.signInWithPopup(auth,provider);
-      say('Googleログインしました。新しく投稿するボタンから投稿できます。');
+      const result=await limited(authSdk.signInWithPopup(auth,provider),30000,
+        'Googleログインが時間切れです。ポップアップの状態を確認してください。');
+      currentUser=result?.user||auth.currentUser||currentUser;
+      controls();say('Googleログインしました。「新しく投稿する」から投稿できます。');
     }catch(err){
       const code=String(err?.code||'unknown');
       const hints={
@@ -192,7 +232,7 @@
         'auth/operation-not-allowed':'FirebaseでGoogleログインを有効にしてください。',
         'auth/network-request-failed':'通信状況を確認して再試行してください。'
       };
-      say('ログインできません：'+(hints[code]||'もう一度お試しください。')+' ['+code+']',true);
+      say('ログインできません：'+(hints[code]||String(err?.message||'再試行してください。'))+' ['+code+']',true);
     }finally{login.disabled=false;controls();}
   });
   form.addEventListener('submit',async e=>{
@@ -206,30 +246,39 @@
     try{
       await request('/board/create','POST',{type:type.value,title:t,body:b});
       editor.hidden=true;show.hidden=false;form.reset();
-      say('投稿しました。ありがとうございます。');await load(true);
+      await load(true);say('投稿しました。ありがとうございます。');
     }catch(err){say(String(err.message||err),true);}
     finally{posting=false;controls();}
   });
   async function initAuth(){
+    if(authInitBusy)return;
+    if(auth&&authSdk)return;
+    authInitBusy=true;authInitError='';controls();
     const cfg=/** @type {any} */(window).VS_FIREBASE_CONFIG;
-    if(!cfg||cfg.projectId!=='derby-vs-arena'||!cfg.apiKey){
-      say('Firebase公開設定を読み込めません。掲示板からログインできません。',true);return;
-    }
     try{
+      if(!cfg||cfg.projectId!=='derby-vs-arena'||!cfg.apiKey)
+        throw Error('Firebase公開設定を読み込めません。firebase-config.js を確認してください。');
       const base='https://www.gstatic.com/firebasejs/13.2.0/';
-      const [appSdk,moduleAuth]=await Promise.all([
-        import(base+'firebase-app.js'),import(base+'firebase-auth.js')]);
+      const [appSdk,moduleAuth]=await limited(Promise.all([
+        import(base+'firebase-app.js'),import(base+'firebase-auth.js')]),
+        12000,'Firebaseログインの読み込みが時間切れです。通信を確認して再試行してください。');
       const app=appSdk.getApps().find(a=>a.options.projectId===cfg.projectId)||
         appSdk.initializeApp(cfg,'vs-arena-registration');
       authSdk=moduleAuth;
       auth=authSdk.getAuth(app);
+      let firstChangeDone;
+      const firstChange=new Promise(resolve=>{firstChangeDone=resolve;});
       authSdk.onAuthStateChanged(auth,user=>{
-        currentUser=user;controls();load(true);
+        currentUser=user;authInitError='';controls();load(true);firstChangeDone();
+      },err=>{
+        authInitError='Googleログインの状態を確認できません：'+String(err?.code||err?.message||err);
+        say(authInitError,true);controls();firstChangeDone();
       });
+      await limited(firstChange,9000,'Googleログインの状態確認が時間切れです。ログインボタンで再試行してください。');
     }catch(err){
-      console.warn('掲示板：ログイン状態を確認できません',err);
-      say('Googleログインの初期化に失敗しました：'+String(err?.code||err?.message||err),true);
-    }
+      authInitError=String(err?.message||err);
+      say(authInitError,true);
+    }finally{authInitBusy=false;controls();}
   }
   controls();load(true);initAuth();
 })();
