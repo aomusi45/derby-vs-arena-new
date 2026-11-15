@@ -257,6 +257,15 @@ def unique_horse_count(entries: list[dict]) -> int:
 def choose(entries: list[dict], card: dict, slot: int, published: list[dict], usage: dict | None = None) -> list[dict]:
     """One entry/slot; lifetime <=20; G1 <=2, using permanent Firestore receipts."""
     slot_start_ms = slot * 900_000
+    target_day = datetime.fromtimestamp(slot_start_ms/1000, timezone.utc).astimezone(JST).date()
+    already_raced_today = set()
+    for meta in published:
+        if (meta.get('name') != card.get('name') or meta.get('intervalMinutes') != 15 or
+                type(meta.get('slot')) is not int):
+            continue
+        raced_day = datetime.fromtimestamp(meta['slot']*900, timezone.utc).astimezone(JST).date()
+        if raced_day == target_day:
+            already_raced_today.update(k for k in meta.get('horseKeys', []) if isinstance(k,str))
     used_receipts = set()
     used_horse_before = {}
     for meta in published:
@@ -279,6 +288,8 @@ def choose(entries: list[dict], card: dict, slot: int, published: list[dict], us
         if row.get('legacyWithoutWeek'):
             continue
         ident = row['registrationId']
+        if row['horseKey'] in already_raced_today:
+            continue
         state = (usage or {}).get(row['horseKey'])
         # No ledger access = fail closed for real entries. A passing empty map
         # explicitly says there are no past completed appearances.
