@@ -28,8 +28,8 @@
     {
       "horseName": "サンプルホース150",
       "ownerName": "管理人あおむし",
-      "prizeYen": 2485000000,
-      "starts": 16,
+      "prizeYen": 2665000000,
+      "starts": 17,
       "raceResults": [
         {
           "slot": 1994053,
@@ -136,6 +136,17 @@
           "firstOwnerName": "管理人あおむし",
           "secondOwnerName": "",
           "firstSecondMargin": "5 1/2馬身"
+        },
+        {
+          "slot": 1994163,
+          "raceName": "マイルチャンピオンシップ",
+          "place": 1,
+          "prizeYen": 180000000,
+          "firstHorseName": "サンプルホース150",
+          "secondHorseName": "アーモンドアイス",
+          "firstOwnerName": "管理人あおむし",
+          "secondOwnerName": "",
+          "firstSecondMargin": "大差"
         }
       ]
     },
@@ -445,7 +456,7 @@
       "rank": 4,
       "horseName": "サンプルホース150",
       "ownerName": "管理人あおむし",
-      "prizeYen": 2485000000
+      "prizeYen": 2665000000
     },
     {
       "rank": 5,
@@ -635,6 +646,19 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994163,
+      "raceName": "マイルチャンピオンシップ",
+      "place": 1,
+      "prizeYen": 180000000,
+      "firstHorseName": "サンプルホース150",
+      "secondHorseName": "アーモンドアイス",
+      "firstOwnerName": "管理人あおむし",
+      "secondOwnerName": "",
+      "firstSecondMargin": "大差"
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
