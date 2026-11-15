@@ -1,4 +1,4 @@
-/* V32: weekly TOP10 and historical representative: expandable official race history.
+/* V33: weekly TOP10 and historical representative: expandable official race history.
  * Read-only display from weekly_awards.json; results/replay screens are untouched.
  */
 (()=>{
@@ -31,7 +31,10 @@
       r&&Number.isSafeInteger(r.slot)&&r.slot>=0&&
       typeof r.raceName==='string'&&r.raceName.length>0&&r.raceName.length<=100&&
       Number.isInteger(r.place)&&r.place>=1&&r.place<=18&&
-      Number.isSafeInteger(r.prizeYen)&&r.prizeYen>=0);
+      Number.isSafeInteger(r.prizeYen)&&r.prizeYen>=0&&
+      ['firstHorseName','secondHorseName','firstOwnerName','secondOwnerName','firstSecondMargin']
+        .every(k=>r[k]===undefined||(typeof r[k]==='string'&&r[k].length<=
+          (k.endsWith('HorseName')?60:k.endsWith('OwnerName')?24:40))));
   }
   function historyFor(h){
     // New export is per-horse: prevents crossing different COM 20-start blocks.
@@ -55,15 +58,31 @@
       note.textContent='保存されている'+history.length+'戦分を表示しています（全'+h.starts+'戦）。過去の未保存分は表示できません。';
       box.append(note);
     }
+    function podiumLine(container,label,horse,owner){
+      const line=document.createElement('div');line.className='vs-history-podium-line';
+      const knownHorse=typeof horse==='string'&&horse.length>0;
+      const knownOwner=typeof owner==='string';
+      line.textContent=label+'：'+(knownHorse?horse:'未記録')+
+        '　オーナー：'+(knownOwner?(owner||'COM'):'未記録');
+      container.append(line);
+    }
     const header=document.createElement('div');header.className='vs-history-head';
-    header.textContent='開催日時 ／ レース名 ／ 着順 ／ 獲得賞金';box.append(header);
+    header.textContent='開催日時 ／ レース名 ／ 着順 ／ 獲得賞金 ／ 1・2着馬と着差';box.append(header);
     for(const r of history){
       const row=document.createElement('div');row.className='vs-history-race';
       const main=document.createElement('div');main.className='vs-history-race-name';
       main.textContent=fmtSlot(r.slot)+'　'+r.raceName;
       const result=document.createElement('div');result.className='vs-history-race-result';
       result.textContent=r.place+'着　'+money(r.prizeYen);
-      row.append(main,result);box.append(row);
+      row.append(main,result);
+      const podium=document.createElement('div');podium.className='vs-history-podium';
+      podiumLine(podium,'1着馬',r.firstHorseName,r.firstOwnerName);
+      podiumLine(podium,'2着馬',r.secondHorseName,r.secondOwnerName);
+      const gap=document.createElement('div');gap.className='vs-history-podium-line';
+      gap.textContent='1・2着の着差：'+(typeof r.firstSecondMargin==='string'&&r.firstSecondMargin?
+        r.firstSecondMargin:'未記録');
+      podium.append(gap);
+      row.append(podium);box.append(row);
     }
     return box;
   }

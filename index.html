@@ -48,7 +48,7 @@
 .vs-award-row .meta{color:#bcd1c4;font-size:12px;line-height:1.7}
 #vs-awards-more{margin:14px 0 0}
 #vs-awards-more[hidden]{display:none!important}
-/* V32: responsive expandable race history within weekly TOP10 and champions. */
+/* V33: responsive expandable race history plus top-two horses/owners/margin. */
 .vs-history-toggle{display:inline-flex;align-items:center;justify-content:space-between;
   text-align:left;gap:8px;width:100%;min-height:44px;background:transparent;border:0;
   padding:5px 2px;color:#ffe2a1;font:inherit;font-weight:750;cursor:pointer}
@@ -63,6 +63,10 @@
 .vs-history-race-name{flex:1;min-width:0;overflow-wrap:anywhere}
 .vs-history-race-result{flex:none;text-align:right;color:#ffe2a0;font-variant-numeric:tabular-nums}
 .vs-history-note{color:#d7cda9;line-height:1.7;margin:3px 0 9px}
+.vs-history-race{flex-wrap:wrap}
+.vs-history-podium{width:100%;margin-top:6px;padding:7px 9px;border-left:2px solid #bca06b;
+  background:#0d2923;border-radius:4px;color:#e6e9d9;font-size:11px;line-height:1.7}
+.vs-history-podium-line{overflow-wrap:anywhere}
 .vs-award-row .vs-history-toggle{font-size:15px;color:#ffe4a0}
 .vs-award-row .vs-history-content{margin-top:10px}
 @media(max-width:520px){.vs-history-race{flex-direction:column;gap:2px}
@@ -657,7 +661,7 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 </script>
 <script src="site.js" defer></script>
 <script src="visitor-counter.js?v=20261113-v16" defer></script>
-<script src="owner-ranking.js?v=20261115-v32-history-accordion" defer></script>
+<script src="owner-ranking.js?v=20261115-v33-podium-details" defer></script>
 <script src="firebase-config.js" defer></script>
 <script src="registration.js?v=20261114-v30-individual-booking" defer></script>
 <script src="my-arena-stats.js?v=20261114-v31-no-results-spoilers" defer></script>
