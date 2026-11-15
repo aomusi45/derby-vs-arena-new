@@ -164,11 +164,104 @@
       "raceResults": []
     },
     {
-      "horseName": "スペシャルウインク",
+      "horseName": "ウオッカナ",
       "ownerName": "",
       "prizeYen": 545000000,
       "starts": 20,
-      "raceResults": []
+      "raceResults": [
+        {
+          "slot": 1994112,
+          "raceName": "大阪杯",
+          "place": 7,
+          "prizeYen": 0
+        },
+        {
+          "slot": 1994113,
+          "raceName": "桜花賞",
+          "place": 3,
+          "prizeYen": 35000000
+        },
+        {
+          "slot": 1994114,
+          "raceName": "皐月賞",
+          "place": 7,
+          "prizeYen": 0
+        },
+        {
+          "slot": 1994117,
+          "raceName": "ヴィクトリアマイル",
+          "place": 3,
+          "prizeYen": 37500000
+        },
+        {
+          "slot": 1994118,
+          "raceName": "オークス",
+          "place": 10,
+          "prizeYen": 0
+        },
+        {
+          "slot": 1994119,
+          "raceName": "日本ダービー",
+          "place": 7,
+          "prizeYen": 0
+        },
+        {
+          "slot": 1994120,
+          "raceName": "安田記念",
+          "place": 6,
+          "prizeYen": 0
+        },
+        {
+          "slot": 1994123,
+          "raceName": "秋華賞",
+          "place": 9,
+          "prizeYen": 0
+        },
+        {
+          "slot": 1994125,
+          "raceName": "天皇賞（秋）",
+          "place": 12,
+          "prizeYen": 0,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "サンプルホース150",
+          "firstOwnerName": "",
+          "secondOwnerName": "管理人あおむし",
+          "firstSecondMargin": "2 1/2馬身"
+        },
+        {
+          "slot": 1994126,
+          "raceName": "エリザベス女王杯",
+          "place": 3,
+          "prizeYen": 37500000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "ダイワスカーレッタ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "大差"
+        },
+        {
+          "slot": 1994127,
+          "raceName": "マイルチャンピオンシップ",
+          "place": 3,
+          "prizeYen": 45000000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "イクイノマックス",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "6馬身"
+        },
+        {
+          "slot": 1994128,
+          "raceName": "ジャパンカップ",
+          "place": 17,
+          "prizeYen": 0,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "テイエムオペラオン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "ハナ"
+        }
+      ]
     }
   ],
   "standings": [
@@ -228,15 +321,15 @@
     },
     {
       "rank": 10,
-      "horseName": "スペシャルウインク",
+      "horseName": "ウオッカナ",
       "ownerName": "",
       "prizeYen": 545000000
     },
     {
       "rank": 11,
-      "horseName": "ウオッカナ",
+      "horseName": "スペシャルウインク",
       "ownerName": "",
-      "prizeYen": 522000000
+      "prizeYen": 545000000
     },
     {
       "rank": 12,
