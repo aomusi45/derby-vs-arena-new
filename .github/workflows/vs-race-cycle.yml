@@ -10,6 +10,7 @@ on:
       - 'tools/scheduled_vs.py'
       - 'tools/push_recorded_races.py'
       - 'site.js'
+      - 'feedback-board.js'
       - 'visitor-counter.js'
       - 'index.html'
       - 'registration.js'
@@ -119,6 +120,7 @@ jobs:
           cp vs_replay_engine_part1.txt vs_replay_engine_part2.txt public_site/
           cp weekly_awards.json my-arena-stats.js public_site/
           cp visitor-counter.js public_site/
+          cp feedback-board.js public_site/
           # Publish Google Search Console verification and XML sitemap without changing the arena build.
           if [ -f sitemap.xml ]; then cp sitemap.xml public_site/; fi
           for file in google*.html; do
