@@ -907,6 +907,234 @@
       ]
     },
     {
+      "horseName": "ドウデュースト",
+      "ownerName": "",
+      "prizeYen": 250000000,
+      "starts": 20,
+      "raceResults": [
+        {
+          "slot": 1994147,
+          "raceName": "有馬記念",
+          "place": 5,
+          "prizeYen": 50000000,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "シンボリルドルフィ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "5 3/4馬身"
+        },
+        {
+          "slot": 1994148,
+          "raceName": "大阪杯",
+          "place": 17,
+          "prizeYen": 0,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "キタサンブラッキー",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "4 1/4馬身"
+        },
+        {
+          "slot": 1994150,
+          "raceName": "皐月賞",
+          "place": 17,
+          "prizeYen": 0,
+          "firstHorseName": "エアグルービー",
+          "secondHorseName": "クロノジェネシア",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "ハナ"
+        },
+        {
+          "slot": 1994152,
+          "raceName": "NHKマイルカップ",
+          "place": 12,
+          "prizeYen": 0,
+          "firstHorseName": "ウオッカナ",
+          "secondHorseName": "ロードカナリア",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "4 1/2馬身"
+        },
+        {
+          "slot": 1994155,
+          "raceName": "日本ダービー",
+          "place": 10,
+          "prizeYen": 0,
+          "firstHorseName": "キタサンブラッキー",
+          "secondHorseName": "ナリタブライワン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "5 1/4馬身"
+        },
+        {
+          "slot": 1994156,
+          "raceName": "安田記念",
+          "place": 14,
+          "prizeYen": 0,
+          "firstHorseName": "サンプルホース150",
+          "secondHorseName": "アーモンドアイス",
+          "firstOwnerName": "管理人あおむし",
+          "secondOwnerName": "",
+          "firstSecondMargin": "5 1/2馬身"
+        },
+        {
+          "slot": 1994157,
+          "raceName": "宝塚記念",
+          "place": 9,
+          "prizeYen": 0,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "テイエムオペラオン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "6 1/2馬身"
+        },
+        {
+          "slot": 1994161,
+          "raceName": "天皇賞（秋）",
+          "place": 13,
+          "prizeYen": 0,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "シンボリルドルフィ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "5 3/4馬身"
+        },
+        {
+          "slot": 1994163,
+          "raceName": "マイルチャンピオンシップ",
+          "place": 14,
+          "prizeYen": 0,
+          "firstHorseName": "サンプルホース150",
+          "secondHorseName": "アーモンドアイス",
+          "firstOwnerName": "管理人あおむし",
+          "secondOwnerName": "",
+          "firstSecondMargin": "大差"
+        },
+        {
+          "slot": 1994164,
+          "raceName": "ジャパンカップ",
+          "place": 14,
+          "prizeYen": 0,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "ナリタブライワン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "3 1/2馬身"
+        },
+        {
+          "slot": 1994165,
+          "raceName": "有馬記念",
+          "place": 7,
+          "prizeYen": 0,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "シンボリルドルフィ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "6馬身"
+        },
+        {
+          "slot": 1994166,
+          "raceName": "大阪杯",
+          "place": 9,
+          "prizeYen": 0,
+          "firstHorseName": "サンプルホース150",
+          "secondHorseName": "ディープインパルス",
+          "firstOwnerName": "管理人あおむし",
+          "secondOwnerName": "",
+          "firstSecondMargin": "5馬身"
+        },
+        {
+          "slot": 1994168,
+          "raceName": "皐月賞",
+          "place": 11,
+          "prizeYen": 0,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "ブエナビスター",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "4馬身"
+        },
+        {
+          "slot": 1994170,
+          "raceName": "NHKマイルカップ",
+          "place": 15,
+          "prizeYen": 0,
+          "firstHorseName": "アパパネコ",
+          "secondHorseName": "ブエナビスター",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "3馬身"
+        },
+        {
+          "slot": 1994175,
+          "raceName": "宝塚記念",
+          "place": 10,
+          "prizeYen": 0,
+          "firstHorseName": "シンボリルドルフィ",
+          "secondHorseName": "ブエナビスター",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "3 1/2馬身"
+        },
+        {
+          "slot": 1994179,
+          "raceName": "天皇賞（秋）",
+          "place": 11,
+          "prizeYen": 0,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "ブエナビスター",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "3馬身"
+        },
+        {
+          "slot": 1994182,
+          "raceName": "ジャパンカップ",
+          "place": 3,
+          "prizeYen": 125000000,
+          "firstHorseName": "テイエムオペラオン",
+          "secondHorseName": "ナリタブライワン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "6馬身"
+        },
+        {
+          "slot": 1994183,
+          "raceName": "有馬記念",
+          "place": 4,
+          "prizeYen": 75000000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "キタサンブラッキー",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "2 1/4馬身"
+        },
+        {
+          "slot": 1994184,
+          "raceName": "大阪杯",
+          "place": 12,
+          "prizeYen": 0,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "ブエナビスター",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "9 1/4馬身"
+        },
+        {
+          "slot": 1994186,
+          "raceName": "皐月賞",
+          "place": 12,
+          "prizeYen": 0,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "ダイワスカーレッタ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "6 1/2馬身"
+        }
+      ]
+    },
+    {
       "horseName": "ラッキーライラッキ",
       "ownerName": "",
       "prizeYen": 170000000,
@@ -2074,30 +2302,36 @@
     },
     {
       "rank": 5,
+      "horseName": "ドウデュースト",
+      "ownerName": "",
+      "prizeYen": 250000000
+    },
+    {
+      "rank": 6,
       "horseName": "ラッキーライラッキ",
       "ownerName": "",
       "prizeYen": 170000000
     },
     {
-      "rank": 6,
+      "rank": 7,
       "horseName": "クロノジェネシア",
       "ownerName": "",
       "prizeYen": 140000000
     },
     {
-      "rank": 7,
+      "rank": 8,
       "horseName": "リスグラシュガー",
       "ownerName": "",
       "prizeYen": 65000000
     },
     {
-      "rank": 8,
+      "rank": 9,
       "horseName": "オルフェーブル",
       "ownerName": "",
       "prizeYen": 50000000
     },
     {
-      "rank": 9,
+      "rank": 10,
       "horseName": "コントレイン",
       "ownerName": "",
       "prizeYen": 40000000
