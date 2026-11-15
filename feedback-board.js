@@ -18,7 +18,7 @@
   const login=/** @type {HTMLButtonElement} */($('dbf-feedback-login'));
   const identity=$('dbf-feedback-auth');
   if(!list||!form||!msg||!login||!more)return;
-  let auth=null,currentUser=null,posts=[],pageToken=null,loading=false,posting=false;
+  let auth=null,authSdk=null,currentUser=null,posts=[],pageToken=null,loading=false,posting=false;
   let lastRequest=0,queuedReset=false;
   const say=(value,error=false)=>{msg.textContent=value;msg.style.color=error?'#ffc5b8':'#d9e8d6';};
   const googleUser=()=>currentUser&&!currentUser.isAnonymous&&
@@ -170,10 +170,30 @@
   cancel.addEventListener('click',()=>{editor.hidden=true;show.hidden=false;form.reset();});
   refresh.addEventListener('click',()=>load(true));
   more.addEventListener('click',()=>load(false));
-  login.addEventListener('click',()=>{
-    const b=$('vs-entry-google');
-    if(b){b.scrollIntoView({behavior:'smooth',block:'center'});b.click();}
-    else say('出走馬登録欄のGoogleログインをご利用ください。',true);
+  // The board can sign in directly, even if the horse-registration UI has
+  // not initialized. Both UIs reuse the same named Firebase app/auth session.
+  login.addEventListener('click',async()=>{
+    if(googleUser())return;
+    if(!auth||!authSdk){
+      say('Googleログインの準備ができません。ページを再読み込みしてください。',true);return;
+    }
+    login.disabled=true;
+    try{
+      const provider=new authSdk.GoogleAuthProvider();
+      provider.setCustomParameters({prompt:'select_account'});
+      await authSdk.signInWithPopup(auth,provider);
+      say('Googleログインしました。新しく投稿するボタンから投稿できます。');
+    }catch(err){
+      const code=String(err?.code||'unknown');
+      const hints={
+        'auth/popup-blocked':'Googleログインのポップアップを許可してください。',
+        'auth/popup-closed-by-user':'Googleログインがキャンセルされました。',
+        'auth/unauthorized-domain':'Firebaseで aomusi45.github.io を承認済みドメインに登録してください。',
+        'auth/operation-not-allowed':'FirebaseでGoogleログインを有効にしてください。',
+        'auth/network-request-failed':'通信状況を確認して再試行してください。'
+      };
+      say('ログインできません：'+(hints[code]||'もう一度お試しください。')+' ['+code+']',true);
+    }finally{login.disabled=false;controls();}
   });
   form.addEventListener('submit',async e=>{
     e.preventDefault();
@@ -192,18 +212,24 @@
   });
   async function initAuth(){
     const cfg=/** @type {any} */(window).VS_FIREBASE_CONFIG;
-    if(!cfg||cfg.projectId!=='derby-vs-arena')return;
+    if(!cfg||cfg.projectId!=='derby-vs-arena'||!cfg.apiKey){
+      say('Firebase公開設定を読み込めません。掲示板からログインできません。',true);return;
+    }
     try{
       const base='https://www.gstatic.com/firebasejs/13.2.0/';
-      const [appSdk,authSdk]=await Promise.all([
+      const [appSdk,moduleAuth]=await Promise.all([
         import(base+'firebase-app.js'),import(base+'firebase-auth.js')]);
       const app=appSdk.getApps().find(a=>a.options.projectId===cfg.projectId)||
         appSdk.initializeApp(cfg,'vs-arena-registration');
+      authSdk=moduleAuth;
       auth=authSdk.getAuth(app);
       authSdk.onAuthStateChanged(auth,user=>{
         currentUser=user;controls();load(true);
       });
-    }catch(err){console.warn('掲示板：ログイン状態を確認できません',err);}
+    }catch(err){
+      console.warn('掲示板：ログイン状態を確認できません',err);
+      say('Googleログインの初期化に失敗しました：'+String(err?.code||err?.message||err),true);
+    }
   }
   controls();load(true);initAuth();
 })();
