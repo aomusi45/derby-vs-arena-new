@@ -145,6 +145,20 @@
 .vs-my-week-result-replay{margin-top:5px;min-height:35px;padding:6px 12px;font-size:12px}
 .vs-my-week-result-expired{font-size:11px;color:#a8bbae;display:block;margin-top:3px}
 @media(max-width:520px){#vs-my-week-card{padding:12px 9px}.vs-my-metrics{gap:6px}}
+
+/* Tester recruitment: always show THREE separate, full-width, tappable links. */
+.dbf-tester-steps-v2{list-style:none!important;padding:0!important;margin:0 0 12px!important;display:grid!important;gap:12px!important}
+.dbf-tester-steps-v2>li{list-style:none!important;padding:13px 14px!important;margin:0!important;border:1px solid #9d845377;border-radius:12px;background:#08211bc9}
+.dbf-tester-steps-v2>li>strong{display:block;color:#ffe4ac;font-size:14px;line-height:1.55;margin-bottom:4px}
+.dbf-tester-steps-v2>li>p{color:#e2e9e2;margin:0 0 10px;font-size:12px;line-height:1.7}
+.dbf-tester-step-button{box-sizing:border-box;display:flex!important;visibility:visible!important;align-items:center;justify-content:center;width:100%;min-height:50px;padding:10px 14px;border:1px solid #e3c589;border-radius:9px;background:#f4dfb8;color:#132920!important;font-weight:900;font-size:13px;text-align:center;text-decoration:none!important;line-height:1.5}
+.dbf-tester-step-primary{background:linear-gradient(180deg,#ffe4a2,#dbac57);border-color:#ffe09c}
+.dbf-tester-step-inline{color:#ffe4a2!important;font-weight:750;text-decoration:underline!important;text-underline-offset:3px;overflow-wrap:anywhere}
+.dbf-tester-step-inline:focus-visible{outline:2px solid #ffdf8e;outline-offset:2px}
+.dbf-tester-step-button:hover{filter:brightness(1.07)}
+.dbf-tester-step-button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.dbf-tester-step-url{display:block;margin-top:7px;font-size:10px;overflow-wrap:anywhere;color:#c8d9cb;line-height:1.5}
+
 /* DBF official site: Android closed-test invitation (presentation only). */
 .dbf-closed-test{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:center;margin:0 0 25px;padding:24px 27px;border:1px solid #d7b570;border-radius:15px;background:linear-gradient(120deg,#193b31,#0a211f 70%);box-shadow:0 12px 36px #0006,inset 0 1px #f0d8a226}
 .dbf-test-kicker{margin:0 0 9px;color:#e8c982;font-size:11px;font-weight:800;letter-spacing:.18em}
@@ -210,16 +224,24 @@
         </div>
         <div class="dbf-test-guide">
           <h3>テストへの参加方法</h3>
-          <ol class="dbf-test-steps">
-            <li>Googleグループに参加：テストに使うGoogleアカウントでログインし、テスター募集グループに参加してください。</li>
-            <li>Google Playでテスター登録：同じGoogleアカウントで参加ページを開き、「テスターになる」を押してください。</li>
-            <li>アプリをインストール：テスター登録後、Google Playのアプリページからインストールしてください。</li>
+          <ol class="dbf-test-steps dbf-tester-steps-v2">
+            <li>
+              <strong>Googleグループに参加する</strong>
+              <p>テストに使うGoogleアカウントでログインし、まず<a class="dbf-tester-step-inline" href="https://groups.google.com/g/-derbyfantasy-testers" target="_blank" rel="noopener noreferrer">Googleグループに参加</a>してください。</p>
+              <a class="dbf-tester-step-button dbf-tester-step-primary" href="https://groups.google.com/g/-derbyfantasy-testers" target="_blank" rel="noopener noreferrer">① Googleグループに参加する ↗</a>
+              <span class="dbf-tester-step-url">groups.google.com/g/-derbyfantasy-testers</span>
+            </li>
+            <li>
+              <strong>Google Playでテスター登録する</strong>
+              <p>グループに参加した同じGoogleアカウントで<a class="dbf-tester-step-inline" href="https://play.google.com/apps/testing/com.derbyfantasy.game" target="_blank" rel="noopener noreferrer">Google Playのテスター参加ページ</a>を開き、「テスターになる」を押してください。</p>
+              <a class="dbf-tester-step-button" href="https://play.google.com/apps/testing/com.derbyfantasy.game" target="_blank" rel="noopener noreferrer">② Google Playでテスター登録 ↗</a>
+            </li>
+            <li>
+              <strong>アプリをインストールする</strong>
+              <p>テスター登録が完了したら、<a class="dbf-tester-step-inline" href="https://play.google.com/store/apps/details?id=com.derbyfantasy.game" target="_blank" rel="noopener noreferrer">Google Playのアプリページ</a>からダービーファンタジーをインストールしてください。</p>
+              <a class="dbf-tester-step-button" href="https://play.google.com/store/apps/details?id=com.derbyfantasy.game" target="_blank" rel="noopener noreferrer">③ アプリをインストール ↗</a>
+            </li>
           </ol>
-          <div class="dbf-test-links">
-            <a class="dbf-test-join" href="https://groups.google.com/g/-derbyfantasy-testers" target="_blank" rel="noopener noreferrer">① Googleグループに参加 ↗</a>
-            <a class="dbf-test-play" href="https://play.google.com/apps/testing/com.derbyfantasy.game" target="_blank" rel="noopener noreferrer">② Google Playでテスター登録 ↗</a>
-            <a class="dbf-test-play" href="https://play.google.com/store/apps/details?id=com.derbyfantasy.game" target="_blank" rel="noopener noreferrer">③ アプリをインストール ↗</a>
-          </div>
           <p class="dbf-test-note">※ ①のグループ参加と②のテスター登録は、必ず同じGoogleアカウントで行ってください。③はテスター登録完了後に進んでください。</p>
         </div>
       </section>
