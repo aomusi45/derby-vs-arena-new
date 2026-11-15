@@ -192,6 +192,35 @@
 #dbf-visitor-counter .dbf-visit-heading{color:#e4cb8b;font-weight:700}
 #dbf-visitor-counter strong{color:#ffe4aa;font-variant-numeric:tabular-nums;font-size:15px}
 @media(max-width:520px){#dbf-visitor-counter{justify-content:center;gap:12px;font-size:11px}}
+
+/* V36: Feedback board, deliberately separate from race UI. */
+.dbf-feedback-quicklink{display:inline-block;margin-top:16px;padding:12px 17px;border:1px solid #e7c989;border-radius:8px;background:#173a30;color:#ffe7a8!important;text-decoration:none;font-weight:800}
+#vs-feedback-panel{margin:12px 0 36px;min-height:0}#vs-feedback-panel h2{color:#f5dfa7;margin:10px 0}
+.dbf-feedback-lead{color:#e8e6d5;font-size:14px;line-height:1.8;margin:0 0 16px}
+.dbf-feedback-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.dbf-feedback-tools .vs-action-btn{min-height:42px;padding:9px 14px}
+.dbf-feedback-tools button:not(.vs-action-btn),.dbf-feedback-small{min-height:35px;padding:7px 11px;border:1px solid #bb9c64;background:#18392f;color:#f5e4ba;border-radius:7px;font:inherit;font-size:12px;font-weight:650;cursor:pointer}
+#vs-feedback-panel button:disabled{opacity:.55;cursor:not-allowed}
+.dbf-feedback-editor{padding:14px;margin:12px 0 18px;background:#081d19;border:1px solid #b8995d88;border-radius:10px}
+.dbf-feedback-field{display:block;margin:0 0 13px;font-size:13px;color:#f4dfb3;font-weight:650}
+.dbf-feedback-field input,.dbf-feedback-field textarea,.dbf-feedback-field select,.dbf-feedback-reply-form textarea,.dbf-feedback-moderation{display:block;box-sizing:border-box;width:100%;margin:7px 0 0;padding:11px 12px;min-height:44px;background:#102924;color:#fff1ca;border:1px solid #a9915c;border-radius:8px;font:inherit;font-size:14px}
+.dbf-feedback-field textarea,.dbf-feedback-reply-form textarea{resize:vertical;min-height:94px;line-height:1.6}
+.dbf-feedback-item{border:1px solid #9a81587a;border-radius:10px;margin:12px 0;padding:14px;background:#071d18;overflow-wrap:anywhere}
+.dbf-feedback-post-header{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.dbf-feedback-category{color:#ffdd91;font-weight:750;font-size:12px}
+.dbf-feedback-status{color:#cbe2d0;font-weight:700;font-size:11px;border:1px solid #768d72;padding:3px 8px;border-radius:999px}
+.dbf-feedback-post-title{margin:10px 0 4px;color:#fff0c2;font-size:16px;line-height:1.6}
+.dbf-feedback-post-meta{margin:5px 0 8px;color:#b9cdbd;font-size:11px}
+.dbf-feedback-post-body{margin:7px 0 8px;white-space:pre-wrap;word-break:break-word;line-height:1.8;color:#ebefe8;font-size:13px}
+.dbf-feedback-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 0}
+.dbf-feedback-actions .dbf-feedback-moderation{margin:0;min-height:35px;width:auto;padding:6px;font-size:12px}
+.dbf-feedback-replies{border-top:1px solid #ae93695c;margin-top:14px;padding-top:8px}
+.dbf-feedback-replies h4{color:#e8d397;font-size:12px;margin:8px 0}
+.dbf-feedback-reply{border-left:2px solid #b8965c;padding:4px 10px;margin:10px 0;background:#0d2a23}
+.dbf-feedback-reply-form{border-top:1px solid #aa925857;margin-top:12px;padding-top:12px}
+.dbf-feedback-reply-form button{margin-top:10px}
+.dbf-feedback-note{color:#aec1b4;font-size:11px;line-height:1.7}
+@media(max-width:520px){#vs-feedback-panel{padding:15px 12px}.dbf-feedback-item{padding:11px}.dbf-feedback-tools .vs-action-btn{width:100%}}
 </style>
 </head>
 <body>
@@ -212,6 +241,7 @@
       <h1>DERBY FANTASY<span>競馬ゲーム・競走馬育成｜公式VSアリーナ</span></h1>
       <p class="sub">競走馬を育ててGⅠに挑戦。ダービーファンタジー公式アリーナ</p>
       <div class="line"></div>
+      <a class="dbf-feedback-quicklink" href="#vs-feedback-panel">ご意見・不具合報告掲示板はこちら</a>
     </header>
 
     <main>
@@ -407,6 +437,43 @@
         <p class="small">毎週の獲得賞金1位を第1代、第2代…と永久記録します。</p>
         <div id="vs-awards-list" aria-live="polite">受賞記録を読み込み中…</div>
         <button class="vs-action-btn" type="button" id="vs-awards-more" hidden>もっと見る（20件ずつ）</button>
+      </section>
+
+      <!-- V36: feedback board; server stores in separate Firestore collections. -->
+      <section class="panel" id="vs-feedback-panel" aria-labelledby="dbf-feedback-heading">
+        <div class="num">06 / FEEDBACK &amp; BUG REPORTS</div>
+        <h2 id="dbf-feedback-heading">ご意見・不具合報告掲示板</h2>
+        <p class="dbf-feedback-lead">ご意見や、不具合の報告をぜひお願いします。</p>
+        <p id="dbf-feedback-auth" class="small">ログイン状態を確認しています。</p>
+        <div class="dbf-feedback-tools">
+          <button type="button" id="dbf-feedback-open" class="vs-action-btn" disabled>新しく投稿する</button>
+          <button type="button" id="dbf-feedback-login" class="vs-action-btn">Googleでログインして投稿</button>
+          <button type="button" id="dbf-feedback-refresh">投稿を更新</button>
+        </div>
+        <div id="dbf-feedback-editor" class="dbf-feedback-editor" hidden>
+          <form id="dbf-feedback-form">
+            <label class="dbf-feedback-field" for="dbf-feedback-type">投稿の種類
+              <select id="dbf-feedback-type" required>
+                <option value="idea">ご意見・要望</option>
+                <option value="bug">不具合報告</option>
+              </select>
+            </label>
+            <label class="dbf-feedback-field" for="dbf-feedback-title">件名（80文字以内）
+              <input id="dbf-feedback-title" type="text" required maxlength="80" autocomplete="off" placeholder="例：レースカメラの不具合">
+            </label>
+            <label class="dbf-feedback-field" for="dbf-feedback-body">ご意見・不具合の内容（2000文字以内）
+              <textarea id="dbf-feedback-body" required maxlength="2000" rows="5" placeholder="発生した画面、操作、改善のご希望などをお書きください。"></textarea>
+            </label>
+            <div class="dbf-feedback-tools">
+              <button type="submit" class="vs-action-btn">投稿する</button>
+              <button type="button" id="dbf-feedback-cancel">キャンセル</button>
+            </div>
+          </form>
+        </div>
+        <p id="dbf-feedback-message" class="small" role="status" aria-live="polite">投稿を読み込み中…</p>
+        <div id="dbf-feedback-list" aria-label="ご意見・不具合報告一覧">投稿を読み込み中…</div>
+        <button type="button" id="dbf-feedback-more" class="vs-action-btn" hidden>以前の投稿をもっと見る</button>
+        <p class="dbf-feedback-note">投稿は誰でも閲覧できます。投稿・返信はGoogleログインが必要です。登録済みのオーナー名を公開し、メールアドレスは表示しません。個人情報やパスワードを書き込まないでください。</p>
       </section>
     </main>
 
@@ -687,6 +754,7 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 <script src="owner-ranking.js?v=20261115-v33-podium-details" defer></script>
 <script src="firebase-config.js" defer></script>
 <script src="registration.js?v=20261114-v30-individual-booking" defer></script>
+<script src="feedback-board.js?v=20261115-v36" defer></script>
 <script src="my-arena-stats.js?v=20261114-v31-no-results-spoilers" defer></script>
 <!-- DBF arena return-to-game button. Place immediately before </body>. -->
 <style id="dbf-arena-return-style">
