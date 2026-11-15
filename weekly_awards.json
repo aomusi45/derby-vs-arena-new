@@ -19,17 +19,10 @@
       "raceResults": []
     },
     {
-      "horseName": "イクイノマックス",
-      "ownerName": "",
-      "prizeYen": 2946000000,
-      "starts": 20,
-      "raceResults": []
-    },
-    {
       "horseName": "サンプルホース150",
       "ownerName": "管理人あおむし",
-      "prizeYen": 2665000000,
-      "starts": 17,
+      "prizeYen": 2965000000,
+      "starts": 18,
       "raceResults": [
         {
           "slot": 1994053,
@@ -147,8 +140,26 @@
           "firstOwnerName": "管理人あおむし",
           "secondOwnerName": "",
           "firstSecondMargin": "大差"
+        },
+        {
+          "slot": 1994166,
+          "raceName": "大阪杯",
+          "place": 1,
+          "prizeYen": 300000000,
+          "firstHorseName": "サンプルホース150",
+          "secondHorseName": "ディープインパルス",
+          "firstOwnerName": "管理人あおむし",
+          "secondOwnerName": "",
+          "firstSecondMargin": "5馬身"
         }
       ]
+    },
+    {
+      "horseName": "イクイノマックス",
+      "ownerName": "",
+      "prizeYen": 2946000000,
+      "starts": 20,
+      "raceResults": []
     },
     {
       "horseName": "シンボリルドルフィ",
@@ -448,15 +459,15 @@
     },
     {
       "rank": 3,
-      "horseName": "イクイノマックス",
-      "ownerName": "",
-      "prizeYen": 2946000000
+      "horseName": "サンプルホース150",
+      "ownerName": "管理人あおむし",
+      "prizeYen": 2965000000
     },
     {
       "rank": 4,
-      "horseName": "サンプルホース150",
-      "ownerName": "管理人あおむし",
-      "prizeYen": 2665000000
+      "horseName": "イクイノマックス",
+      "ownerName": "",
+      "prizeYen": 2946000000
     },
     {
       "rank": 5,
@@ -646,6 +657,19 @@
     }
   ],
   "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "サンプルホース150",
+      "slot": 1994166,
+      "raceName": "大阪杯",
+      "place": 1,
+      "prizeYen": 300000000,
+      "firstHorseName": "サンプルホース150",
+      "secondHorseName": "ディープインパルス",
+      "firstOwnerName": "管理人あおむし",
+      "secondOwnerName": "",
+      "firstSecondMargin": "5馬身"
+    },
     {
       "ownerName": "管理人あおむし",
       "horseName": "サンプルホース150",
