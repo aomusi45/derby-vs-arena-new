@@ -2439,36 +2439,56 @@
     },
     {
       "rank": 27,
+      "horseName": "テンノシン",
+      "ownerName": "管理人あおむし",
+      "prizeYen": 125000000
+    },
+    {
+      "rank": 28,
       "horseName": "コントレイン",
       "ownerName": "",
       "prizeYen": 120000000
     },
     {
-      "rank": 28,
+      "rank": 29,
       "horseName": "リスグラシュガー",
       "ownerName": "",
       "prizeYen": 65000000
     },
     {
-      "rank": 29,
+      "rank": 30,
       "horseName": "クロワデュノワール",
       "ownerName": "",
       "prizeYen": 50000000
     },
     {
-      "rank": 30,
+      "rank": 31,
       "horseName": "ソングライオン",
       "ownerName": "",
       "prizeYen": 36000000
     },
     {
-      "rank": 31,
+      "rank": 32,
       "horseName": "メジロドーベリー",
       "ownerName": "",
       "prizeYen": 0
     }
   ],
-  "raceResults": [],
+  "raceResults": [
+    {
+      "ownerName": "管理人あおむし",
+      "horseName": "テンノシン",
+      "slot": 1994236,
+      "raceName": "ジャパンカップ",
+      "place": 3,
+      "prizeYen": 125000000,
+      "firstHorseName": "ディープインパルス",
+      "secondHorseName": "シンボリルドルフィ",
+      "firstOwnerName": "",
+      "secondOwnerName": "",
+      "firstSecondMargin": "5馬身"
+    }
+  ],
   "awards": [
     {
       "weekStart": "2026-11-09",
