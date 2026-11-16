@@ -7,6 +7,8 @@
   const file=$('vs-entry-file'),submit=$('vs-entry-submit'),message=$('vs-entry-message');
   const preview=$('vs-entry-preview'),loginStatus=$('vs-entry-login-status');
   const google=$('vs-entry-google');
+  const consent=$('vs-fair-play-consent');
+  const hasEntryConsent=()=>!!consent?.checked;
   const ownerInput=$('vs-entry-ownername'),ownerHint=$('vs-entry-owner-status');
   if(!file||!submit||!message||!preview||!loginStatus||!google||!ownerInput)return;
   const cleanOwner=value=>typeof value==='string' ? value.trim().replace(/[\u0000-\u001f\u007f]/g,'') : '';
@@ -99,14 +101,14 @@
     return !!card&&[...bookedSlots].some(other=>slotCard(other)?.name===card.name);
   };
   const bookingAvailable=()=>!!savedHorse&&savedHorse.appearances<20&&
-    validOwner(reservedOwnerName)&&isGoogle()&&ready&&bookingsLoaded;
+    validOwner(reservedOwnerName)&&isGoogle()&&ready&&bookingsLoaded&&hasEntryConsent();
   function renderTodayBookings(){
     if(!bookingList)return;
     const now=Date.now(),day=jpDay(now),slotStart=nextSlot();
     const signature=[day,slotStart,Math.floor(now/30000),
       publicCatalog?.races?.length||0,bookingsLoaded,bookingBusy,busy,
       bookedSlots.size,[...bookedSlots].join(','),savedHorse?.horseId||'',
-      savedHorse?.appearances??'',isGoogle()].join('|');
+      savedHorse?.appearances??'',isGoogle(),hasEntryConsent()].join('|');
     if(bookingRenderKey===signature)return;
     bookingRenderKey=signature;
     const priorScroll=bookingList.scrollTop;
@@ -166,6 +168,7 @@
     bookingRenderKey='';renderTodayBookings();updateSubmit();
   }
   async function reserveOneSlot(slot,raceName){
+    if(!hasEntryConsent()){say('大会参加規約・注意事項に同意してください。');return;}
     if(!bookingAvailable()||busy||bookingBusy)return;
     const card=slotCard(slot);
     if(!card||card.name!==raceName)return;
@@ -507,17 +510,17 @@
       savedHorse.horseName+'（'+traits(savedHorse)+'／'+savedHorse.appearances+'/20戦）'+
       (completed?'・登録終了':'');
     ownerInput.readOnly=hasOwner;
-    ownerSave.disabled=busy||authPending||!allowed||!validOwner(cleanOwner(ownerInput.value));
+    ownerSave.disabled=busy||authPending||!allowed||!validOwner(cleanOwner(ownerInput.value))||!hasEntryConsent();
     const newHorse=hasOwner&&(!savedHorse||completed);
     submit.textContent=completed?'新しい馬を保存する':'この馬を保存する';
-    submit.disabled=busy||bookingBusy||authPending||!newHorse||!chosen||!workerReady();
+    submit.disabled=busy||bookingBusy||authPending||!newHorse||!chosen||!workerReady()||!hasEntryConsent();
     const needsWeek=savedHorse&&savedHorse.weekIndex!==currentWeek();
     const capFull=weeklyCheckedIndex===currentWeek()&&weeklyRegistered>=120&&needsWeek;
     const sameG1Applied=bookingsLoaded&&bookedSameG1(nextSlot());
     const wasApplied=!!ownRegistration||!!savedHorse?.registered||bookedSlots.has(nextSlot())||sameG1Applied;
     const blocked= savedHorse?raceEligibility(savedHorse,slotCard(nextSlot())):'';
     raceSubmit.disabled=busy||bookingBusy||authPending||!ready||!hasOwner||!savedHorse||completed||
-      !workerReady()||!bookingsLoaded||!acceptingNow()||wasApplied||capFull||!!blocked;
+      !workerReady()||!bookingsLoaded||!acceptingNow()||wasApplied||capFull||!!blocked||!hasEntryConsent();
     raceSubmit.textContent=!bookingsLoaded?'予約状況を確認中':sameG1Applied?'同GⅠは本日登録済み':wasApplied?'予約・登録済み':
       !acceptingNow()?'受付時間外':
       capFull?'週間枠が満員':blocked?'登録不可':'このレースに登録';
@@ -715,8 +718,12 @@
       updateSubmit();
     }
   });
+  if(consent)consent.addEventListener('change',()=>{
+    bookingRenderKey='';renderTodayBookings();updateSubmit();
+  });
   ownerInput.addEventListener('input',updateSubmit);
   ownerSave.addEventListener('click',async()=>{
+    if(!hasEntryConsent()){say('大会参加規約・注意事項に同意してください。');return;}
     if(!isGoogle()||busy||authPending||reservedOwnerName||!profileLoaded)return;
     const ownerName=cleanOwner(ownerInput.value);
     if(!validOwner(ownerName)){say('オーナー名は1〜24文字で入力してください。');return;}
@@ -757,6 +764,7 @@
     updateSubmit();
   });
   submit.addEventListener('click',async()=>{
+    if(!hasEntryConsent()){say('大会参加規約・注意事項に同意してください。');return;}
     if(!isGoogle()||busy||!chosen||!reservedOwnerName||!profileLoaded)return;
     if(savedHorse&&savedHorse.appearances!==20){say('20戦終了まで新しい馬に変更できません。');return;}
     busy=true;updateSubmit();say('愛馬の能力を公式サーバーに保存しています…');
@@ -770,6 +778,7 @@
     finally{busy=false;updateSubmit();}
   });
   raceSubmit.addEventListener('click',async()=>{
+    if(!hasEntryConsent()){say('大会参加規約・注意事項に同意してください。');return;}
     if(!isGoogle()||busy||!savedHorse||savedHorse.appearances>=20||!acceptingNow())return;
     if(!bookingsLoaded){say('当日の予約記録を確認中です。再度お試しください。');return;}
     if(bookedSameG1(nextSlot())){say('このGⅠは本日すでに予約・登録済みです。開催時刻を変えても再登録できません。');updateSubmit();return;}

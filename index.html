@@ -78,6 +78,18 @@
   #vs-entry-unlock{width:100%}
   .vs-entry-label{display:block;margin-top:13px;color:#ffe6ae;font-size:13px}
   #vs-entry-submit{margin:12px 0;width:100%}
+  .vs-fair-play-warning{margin:13px 0 17px;padding:13px 12px;border:1px solid #d9b56b;border-radius:9px;background:#382916;color:#ffebbb}
+  .vs-fair-play-warning strong{display:block;font-size:14px;color:#ffe1a0;margin-bottom:6px}
+  .vs-fair-play-warning p{margin:6px 0;font-size:12px;line-height:1.75;color:#f5e2bb}
+  .vs-fair-play-warning a,.vs-fair-play-terms a{color:#ffdfa1;text-decoration:underline;text-underline-offset:2px}
+  .vs-fair-play-consent{display:flex;align-items:flex-start;gap:10px;margin:12px 0 6px;padding:11px 10px;background:#08241e;border:1px solid #a88b51;border-radius:7px;cursor:pointer;font-size:13px;line-height:1.65;font-weight:700;color:#fff0c7}
+  .vs-fair-play-consent input{flex:none;width:21px;height:21px;margin:1px 0 0;accent-color:#e0bd71;cursor:pointer}
+  #vs-consent-help{margin:6px 0 0;color:#f0d9a2;font-size:11px}
+  .vs-fair-play-terms{margin:0 0 25px;padding:19px 18px;border:1px solid #b89551;border-radius:12px;background:#0e2822}
+  .vs-fair-play-terms h2{margin:4px 0 10px;font-size:18px;color:#ffe4aa}
+  .vs-fair-play-terms p{color:#d8e2d6;font-size:13px;line-height:1.9;margin:7px 0}
+  .vs-fair-play-terms .vs-legal-note{font-weight:700;color:#ffe0aa}
+  @media(max-width:520px){.vs-fair-play-warning{padding:11px 10px}.vs-fair-play-terms{padding:14px 12px}}
   #vs-entry-preview{color:#f2db9c!important;font-weight:700}
   #vs-entry-message{white-space:pre-line}
   /* V30: scrollable same-day individual G1 booking list; keeps the old entry screen intact. */
@@ -346,6 +358,16 @@
         <section class="panel">
           <div class="num">02 / ENTRY</div>
           <h2>出走馬登録</h2>
+          <div class="vs-fair-play-warning" aria-labelledby="vs-fair-play-title">
+            <strong id="vs-fair-play-title">⚠️ 不正登録・データ改ざんは禁止です</strong>
+            <p>登録データの改ざん・偽造、なりすまし、不正な重複登録、システムの不正利用を禁止します。不正行為が確認された場合、予告なく登録を取り消し、参加資格を停止する場合があります。<b>悪質な行為には、必要に応じて法的措置を講じる場合があります。</b></p>
+            <p>詳細は<a href="#vs-participation-terms">大会参加規約・注意事項</a>をご確認ください。</p>
+            <label class="vs-fair-play-consent" for="vs-fair-play-consent">
+              <input id="vs-fair-play-consent" type="checkbox" aria-describedby="vs-consent-help">
+              <span>大会参加規約・注意事項を確認し、同意します</span>
+            </label>
+            <p id="vs-consent-help">同意チェック後に、オーナー名・愛馬の登録、レースへの申込み、出走予約ができます。</p>
+          </div>
           <div id="vs-my-week-card" aria-label="今週の登録馬と個人成績">
             <p class="vs-my-kicker">MY HORSE · 今週の登録馬</p>
             <strong id="vs-my-week-horse">ログイン後に表示します</strong>
@@ -424,6 +446,14 @@
           <div id="vs-result-list" aria-live="polite"><p>直近24時間のレース記録を確認しています。</p></div>
         </section>
       </div>
+      <section id="vs-participation-terms" class="vs-fair-play-terms" aria-labelledby="vs-participation-terms-title">
+        <h2 id="vs-participation-terms-title">大会参加規約・注意事項</h2>
+        <p>ダービーファンタジー公式VSアリーナでは、登録馬データの改ざん・偽造、他人へのなりすまし、不正な重複登録、システムの不正利用など、公平性を損なう行為を禁止します。</p>
+        <p>不正行為が確認された場合、事前の通知なく登録の取り消し、参加資格の停止などの措置を講じる場合があります。</p>
+        <p class="vs-legal-note">悪質な不正行為については、必要に応じて法的措置を講じる場合があります。</p>
+        <p>すべての参加者が公平に楽しめる大会運営にご協力ください。参加時は上記の内容を確認し、登録画面で同意してください。</p>
+        <p><a href="#vs-fair-play-title">登録画面の同意欄に戻る</a></p>
+      </section>
       <section class="panel" id="vs-ranking-panel" aria-label="週間獲得賞金ランキング">
         <div class="num">04 / WEEKLY PRIZE RANKING</div>
         <h2>週間獲得賞金 TOP10</h2>
@@ -782,7 +812,7 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 <script src="visitor-counter.js?v=20261113-v16" defer></script>
 <script src="owner-ranking.js?v=20261115-v33-podium-details" defer></script>
 <script src="firebase-config.js" defer></script>
-<script src="registration.js?v=20261116-v42-week-reset" defer></script>
+<script src="registration.js?v=20261117-v44-fair-play-consent" defer></script>
 <script src="feedback-board.js?v=20261116-v40-stuck-loading-recovery" defer></script>
 <script src="my-arena-stats.js?v=20261114-v31-no-results-spoilers" defer></script>
 <!-- DBF arena return-to-game button. Place immediately before </body>. -->
