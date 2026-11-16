@@ -26,7 +26,7 @@ const state={watchSerial:0,enginePromise:null,watchMode:'',archiveMeta:null,reco
   async function loadRecord(meta){
     if(!/^races\/[0-9]+\.json(?:\.gz)?$/.test(meta.file))throw Error('レース記録のファイル名が不正です。');
     const record=await fetchJSON('./'+meta.file);
-    if(!recordCheck(record) || record.race.name!==meta.name || Number(record.race.distance)!==meta.distance ||
+    if(!recordCheck(record) || record.race.name!==meta.name || record.race.venue!==meta.venue || Number(record.race.distance)!==meta.distance ||
        record.durationMs!==meta.durationMs || record.results.length!==meta.results.length)
       throw Error('記録内容が開催情報と一致しません。');
     return record;
@@ -43,10 +43,39 @@ const state={watchSerial:0,enginePromise:null,watchMode:'',archiveMeta:null,reco
     if(html.split(hook).length!==2||html.split(anchor).length!==2)
       throw Error('レースエンジンの形式が対応版ではありません。');
     html=html.replace(hook,'if(!window.__dfOfficialSpectator)'+hook);
-    const bridge=`\nwindow.DFOfficialViewerBridge=Object.freeze({
+    const bridge=`
+// Official replay: the VS field builder defaults to Tokyo; restore the recorded G1 venue.
+// This changes only the spectator's track and captions, never the saved frame data.
+function dfV43RestoreReplayCourse(record){
+  const r=record?.race||{};
+  const card=GRADED_RACES_V78.find(c=>c.grade==='GⅠ'&&c.name===r.name&&
+    c.venue===r.venue&&c.distance===r.distance&&c.surface===r.surface);
+  if(!card)throw Error('保存レースの競馬場・距離が公式GⅠ番組表と一致しません。');
+  // Preserve classType:'vs' and grade:'VS' for existing spectator-only logic.
+  currentRace={...currentRace,name:card.name,venue:card.venue,
+    surface:card.surface,distance:card.distance,layout:card.layout,month:card.month,
+    weightRule:card.weightRule};
+  currentWeather=['晴れ','曇り','雨'].includes(r.weather)?r.weather:currentWeather;
+  updateTrackShape();
+  rebuildCourse(); // Rebuild actual venue scenery and right/left track, including minimap.
+  applyWeather();
+  updateRaceOverlay();
+  const title=document.querySelector('.race-title');
+  if(title?.firstChild)title.firstChild.textContent=card.venue+'競馬場　'+card.name+' ';
+  const grade=title?.querySelector('.g1');
+  if(grade)grade.textContent='GⅠ';
+  const info=document.getElementById('courseInfo');
+  if(info)info.textContent=card.venue+'競馬場｜'+card.surface+card.distance+'m｜'+
+    currentCourse.direction+'回り・'+(card.layout==='本'?'本コース':card.layout+'回り')+
+    '｜馬場：'+currentGoing+'｜天候：'+currentWeather+'｜'+STARTERS+'頭';
+  const overlay=document.getElementById('raceOverlayName');
+  if(overlay)overlay.textContent=card.venue+'競馬場　'+card.name+' GⅠ';
+}
+window.DFOfficialViewerBridge=Object.freeze({
       prepare(record){
         const result=window.DFOfficialVSReplay.play(record);
         if(!result?.ok)throw Error('保存したレースを準備できませんでした。');
+        dfV43RestoreReplayCourse(record);
         document.getElementById('newspaperRaceStart').disabled=true;
         dfV2SetGameScreenNow('newspaper');
         if(document.body.dataset.gameScreen!=='newspaper')throw Error('競馬新聞を開けませんでした。');
