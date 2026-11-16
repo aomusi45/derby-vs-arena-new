@@ -320,8 +320,8 @@
           <strong>週間賞金TOP10：</strong>月曜日～日曜日に獲得した賞金を馬ごとに集計し、馬名・オーナー名とともに常時表示します。<br>
           <strong>歴代年度代表馬：</strong>週間賞金1位を「第○代 年度代表馬」に認定し、永久に記録します。<br>
           <strong>同じGⅠは通算2回：</strong>日付・週が変わってもリセットされません。<br>
-          <strong>毎週の出走枠：</strong>毎週最大120オーナーが出走申込み可能。登録馬は20戦終了まで継続して利用できます。<br>
-          <strong>登録馬の通算20戦：</strong>20戦終了後に別の馬を登録できます。オーナー名はGoogleアカウントに固定されます。</p>
+          <strong>毎週の出走枠：</strong>毎週最大120オーナーが参加可能。日本時間の月曜0:00に前週の登録馬は終了し、今週の新しい馬を登録します。<br>
+          <strong>登録馬の通算20戦：</strong>1週間の出走は最大20戦。週内は20戦完了まで変更できません。以前登録した馬は翌週以降も再登録できません。オーナー名は固定です。</p>
         </div>
       </section>
 
@@ -389,7 +389,7 @@
             <p id="vs-today-reservation-message" class="small" aria-live="polite">Googleログイン後に予約状況を読み込みます。</p>
             <div id="vs-today-reservation-list" role="list" aria-label="本日の出走予約一覧">開催予定を読み込み中…</div>
           </section>
-          <p>Googleログインでオーナー名と愛馬を保存します。初回の1回だけオーナー名と馬ファイルを登録すると、次回からはファイル選択不要です。馬は通算20戦終了後のみ変更できます。</p>
+          <p>Googleログインでオーナー名を一度だけ登録します。愛馬は週ごとに新しく保存し、今週の間は出走申込ごとのファイル選択は不要です。馬は週内20戦終了まで変更できず、月曜0:00に登録を切り替えます。</p>
           <div class="vs-entry-auth" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
             <button class="vs-action-btn" id="vs-entry-google" type="button">Googleでログイン</button>
           </div>
@@ -407,7 +407,7 @@
             <button class="vs-action-btn" id="vs-owner-save" type="button" disabled>オーナー名を登録</button>
           </div>
           <div id="vs-entry-form" hidden>
-            <label for="vs-entry-file" class="vs-entry-label">最初の1回：VS登録馬ファイルを選ぶ（.dbfvs.json / .dbfvs / .json）</label>
+            <label for="vs-entry-file" class="vs-entry-label">今週のVS登録馬ファイルを選ぶ（.dbfvs.json / .dbfvs / .json）</label>
             <input id="vs-entry-file" type="file" accept=".dbfvs.json,.dbfvs,.json,application/json,application/octet-stream">
             <p class="small">暗号化馬データの復号は公式サーバーで行い、能力を固定して保存します。以前のパスワード式ファイルは新しいゲームから書き出し直してください。</p>
             <p id="vs-entry-preview" aria-live="polite"></p>
@@ -753,7 +753,7 @@ window.DBFArchiveLegacy=Object.freeze({open(meta){if(meta&&typeof meta.file==='s
 <script src="visitor-counter.js?v=20261113-v16" defer></script>
 <script src="owner-ranking.js?v=20261115-v33-podium-details" defer></script>
 <script src="firebase-config.js" defer></script>
-<script src="registration.js?v=20261115-v38-roster-daily-g1" defer></script>
+<script src="registration.js?v=20261116-v42-week-reset" defer></script>
 <script src="feedback-board.js?v=20261116-v40-stuck-loading-recovery" defer></script>
 <script src="my-arena-stats.js?v=20261114-v31-no-results-spoilers" defer></script>
 <!-- DBF arena return-to-game button. Place immediately before </body>. -->

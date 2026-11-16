@@ -1,5 +1,5 @@
 /* Firebase VS horse registration. UI code is isolated from the race viewer.
-   Google-only login; owner name and horse roster stay bound to UID until 20 starts.
+   Google-only login; owner name remains permanent, each weekly horse expires Monday 00:00 JST.
    The website NEVER receives or stores service-account credentials. */
 (()=>{
   'use strict';
@@ -31,6 +31,7 @@
   const WEEK_EPOCH_MS=Date.UTC(1970,0,4,15); // Monday 00:00 JST
   const jstWeekIndex=ms=>Math.floor((ms-WEEK_EPOCH_MS)/WEEK_MS);
   const currentWeek=()=>jstWeekIndex(Date.now());
+  let visibleWeek=currentWeek();
   const acceptingNow=()=>Date.now()%SLOT_MS<REGISTRATION_OPEN_MS &&
     currentWeek()===jstWeekIndex((Math.floor(Date.now()/SLOT_MS)+1)*SLOT_MS);
   const registrationForm=$('vs-entry-form'),persisted=$('vs-entry-persisted');
@@ -246,13 +247,13 @@
       ownerLockLabel.textContent=!activeLock?'登録馬：未登録':
         '保存済みの愛馬：'+activeLock.horseName+'（'+traits(activeLock)+'／'+
           (lockedCount===null?'出走履歴確認中':lockedCount+'/20戦')+
-          '）。20戦終了後に新しい馬を登録できます。';
+          '）。今週は20戦終了まで固定。月曜0:00に週が切り替わります。';
     }
     if(weeklyCapLabel){
       weeklyCapLabel.textContent='今週の登録枠：'+
         (weeklyCheckedIndex===currentWeek()&&Number.isInteger(weeklyRegistered)
           ?weeklyRegistered+' / 120頭':'確認中 / 120頭')+
-        '（愛馬は通算20戦まで継続登録）';
+        '（週内20戦上限／月曜0:00に登録馬を切り替え）';
     }
     if(persisted)persisted.textContent=ownForCurrentSlot()
       ?'登録済み：'+String(ownRegistration.horseName||'不明')+'（'+traits(ownRegistration.roster||{})+'） ／ オーナー：'+String(ownRegistration.ownerName||'不明')+'（差し替え不可）'
@@ -405,12 +406,12 @@
   }
   renderPublicStatus();
   refreshPublicStatus();refreshSlotRoster();
-  setInterval(()=>{renderPublicStatus();updateSubmit();renderTodayBookings();},1000);
+  setInterval(()=>{checkWeeklyRollover();renderPublicStatus();updateSubmit();renderTodayBookings();},1000);
   setInterval(refreshSlotRoster,20000);
   // Reconcile bookings made on other devices and at the JST midnight rollover.
   setInterval(()=>{if(isGoogle()&&!bookingBusy&&!busy)refreshTodayBookings();},30000);
   setInterval(refreshPublicStatus,30000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshPublicStatus();refreshSharedEntries();refreshSlotRoster();}});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkWeeklyRollover();refreshPublicStatus();refreshSharedEntries();refreshSlotRoster();}});
   const num=(raw,def,lo,hi)=>{
     if(raw===null||raw===undefined||raw==='')return def;
     const n=Number(raw);
@@ -471,6 +472,24 @@
   const profileCard=$('vs-entry-profile'),savedOwnerText=$('vs-saved-owner');
   const savedHorseText=$('vs-saved-horse');
   let serverChecked=false,savedHorse=null,loadSeq=0;
+  // Never show a previous week's horse after Monday 00:00 JST, even if the
+  // Worker profile is delayed or a browser tab remains open over midnight.
+  function checkWeeklyRollover(){
+    const nowWeek=currentWeek();
+    if(nowWeek===visibleWeek)return;
+    visibleWeek=nowWeek;
+    savedHorse=null;lockedHorse=null;lockedCount=null;
+    ownRegistration=null;ownRegistrationId=null;localConfirmed=null;
+    bookedSlots=new Set();bookedRaceCodes=new Set();bookingDay='';
+    bookingsLoaded=false;bookingRenderKey='';
+    weeklyRegistered=null;weeklyCheckedIndex=null;
+    if(isGoogle()){
+      say('新しい週になりました。前週の愛馬登録は終了しました。今週の愛馬を登録してください。');
+      if(!busy)loadProfile(auth.currentUser,false).catch(err=>
+        say('今週の登録状態を確認できません：'+String(err.message||err)));
+      refreshWeeklyCapacity();
+    }
+  }
   const GOOGLE_PROVIDER='google.com';
   const isGoogle=()=>!!auth?.currentUser&&!auth.currentUser.isAnonymous&&
     auth.currentUser.providerData?.some(p=>p.providerId===GOOGLE_PROVIDER);
@@ -554,13 +573,16 @@
     const seq=++loadSeq;
     const result=await workerRequest('/profile',{},user);
     if(seq!==loadSeq||auth?.currentUser?.uid!==user.uid)return;
-    const count=result.horseName?Number(result.appearances):null;
-    if(result.horseName&&!countValid(count))throw Error('保存済みの出走回数が不正です');
+    // Both Worker and browser must agree on the JST week. An older response
+    // must never restore the expired horse after midnight.
+    const currentHorse=!!result.horseName&&result.weekIndex===currentWeek();
+    const count=currentHorse?Number(result.appearances):null;
+    if(currentHorse&&!countValid(count))throw Error('保存済みの出走回数が不正です');
     reservedOwnerName=cleanOwner(result.ownerName||'');
     if(reservedOwnerName&&!validOwner(reservedOwnerName))throw Error('登録済みオーナー名が不正です');
     ownerInput.value=reservedOwnerName||ownerInput.value;
     profileLoaded=true;serverChecked=true;
-    savedHorse=result.horseName?{
+    savedHorse=currentHorse?{
       horseName:String(result.horseName),horseId:String(result.horseId||''),
       sex:result.horseSex,age:result.horseAge,
       appearances:count,weekIndex:result.weekIndex,registered:!!result.registered}:null;
@@ -587,7 +609,7 @@
     try{
       const doc=await sdk.getDocFromServer(sdk.doc(db,'vs_entries',user.uid));
       if(auth?.currentUser?.uid!==user.uid)return;
-      if(doc.exists()){
+      if(doc.exists()&&doc.data().weekIndex===currentWeek()){
         if(!ownRegistration||ownRegistration.updatedAt?.toMillis?.()!==doc.data().updatedAt?.toMillis?.())
           await updateOwnFromDocument(user,doc.data());
       }else if(ownRegistration){
@@ -730,7 +752,7 @@
         chosen=normalize(parsed);
         preview.textContent='登録予定の馬：'+chosen.name+' ／ '+traits(chosen.runner);
       }
-      say('この馬を保存すると、20戦終了まで変更できません。');
+      say('今週は20戦終了まで馬を変更できません。月曜0:00に今週の登録は終了します。');
     }catch(err){if(serial===selectionSerial)say('馬データを読み込めません：'+String(err.message||err));}
     updateSubmit();
   });
@@ -743,7 +765,7 @@
         chosen.sealed?{envelope:chosen.envelope}:{snapshot:chosen.originalSnapshot});
       await loadProfile(auth.currentUser,false);
       chosen=null;file.value='';preview.textContent='';
-      say('愛馬「'+result.horseName+'」を保存しました。次からファイル選択は不要です。受付時間になったら「このレースに登録」を押してください。');
+      say('愛馬「'+result.horseName+'」を今週の馬として保存しました。今週の出走申込ではファイル選択不要です。');
     }catch(err){say('登録馬を保存できません：'+String(err.message||err));}
     finally{busy=false;updateSubmit();}
   });
@@ -767,9 +789,10 @@
   });
   window.DBFMyArenaIdentity=Object.freeze({snapshot(){
     if(!isGoogle()||!profileLoaded||!validOwner(reservedOwnerName))return null;
+    const currentHorse=savedHorse?.weekIndex===currentWeek()?savedHorse:null;
     return {ownerName:reservedOwnerName,
-      horseName:savedHorse?.horseName||'',
-      sex:savedHorse?.sex||'',age:savedHorse?.age??null,weekIndex:currentWeek()};
+      horseName:currentHorse?.horseName||'',
+      sex:currentHorse?.sex||'',age:currentHorse?.age??null,weekIndex:currentWeek()};
   }});
   window.VSEntry=Object.freeze({normalize});
   init().catch(err=>{ready=false;updateSubmit();say('Firebase初期化エラー：'+String(err.message||err));});
