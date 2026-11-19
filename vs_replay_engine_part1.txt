@@ -8984,7 +8984,7 @@ function dfV56BendAt(distance){
 }
 // Ver.57: camera-only gate dolly. The race stays in its existing idle state
 // while the already-authorized start button shows a short live gate closeup.
-const dfV57GateIntro={active:false,begun:0,progress:0,serial:0,durationMs:3400};
+const dfV57GateIntro={active:false,begun:0,progress:0,serial:0,durationMs:5000};
 // Ver.61: hold the SAME gate lens/eye/lookAt when the doors open.  The camera
 // travels beside the moving field rather than cutting immediately to TV mode.
 // Track displacement comes from the PRESENTATION centreline only, never
@@ -8993,19 +8993,20 @@ const dfV57GateIntro={active:false,begun:0,progress:0,serial:0,durationMs:3400};
 // a single aim for the final stretch. No result, betting or race data is used.
 let dfV62EndHoldUntil=0;
 const dfV61GateFollow={
- active:false,eye:null,aim:null,fov:0,origin:null,startedAt:0,
+ active:false,hasStarted:false,eye:null,aim:null,fov:0,origin:null,startedAt:0,
+ holdElapsedMs:0,holdDurationMs:5000,
  begin(){
   if(!camera||!runners.length||!dfV52Director.initialized)return;
-  this.active=true;
+  this.active=true;this.hasStarted=true;
   this.eye=dfV52Director.eye.clone();
   this.aim=dfV52Director.aim.clone();
   this.fov=camera.fov;
   this.origin=trackAt(0).clone();
-  this.startedAt=performance.now();
+  this.startedAt=performance.now();this.holdElapsedMs=0;
   // The intro has finished; carry over exactly the displayed last camera frame.
   dfV52Director.transition=null;
  },
- reset(){this.active=false;this.eye=null;this.aim=null;this.origin=null;this.fov=0;this.startedAt=0;}
+ reset(){this.active=false;this.hasStarted=false;this.eye=null;this.aim=null;this.origin=null;this.fov=0;this.startedAt=0;this.holdElapsedMs=0;}
 };
 function selectShot(){
  // Ver.57: setCam owns the gradual 500m leader-following finish camera.
@@ -9040,6 +9041,18 @@ function dfV59PopularHorses(order){
  return (currentPreRaceOdds?.horse||[]).map(row=>byNo.get(row.no)).filter(Boolean);
 }
 
+// V11 camera-only correction: the previous fixed 30-45m/s limit could leave
+// the virtual lens behind the live pack at 2x playback or during narration pans.
+// Adapt the LIMIT to real horse speed and distance to the current camera target.
+// Exponential smoothing still controls each step; this never teleports a horse.
+function dfV11CameraTravelCap(baseCap,targetDistance,runnerSpeed,narrationPan=false){
+ const baseline=Math.max(0,Number(baseCap)||0);
+ const gap=Math.max(0,Number(targetDistance)||0);
+ const velocity=Math.max(0,Number(runnerSpeed)||0);
+ const minPace=Math.max(baseline,velocity*1.45+12);
+ return Math.min(narrationPan?180:130,
+   Math.max(minPace,baseline+gap*(narrationPan?2.0:1.4)));
+}
 // Ver.79: choose the clear filming side PER VENUE and ACTIVE COURSE rather
 // than forcing all five stadiums onto the same outer/infield side.
 // A fixed choice per race is essential for the continuous, no-cut broadcast:
@@ -9215,26 +9228,26 @@ const dfV52Director={
   if(shot==='broadcast'){
    // Ver.81: show actual FRONT / MIDFIELD / BACKMARKERS in the early and
    // middle stages, with a smooth one-take transfer between subjects. In the
-   // last 800m return to the current leading group. Race order and pace are
+   // last 500m return to the current leading group. Race order and pace are
    // read-only; changing the broadcast subject NEVER changes horse movement.
    const remaining=TOTAL-leader.dist;
    // Ver.106: focus a horse BEFORE its name is spoken, while the camera
    // remains one continuous, fixed-angle shot without jump cuts.
    // No commentary cutaway once the lead group must remain in view.
-   const spoken=remaining>800?order.find(h=>h.no===raceNarration.focusNo&&elapsed<raceNarration.focusUntil):null;
+   const spoken=remaining>500?order.find(h=>h.no===raceNarration.focusNo&&elapsed<raceNarration.focusUntil):null;
    if(spoken){
     const companions=order.filter(h=>h!==spoken)
      .sort((a,b)=>Math.abs(a.dist-spoken.dist)-Math.abs(b.dist-spoken.dist))
      .slice(0,3);
     return {list:[spoken,...companions],kind:'broadcast',phase:'narration'};
    }
-   // From 800m out show the live leaders continuously, not touring/rear runners.
-   if(remaining<=800){
+   // From 500m out show the live leaders continuously, not touring/rear runners.
+   if(remaining<=500){
     return {list:order.filter(h=>leader.dist-h.dist<=22).slice(0,5),kind:'broadcast',phase:'leading'};
    }
    let anchor=leader,phase='leading';
-   if(remaining>800&&leader.dist>=95&&order.length>5){
-    const touringMetres=Math.max(1,TOTAL-800-95);
+   if(remaining>500&&leader.dist>=95&&order.length>5){
+    const touringMetres=Math.max(1,TOTAL-500-95);
     const segment=Math.max(170,Math.min(320,touringMetres/3));
     const stage=Math.floor((leader.dist-95)/segment)%4;
     const slot=stage===0?.47:stage===1?.84:stage===2?.30:0;
@@ -9449,21 +9462,25 @@ const dfV52Director={
    this.aim.copy(this.oneTakeStartAim);
    this.initialized=true;
   }
-  // Stay with the horses during the final 100m; parking an exactly side-on
-  // camera at 100m would leave the horses completely outside the narrow frame.
-  // Lock only once the SAME camera has reached the finish-line SIDE position.
+  // V16: one real SIDE camera from 500m out through the winner's crossing.
+  // The lens travels alongside the horses; at the line its CURRENT pose freezes.
+  // No after-goal settling, fly-to animation, cut, or earlier stationary shot.
   const leader=order[0];
   const progress=Math.max(0,leader.dist);
   const remaining=Math.max(0,TOTAL-progress);
-  // Mark the shot as locked only after the camera itself reaches the goal.
-  // The final position is checked after the smooth move below.
-  if(this.oneTakeGoalLocked||race==='finished'){
+  // Freeze in the SAME render frame as the leading horse crosses the goal.
+  if(this.oneTakeGoalLocked){
    this.railVisibility(false);
    camera.position.copy(this.eye);viewTarget.copy(this.aim);
    camera.lookAt(viewTarget);camera.updateMatrixWorld();
    $('camname').textContent='CAM　ゴール固定・ワンカット';
    return;
   }
+  // V18: MOVE the very same camera with the departing pack immediately.
+  // The stationary gate geometry stays visible for five running seconds, so
+  // the horses and camera pull away from it naturally. No 5-second lens lock,
+  // separate shot, race-speed adjustment or hard handoff at the timer edge.
+  if(gate.active&&gate.holdElapsedMs>=gate.holdDurationMs)gate.active=false;
   // Follow the gates in their original physical frame first. This target is
   // a TRANSLATION of the actual gate camera along the real course centreline.
   const displacement=trackAt(Math.min(progress,480)).sub(this.oneTakeOrigin);
@@ -9499,86 +9516,47 @@ const dfV52Director={
      desiredAim.lerp(aim,.45);
     }
    }
-  // Ver.103: one continuous sideways leader camera. Start the approach at
-  // 1000m to go, reach the true side and slightly overhead by 600m, and keep
-  // that very same angle alongside the leaders all the way to the goal.
-  // No early '300m goal camera' transition and no 100m shot switch.
+  // V16: prepare the single broadcast camera during 800-500m remaining.
+  // At 500m remaining it is already a TRUE FLANK camera, travelling at the
+  // actual live pack's race distance on every frame until the goal itself.
+  // Only the camera is affected; horse positions, velocities and timing are not.
   const nearLeaders=order.filter(h=>leader.dist-h.dist<=24).slice(0,5);
-  const isNiigataFinish=dfV47World?.id==='niigata';
-  const sideBlend=smooth((1000-remaining)/400);
-  const goalTrackPoint=trackAt(TOTAL);
-  // Constant WORLD-side filming vector. Relative to the track's reversing
-  // direction, this gradually changes from the inside to the outside.
+  const sideBlend=smooth((800-remaining)/300);
   const broadcastSide=dfV128FixedWorldCameraSide();
-  const rightCornerMove=dfV59RightFinalCornerMove(progress);
-  // Issue #7: normal and VS races share the same low, oblique rail-side
-  // finish camera. Keep the existing one-take smoothing and zoom unchanged.
+  // The final bend is filmed from the physical outside on right-handed tracks.
+  // Left-handed/straight tracks keep the same finish-side choice as V13.
+  const finishSideSign=currentCourse?.direction==='右'?-1:
+    (broadcastSide.dot(inwardAt(TOTAL))>=0?1:-1);
   const finishGap=Math.max(23,(dfV47World?.width??30)*.5+7);
-  // Keep a safe, smooth margin outside the final corner's near rail.
-  // The adjustment is zero for left-hand and VS races.
-  const outerFinishGap=finishGap+
-   (Math.max(finishGap,(dfV47World?.width??30)*.5+12)-finishGap)*rightCornerMove;
-  // The goal target must be on the SAME exterior as the travelling camera.
-  // VS and every left-handed race keep the original world-side target.
-  const goalSide=(rightCornerMove>0)
-   ?dfV59CameraAroundPack(broadcastSide,dfV59RightOutsideNormal(TOTAL),rightCornerMove,headingAt(TOTAL))
-   :broadcastSide;
-  const goalEye=goalTrackPoint.clone().addScaledVector(goalSide,outerFinishGap);
-  goalEye.addScaledVector(headingAt(TOTAL),-10);
-  goalEye.y+=6.5+DF60_STRAIGHT_LIFT_METRES*dfV60FinalStraightOverhead(TOTAL);
-  const goalAim=goalTrackPoint.clone().addScaledVector(headingAt(TOTAL),-8);
-  goalAim.y+=2.6;
+  const sideGap=currentCourse?.direction==='右'
+    ?Math.max(finishGap,(dfV47World?.width??30)*.5+12):finishGap;
+  // V19: the goal freeze keeps the exact moving camera pose, including its
+  // forward-facing 70%-screen leader composition; no goal-only recentering.
+  let liveSideEye=null,liveSideAim=null;
   if(sideBlend>0){
-   // Use ONLY runners currently close to the lead, so a straggler cannot
-   // force a zoomed-out view. The selection is read-only.
    const pack=order.filter(h=>leader.dist-h.dist<=16).slice(0,5);
    if(!pack.length)pack.push(leader);
-   // Only the leading pack decides the finish shot. Narration may not
-   // drag the lens away toward a midfield or rear horse.
    const packDistance=pack.reduce((sum,h)=>sum+h.dist,0)/pack.length;
-   // Final 100m: follow the live leaders toward the line, rather than
-   // sending the camera ahead to GOAL at 350m out (which loses the horses).
-   // The eye stays alongside the pack; during the last 100m it gradually
-   // catches up from the group centre to the leading horse's position.
-   // At the line it reaches the fixed goal position without a sudden cut.
+   // Stay with the actual lead group; only the last 100m shifts smoothly
+   // toward the leading horse, reaching the exact goal at the crossing.
    const finishApproach=smooth((100-remaining)/100);
-   const sideDist=Math.max(0,Math.min(TOTAL,
-     packDistance+Math.max(0,leader.dist-packDistance)*finishApproach));
+   const sideDist=clamp(packDistance+(leader.dist-packDistance)*finishApproach,0,TOTAL);
    const sideTrack=trackAt(sideDist);
-   const localNormal=inwardAt(sideDist);
-   const cornerOverhead=1-Math.abs(localNormal.dot(broadcastSide));
-   // During the right-handed last bend, take a constant-radius ARC around
-   // the live horses from the previous world-side view to the true outside.
-   // Never cross the track centreline or flip back to the inner rail.
-   const outsideSide=rightCornerMove>0
-    ?dfV59CameraAroundPack(broadcastSide,dfV59RightOutsideNormal(sideDist),
-       rightCornerMove,headingAt(sideDist))
-    :broadcastSide;
-   const sideEye=sideTrack.clone().addScaledVector(outsideSide,outerFinishGap);
-   // Pull the lens gently alongside rather than through the inner/outer rails.
-   const turnAlong=-10*(1-.65*Math.sin(Math.PI*rightCornerMove));
-   sideEye.addScaledVector(headingAt(sideDist),turnAlong);
-   // Keep the Ver.59 right-hand OUTSIDE and left-hand existing side;
-   // only raise the lens smoothly once the real final straight begins.
-   sideEye.y+=6.5+cornerOverhead*2.0+
-     DF60_STRAIGHT_LIFT_METRES*dfV60FinalStraightOverhead(sideDist);
-   const sideAim=pack.reduce((v,h)=>v.add(h.root.position),new THREE.Vector3())
-      .multiplyScalar(1/pack.length);
-   sideAim.y+=2.6;
-    if(remaining>70&&performance.now()<df140LeadDuels.until&&df140LeadDuels.nos.length===2){
-     const pair=df140LeadDuels.nos.map(no=>order.find(h=>h.no===no)).filter(Boolean);
-     if(pair.length===2){
-      const point=pair[0].root.position.clone().add(pair[1].root.position).multiplyScalar(.5);
-      point.y+=2.75;
-      sideAim.lerp(point,.65);
-     }
-    }
-    // Keep aiming at the leading pack through the final 100m. Gently
-   // settle on the goal point only within the last 35m, avoiding a premature
-   // pan that previously let all horses leave the screen.
-   sideAim.lerp(goalAim,smooth((35-remaining)/35));
-   desiredEye.lerp(sideEye,sideBlend);
-   desiredAim.lerp(sideAim,sideBlend);
+   const sideNormal=inwardAt(sideDist);
+   const trueSide=sideNormal.clone().multiplyScalar(finishSideSign);
+   // Rotate *around* the live runners, never through the track when entering
+   // the side camera from the preceding commentary broadcast view.
+   const enteringSide=sideBlend<1
+     ?dfV59CameraAroundPack(broadcastSide,trueSide,sideBlend,headingAt(sideDist))
+     :trueSide;
+   liveSideEye=sideTrack.clone().addScaledVector(enteringSide,sideGap);
+   liveSideEye.y+=6.5+DF60_STRAIGHT_LIFT_METRES*dfV60FinalStraightOverhead(sideDist);
+   // Point precisely across the track at the SAME longitudinal station.
+   // Do not pan toward the goal prematurely: the shot stays genuinely
+   // perpendicular to the runners from 500m until the winning crossing.
+   liveSideAim=sideTrack.clone();liveSideAim.y+=2.6;
+   desiredEye.lerp(liveSideEye,sideBlend);
+   desiredAim.lerp(liveSideAim,sideBlend);
   }
   // Smoothly move the same eye and optical axis each rendered frame. Cap the
   // maximum camera travel, so a popular horse / leadership swap cannot throw
@@ -9592,36 +9570,58 @@ const dfV52Director={
   // visibly framed BEFORE introducing its name; it must not be stranded by
   // the ordinary 24m/s lateral speed limit when the subject is far away.
   // Read-only position/camera test: no race state or commentary text changes.
-  const spokenTarget=remaining>185?order.find(h=>
+  const spokenTarget=remaining>500?order.find(h=>
     h.no===raceNarration.focusNo&&elapsed<raceNarration.focusUntil):null;
   const needsNarrationPan=Boolean(spokenTarget&&!df106FeaturedHorseOnCamera(spokenTarget));
   const responseRate=needsNarrationPan?2.9:2.4;
   this.narrationCatchUp+=(Number(needsNarrationPan)-this.narrationCatchUp)*
     (1-Math.exp(-dt*responseRate));
   const catchUp=this.narrationCatchUp;
+  // V16: narration may pull the camera only before the 500m side-shot lock.
   // Ver.128: the 3-second camera head start permits a gentler narration pan.
   // Keep normal follow, zoom and the fixed finish-shot logic unchanged.
   // At the finish do NOT accelerate the camera to 51-56m/s. Its target
   // follows the actual leaders; let the eye/aim move smoothly at a calm
   // tracking rate even with the default 2x replay speed selected.
   const lastHundred=smooth((110-remaining)/110);
-  const eyeRate=(3.15-.60*lastHundred)*(1-.34*calmFollow)+1.2*catchUp;
-  const aimRate=(4.0-.70*lastHundred)*(1-.34*calmFollow)+1.6*catchUp;
-  const eyeCap=(remaining<360?39:30)-(remaining<360?15*lastHundred:0);
-  const aimCap=(remaining<360?45:33)-(remaining<360?17*lastHundred:0);
-  const moveAlpha=1-Math.exp(-dt*playbackCameraRate*eyeRate);
-  const aimAlpha=1-Math.exp(-dt*playbackCameraRate*aimRate);
-  const eyeMove=desiredEye.sub(this.eye);
-  const eyeStep=Math.min(eyeMove.length()*moveAlpha,dt*eyeCap*playbackCameraRate);
-  if(eyeMove.lengthSq()>1e-10)this.eye.addScaledVector(eyeMove.normalize(),eyeStep);
-  const aimMove=desiredAim.sub(this.aim);
-  const aimStep=Math.min(aimMove.length()*aimAlpha,dt*aimCap*playbackCameraRate);
-  if(aimMove.lengthSq()>1e-10)this.aim.addScaledVector(aimMove.normalize(),aimStep);
+  // Legacy smoothing below remains active before the 500m side shot;
+  // inside that shot camera motion follows the actual horses exactly.
+  const goalCatchUp=0;
+  const eyeRate=(3.15-.60*lastHundred)*(1-.34*calmFollow)+1.2*catchUp+8*goalCatchUp;
+  const aimRate=(4.0-.70*lastHundred)*(1-.34*calmFollow)+1.6*catchUp+10*goalCatchUp;
+  const baseEyeCap=(remaining<360?39:30)-(remaining<360?15*lastHundred:0);
+  const baseAimCap=(remaining<360?45:33)-(remaining<360?17*lastHundred:0);
+  // V11: preserve one-take damping but allow the live eye and aim to catch up.
+  // Especially important while tracking the leaders through the last 600m.
+  const eyeCap=dfV11CameraTravelCap(baseEyeCap,this.eye.distanceTo(desiredEye),leader.velocity,needsNarrationPan);
+  const aimCap=dfV11CameraTravelCap(baseAimCap,this.aim.distanceTo(desiredAim),leader.velocity,needsNarrationPan);
+  if(remaining<=500&&liveSideEye&&liveSideAim){
+   // V16: position is exactly co-moving with the runners from 500m out,
+   // at any replay speed/FPS. No smoothing lag or accidental oblique view.
+   this.eye.copy(liveSideEye);
+   this.aim.copy(liveSideAim);
+  }else if(remaining<700&&liveSideEye&&liveSideAim){
+   // Pre-acquire the physical side pose by the 500m marker. This avoids
+   // a visible jump when the camera begins exact runner-speed translation.
+   const acquire=smooth((700-remaining)/200);
+   const alpha=1-Math.exp(-dt*playbackCameraRate*(8+110*acquire));
+   this.eye.lerp(desiredEye,alpha);
+   this.aim.lerp(desiredAim,alpha);
+  }else{
+   const moveAlpha=1-Math.exp(-dt*playbackCameraRate*eyeRate);
+   const aimAlpha=1-Math.exp(-dt*playbackCameraRate*aimRate);
+   const eyeMove=desiredEye.sub(this.eye);
+   const eyeStep=Math.min(eyeMove.length()*moveAlpha,dt*eyeCap*playbackCameraRate);
+   if(eyeMove.lengthSq()>1e-10)this.eye.addScaledVector(eyeMove.normalize(),eyeStep);
+   const aimMove=desiredAim.sub(this.aim);
+   const aimStep=Math.min(aimMove.length()*aimAlpha,dt*aimCap*playbackCameraRate);
+   if(aimMove.lengthSq()>1e-10)this.aim.addScaledVector(aimMove.normalize(),aimStep);
+  }
   // Ver.81: maintain a similar zoom on the CURRENT featured pack, not the
   // race leader. Ver.80 mistakenly zoomed with the leader even while trying
   // to film horses behind, pulling the selected group out of the picture.
   // Near the finish frame the leaders and fixed goal together as before.
-  const featured=(raceNarration.focusNo&&elapsed<raceNarration.focusUntil&&remaining>800)?group.list[0]:(remaining<=800?leader:group.list[0]);
+  const featured=(raceNarration.focusNo&&elapsed<raceNarration.focusUntil&&remaining>500)?group.list[0]:(remaining<=500?leader:group.list[0]);
   const featuredBody=featured.root.position.clone().add(new THREE.Vector3(0,2.2,0));
   const eyeToFeatured=Math.max(9,this.eye.distanceTo(featuredBody));
   const matchedFov=2*Math.atan(this.oneTakeZoomReference/eyeToFeatured)*180/Math.PI;
@@ -9662,16 +9662,45 @@ const dfV52Director={
    if(nearFront.length===nearLeaders.length)
     desiredFov=Math.max(desiredFov,Math.min(portrait?63:60,fiveHorseFov)*fiveHorseBlend);
   }
-  // Ver.101: once transferred, keep the finish-camera lens stable. Its
-  // placement is next to the goal, filming the horses as they run past.
+  // After the leader crosses, preserve the locked lens and physical pose.
   if(this.oneTakeGoalLocked)desiredFov=camera.fov;
   const newFov=camera.fov+(desiredFov-camera.fov)*(1-Math.exp(-dt*(remaining<120?6.0:4.8)));
   if(Math.abs(newFov-camera.fov)>.005){camera.fov=newFov;camera.updateProjectionMatrix();}
-  // Ver.86: reach the slightly oblique (~15 degree) goal-side broadcast
-  // position before the first horse finishes. Follow the leading five
-  // smoothly during the approach, then park about 10m before the line.
-  if(remaining<=35&&this.eye.distanceTo(goalEye)<7.5&&this.aim.distanceTo(goalAim)<11)
-    this.oneTakeGoalLocked=true;
+  // V19: position the leading horse 70% toward its on-screen travel direction
+  // during the side-on final 500m (rightward => x=.70, leftward => x=.30).
+  // Move eye AND aim by the same course-tangent displacement: this preserves
+  // the true flank angle, the runner scale and the existing one-take lens.
+  // Ease the framing during 700-500m so entering the side shot cannot jump.
+  if(remaining<700&&liveSideEye&&liveSideAim){
+   const compositionBlend=smooth((700-remaining)/200);
+   const tangent=headingAt(Math.min(TOTAL,Math.max(0,leader.dist)));
+   tangent.y=0;tangent.normalize();
+   const forward=this.aim.clone().sub(this.eye).normalize();
+   const screenRight=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();
+   const leadBody=leader.root.position.clone().add(new THREE.Vector3(0,2.2,0));
+   const relative=leadBody.sub(this.eye);
+   const depth=relative.dot(forward);
+   const travelOnScreen=tangent.dot(screenRight);
+   const halfWidth=Math.tan(camera.fov*Math.PI/360)*Math.max(.38,aspect);
+   if(depth>1&&Math.abs(travelOnScreen)>.35&&halfWidth>.01){
+    // Solve perspective x=(right)/(depth*tan(fov/2)*aspect) exactly for a
+    // translation along the running direction, including any bend/tilt.
+    const targetX=.4*Math.sign(travelOnScreen); // NDC: +/-0.4 is 70/30%.
+    const slope=targetX*halfWidth;
+    const denominator=travelOnScreen-slope*tangent.dot(forward);
+    if(Math.abs(denominator)>.25){
+     const metresBack=(slope*depth-relative.dot(screenRight))/denominator;
+     if(Number.isFinite(metresBack)){
+      const shift=clamp(metresBack,-26,26)*compositionBlend;
+      this.eye.addScaledVector(tangent,-shift);
+      this.aim.addScaledVector(tangent,-shift);
+     }
+    }
+   }
+  }
+  // V19: freeze the travelling camera exactly as displayed on the winner's
+  // crossing frame. Do NOT snap back to a centred physical finish-line camera.
+  if(remaining<=.00001)this.oneTakeGoalLocked=true;
   this.key='one-take';this.anchorNo=group.list[0].no;
   this.focusNos=group.list.map(h=>h.no);this.transition=null;
   // Rail geometry is non-interactive scenery: avoid blocking the live horses.
@@ -9679,8 +9708,9 @@ const dfV52Director={
   camera.position.copy(this.eye);viewTarget.copy(this.aim);
   camera.lookAt(viewTarget);camera.updateMatrixWorld();
   lastCameraShot='one-take';
-  $('camname').textContent=remaining<=600?'CAM　柵沿い・低い斜め追走':
-    remaining<=1000?'CAM　ワンカット・先頭へ接近':
+  $('camname').textContent=this.oneTakeGoalLocked?'CAM　ゴール真横・固定':
+    remaining<=500?'CAM　先頭集団・真横並走':
+    remaining<=800?'CAM　真横カメラへ移動':
     group.phase==='rear'?'CAM　ワンカット・後方集団':
     group.phase==='middle'?'CAM　ワンカット・中団':'CAM　ワンカット・先頭';
   mats.sun.position.set(viewTarget.x-42,viewTarget.y+78,viewTarget.z+24);
@@ -9790,16 +9820,79 @@ const dfV52Director={
    }
   }
   lastCameraShot=shot;
-  const name=group.kind==='goal'?'ゴール固定カメラ':front?'スタート':wide?'コーナー俯瞰':group.kind==='broadcast'?(TOTAL-order[0].dist<=800?'先頭集団を追跡':'注目馬を中心に約5頭'):shot==='corner'?'コーナー追走':group.kind==='chasing'?'追走集団':
+  const name=group.kind==='goal'?'ゴール固定カメラ':front?'スタート':wide?'コーナー俯瞰':group.kind==='broadcast'?(TOTAL-order[0].dist<=500?'先頭集団を追跡':'注目馬を中心に約5頭'):shot==='corner'?'コーナー追走':group.kind==='chasing'?'追走集団':
     group.kind==='detail'?'注目馬':shot==='finish'?'ゴール前':shot==='chase'?'先頭追走':'先頭争い';
   $('camname').textContent='CAM　'+name;
   mats.sun.position.set(viewTarget.x-42,viewTarget.y+78,viewTarget.z+24);
   mats.sun.target.position.copy(viewTarget);
  }
 };
+// Ver.90: display-only transitions between manual horse and broadcast views.
+// Preserve the director's unconstrained TARGET pose separately from the
+// interpolated SCREEN pose, so switching never feeds the latter into the
+// next camera calculation. This object never reads/writes horse physics.
+const df90CameraHandoff={
+ active:false,startedAt:0,fromEye:null,fromAim:null,fromFov:0,
+ targetEye:null,targetAim:null,targetFov:0,durationMs:1100,
+ reset(){
+  this.active=false;this.startedAt=0;this.fromEye=null;this.fromAim=null;
+  this.targetEye=null;this.targetAim=null;this.fromFov=0;this.targetFov=0;
+ },
+ begin(){
+  if(!camera||!viewTarget)return;
+  // Capture the ACTUAL visible frame, including an unfinished earlier handoff.
+  this.fromEye=camera.position.clone();this.fromAim=viewTarget.clone();
+  this.fromFov=camera.fov;this.targetEye=null;this.targetAim=null;
+  this.startedAt=performance.now();this.active=true;
+ },
+ restoreTarget(){
+  if(!this.active||!this.targetEye)return;
+  camera.position.copy(this.targetEye);viewTarget.copy(this.targetAim);
+  camera.fov=this.targetFov;camera.updateProjectionMatrix();
+  camera.lookAt(viewTarget);camera.updateMatrixWorld();
+ },
+ apply(instant){
+  if(!this.active)return;
+  // Photo-finish and initial camera setup must never be overlaid by a handoff.
+  if(instant||df78PhotoFinish.active){this.reset();return;}
+  this.targetEye=camera.position.clone();this.targetAim=viewTarget.clone();
+  this.targetFov=camera.fov;
+  const u=Math.max(0,Math.min(1,(performance.now()-this.startedAt)/this.durationMs));
+  if(u>=1){this.reset();return;}
+  const ease=u*u*(3-2*u);
+  camera.position.copy(this.fromEye).lerp(this.targetEye,ease);
+  viewTarget.copy(this.fromAim).lerp(this.targetAim,ease);
+  camera.fov=this.fromFov+(this.targetFov-this.fromFov)*ease;
+  camera.updateProjectionMatrix();camera.lookAt(viewTarget);camera.updateMatrixWorld();
+ }
+};
 // User-selected single-horse camera; read-only against race simulation.
+// Strip cohort labels in this camera UI only; keep the original horse data intact.
+function dfFollowCameraDisplayName(name){
+ return raceDisplayHorseName(name).replace(/・\d+年目DF202$/,'');
+}
+// Ver.93: permit manual follow until the leading runner reaches the last 100m.
+const DF93_FOLLOW_AUTO_RETURN_METERS=100;
 const dfFollowCamera={
  active:false,no:null,roster:null,offset:null,
+ isFinal100(){
+  if(!(race==='running'||race==='paused'||race==='runout'||race==='finished')||!runners.length)return false;
+  const leader=ranks()[0];
+  return !!leader&&leader.dist>=TOTAL-DF93_FOLLOW_AUTO_RETURN_METERS;
+ },
+ // Only the automatic final-100m return is a hard cut. Manual return remains smooth.
+ forceAutoAt100(){
+  if(!this.active)return;
+  this.active=false;this.no=null;this.offset=null;
+  df90CameraHandoff.reset(); // Never blend the last follow frame into the goal camera.
+  // V97: match manual return's broadcast origin/zoom reset BEFORE changing lenses.
+  // This is visual state only; the race/finish physics remains untouched.
+  this.rebaseAuto();
+  df26GoalCamera.reset();    // Recompute the true normal 500m goal-camera pose.
+  camMode='auto';
+  document.querySelectorAll('[data-camera]').forEach(b=>b.classList.toggle('active',b.dataset.camera==='auto'));
+  this.reflect();
+ },
  refresh(){
   if(this.roster===runners)return;
   this.roster=runners;this.active=false;this.no=null;this.offset=null;
@@ -9810,7 +9903,7 @@ const dfFollowCamera={
   for(const h of runners){
    const option=document.createElement('option');
    option.value=String(h.no);
-   option.textContent=`${h.no}番 ${h.name||h.displayName||h.original||'出走馬'}`;
+   option.textContent=`${h.no}番 ${dfFollowCameraDisplayName(h.name||h.displayName||h.original||'出走馬')}`;
    select.appendChild(option);
   }
   panel.hidden=!runners.length;
@@ -9819,31 +9912,61 @@ const dfFollowCamera={
  reflect(){
   const on=document.getElementById('dfFollowSet');
   const off=document.getElementById('dfFollowAuto');
-  if(on)on.setAttribute('aria-pressed',String(this.active));
+  if(on){
+   on.setAttribute('aria-pressed',String(this.active));
+   on.disabled=this.isFinal100();
+   on.title=on.disabled?'残り100mからは通常カメラ固定':'';
+  }
+  const select=document.getElementById('dfFollowHorse');
+  if(select)select.disabled=this.isFinal100();
   if(off)off.setAttribute('aria-pressed',String(!this.active));
  },
  follow(){
+  if(this.isFinal100()){this.reflect();return;}
   const no=Number(document.getElementById('dfFollowHorse')?.value);
   if(!runners.some(h=>h.no===no))return;
-  // A new target must start at its own true screen centre, not the old
-  // horse's smoothed viewing offset or the previous broadcast camera.
-  this.no=no;this.active=true;this.offset=null;this.reflect();setCam(false);
+  // Hold the last on-screen frame while the newly chosen horse is acquired.
+  // A direct jump in absolute world coordinates is visually disorienting.
+  df90CameraHandoff.begin();
+  this.no=no;this.active=true;this.offset=null;
+  // A finish camera created before manual follow must not reuse its old shot
+  // when the viewer subsequently returns to normal mode.
+  df26GoalCamera.reset();
+  this.reflect();setCam(false);
+ },
+ rebaseAuto(){
+  // A continuous one-take must restart from exactly the visible manual pose.
+  // Its position origin AND optical-size reference must be rebased together.
+  if(!dfV47World||!camera||!runners.length||
+    !(race==='running'||race==='paused'||race==='runout'||race==='finished'))return;
+  const director=dfV52Director;
+  const lead=ranks()[0];
+  const progress=Math.max(0,Number(lead?.dist)||0);
+  director.oneTakeStarted=true;
+  director.oneTakeGoalLocked=false;
+  director.transition=null;
+  director.eye.copy(camera.position);director.aim.copy(viewTarget);
+  director.oneTakeStartEye=camera.position.clone();
+  director.oneTakeStartAim=viewTarget.clone();
+  director.oneTakeStartFov=camera.fov;
+  director.oneTakeOrigin=trackAt(Math.min(progress,480)).clone();
+  const initialDistance=director.oneTakeStartEye.distanceTo(director.oneTakeStartAim);
+  director.oneTakeZoomReference=clamp(
+    initialDistance*Math.tan(director.oneTakeStartFov*Math.PI/360)*1.12,14.5,26);
+  director.narrationCatchUp=0;
+ },
+ stopFollow(){
+  if(!this.active)return false;
+  df90CameraHandoff.begin();
+  this.active=false;this.no=null;this.offset=null;this.reflect();
+  this.rebaseAuto();
+  df26GoalCamera.reset();
+  return true;
  },
  normal(){
-  this.active=false;this.no=null;this.offset=null;this.reflect();
+  this.stopFollow();
   camMode='auto';
   document.querySelectorAll('[data-camera]').forEach(b=>b.classList.toggle('active',b.dataset.camera==='auto'));
-  // Resume the existing continuous camera from the frame currently on screen,
-  // rather than snapping back to its outdated pre-follow coordinates.
-  if(dfV47World&&camera&&dfV52Director.oneTakeStarted&&dfV52Director.oneTakeOrigin){
-   dfV52Director.oneTakeStarted=true;
-   dfV52Director.oneTakeGoalLocked=false;
-   dfV52Director.eye.copy(camera.position);
-   dfV52Director.aim.copy(viewTarget);
-   dfV52Director.oneTakeStartEye=camera.position.clone();
-   dfV52Director.oneTakeStartAim=viewTarget.clone();
-   dfV52Director.oneTakeStartFov=camera.fov;
-  }
   setCam(false);
  },
  update(h,instant){
@@ -9882,7 +10005,7 @@ const dfFollowCamera={
   // Keep the auto director synced for a smooth return to its usual camera.
   if(dfV47World){dfV52Director.eye.copy(camera.position);dfV52Director.aim.copy(viewTarget);}
   lastCameraShot='selected-horse';
-  $('camname').textContent=`CAM　注目馬 ${h.no}番 ${h.name||''}`;
+  $('camname').textContent=`CAM　注目馬 ${h.no}番 ${dfFollowCameraDisplayName(h.name||'')}`;
   mats.sun.position.set(viewTarget.x-42,viewTarget.y+78,viewTarget.z+24);
   mats.sun.target.position.copy(viewTarget);
  }
@@ -10003,23 +10126,29 @@ const df26GoalCamera={
 };
 // A read-only bridge for older global camera helpers defined outside the race module.
 window.df30GoalCameraLocked=()=>df26GoalCamera.active;
-function setCam(instant=false){
+function df90SetCamCore(instant=false){
  if(!camera||!runners.length)return;
- if(typeof df78PhotoFinish!=='undefined'&&df78PhotoFinish.active){df78PhotoFinish.applyCamera();return;}
- // Shared camera policy: final-500m goal tracking overrides the selected
- // live camera in both normal and VS, except during photo-finish playback.
- if(race==='running'||race==='paused'||race==='runout'||race==='finished'){
-  const order=ranks();
-  if(df26GoalCamera.active&&df26GoalCamera.sourceRace!==raceNo)df26GoalCamera.reset();
-  if(order[0]&&(df26GoalCamera.active||order[0].dist>=TOTAL-DF57_FINISH_FOLLOW_START)){
-   df26GoalCamera.update(order);return;
-  }
- }
+ if(df78PhotoFinish.active){df78PhotoFinish.applyCamera();return;}
+ // Ver.93: at the last 100m, manual follow ends and the normal GOAL camera
+ // takes over in this very frame, without the usual smoothing/handoff.
  dfFollowCamera.refresh();
+ if(dfFollowCamera.isFinal100())dfFollowCamera.forceAutoAt100();
+ dfFollowCamera.reflect();
  if(dfFollowCamera.active){
   const chosen=runners.find(h=>h.no===dfFollowCamera.no);
   if(chosen){dfFollowCamera.update(chosen,instant);return;}
   dfFollowCamera.active=false;dfFollowCamera.reflect();
+ }
+ if(race==='running'||race==='paused'||race==='runout'||race==='finished'){
+  const order=ranks();
+  if(df26GoalCamera.active&&df26GoalCamera.sourceRace!==raceNo)df26GoalCamera.reset();
+  // V11: normal races on the modern 3-D course MUST stay with the continuous
+  // narration/leader director. The legacy 500m goal camera used to replace it
+  // unconditionally here and could leave the field outside the picture.
+  // Keep legacy-camera behaviour ONLY for races without dfV47World.
+  if(!dfV47World&&order[0]&&(df26GoalCamera.active||order[0].dist>=TOTAL-DF57_FINISH_FOLLOW_START)){
+   df26GoalCamera.update(order);return;
+  }
  }
  // Always compute from the latest running order, not a stored set of horse numbers.
  const order=ranks(),leader=order[0],shot=selectShot();
@@ -10227,6 +10356,13 @@ function setCam(instant=false){
  $('camname').textContent={sweep:'CAM 01　先頭〜最後尾・2回巡回',side:'CAM 01　残り1000m・先頭争い',front5:'CAM 01　ラスト600m・先頭〜5番手',spotlight:'CAM 02　実況注目馬アップ',chase:'CAM 03　先頭追走',front:'CAM 04　スタート',aerial:'CAM 05　コーナー俯瞰'}[shot];
  mats.sun.position.set(center.x-42,78,center.z+24);
  mats.sun.target.position.copy(center);
+}
+// Render-only handoff. The director always advances using its own unsmoothed
+// target pose; the visible camera is blended without changing race state.
+function setCam(instant=false){
+ if(df90CameraHandoff.active&&!instant)df90CameraHandoff.restoreTarget();
+ df90SetCamCore(instant);
+ df90CameraHandoff.apply(instant);
 }
 // ===== Ver.90 source section: 22_nameplate_overlay.js | 馬名ラベル・可視判定 =====
 // Only draw labels for horses whose actual 3D body reaches the camera viewport.
