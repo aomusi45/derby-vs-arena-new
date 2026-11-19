@@ -8195,7 +8195,7 @@ function seedRace(){
  resultRevealStart=null;resultVisibleRows=0;$('result').setAttribute('aria-hidden','true');if($('df132SecretaryAdvice'))$('df132SecretaryAdvice').hidden=true;lastCameraShot='';dfV52Director.reset();df26GoalCamera.reset();dfFollowCamera.active=false;dfFollowCamera.no=null;dfFollowCamera.roster=null;sideCamState={active:false,focusNos:[],nextRefresh:0,center:new THREE.Vector3(),look:new THREE.Vector3(),fov:0,lateral:0,height:0,along:0};gateOpen=0;raceNo++;elapsed=0;realTime=0;finished=[];df140FirstGoalAt=0;dfNormalAllFinishedAt=0;dfNormalWaitingForEnd=false;dfNormalShowFinishButton(false);pauseResumeState='running';resetRaceNarration();runners.forEach((h,i)=>{h.dist=0;h.runoutDist=0;h.velocity=0;h.lane=df75RaceGateLane(i);h.targetLane=h.lane;h.stamina=1;h.finishedAt=null;h.phase=Math.random()*6.28;h.gaitCycle=(h.phase/(2*Math.PI))%1;h.performanceFactor=raceStabilityFactor(h);h.distanceOutside=Math.max(0,h.aptMin-TOTAL,TOTAL-h.aptMax);h.distanceFactor=distanceFactor(h);h.goingFactor=goingFactor(h);h.age=ageForRace(h,currentRace);h.growthFactor=(h.owner||isSpecial125(h))?1:ageGrowthFactor(h.growth,h.age);const aptitudeScale=h.performanceFactor*h.distanceFactor*h.goingFactor*h.growthFactor*conditionRaceMultiplier(h)*df28RaceFormFactor(h)*powerMultiplier(h);h.raceSp=skillAdjustedStat(h,'sp')*aptitudeScale;h.raceSta=skillAdjustedStat(h,'sta')*aptitudeScale;h.raceKick=skillAdjustedStat(h,'kick')*aptitudeScale;h.raceEarly=h.early*aptitudeScale;h.raceSustain=h.sustain*aptitudeScale;h.raceGrit=h.grit*aptitudeScale;h.masterRace=masterV2RaceModifiers(h);
  h.df132Diag=h.owner?{distance:h.distanceFactor,going:h.goingFactor,
   form:df28RaceFormFactor(h),stability:h.performanceFactor,samples:[]}:null;
- h.df171KickTarget=undefined;h.df171KickStart=undefined;h.df171Gap=0;
+ h.df171KickTarget=undefined;h.df171KickStart=undefined;h.df171Gap=0;h.dfV10LeadGapArmed=false;
  h.variant=0;h.df20GoodFinishingNoise=(Math.random()-.5)*1.65;h.decision=.5+Math.random();h.root.position.copy(trackOffset(0,dfV47VisualLane(h.lane)));h.root.rotation.y=dfV47World?Math.atan2(headingAt(0).x,headingAt(0).z):0;if(h.action)h.action.reset().play();h.mixer.setTime(h.phase*.1)});assignTacticBalanceBonuses(runners);assignTacticPositions(runners);df150RaceEvents=[];runners.forEach(df150Seed);race='idle';$('start').textContent='▶ レース開始';$('start').disabled=false;syncPauseButton();df103Subtitle('出走準備が整いました。レース開始で発走します。');$('result').classList.remove('visible');$('resultrows').innerHTML='';motionStarted=false;updateGateAnimation(1);updateHUD();setCam(true);}
 // Ver.171: same ability-scaled late kick, launched earlier when real race gaps
 // demand it. A horse still tires, can be blocked, and is never promised a win.
@@ -8668,6 +8668,38 @@ function df150SecretaryComment(h,rank){
 }
 // ===== End Ver.150 racing model =====
 
+const DF_V10_HORSE_LENGTH_METERS=2.4;
+function dfV10LeaderGapDrive(h,order){
+ if(!order.length||order[0]!==h||h.finishedAt!==null){
+  h.dfV10LeadGapArmed=false;return 0;
+ }
+ const remaining=TOTAL-h.dist;
+ if(remaining>800||remaining<=120||order.length<2)return 0;
+ const next=order.find(o=>o!==h&&o.finishedAt===null);
+ if(!next)return 0;
+ const gap=Math.max(0,h.dist-next.dist);
+ const holdGap=3*DF_V10_HORSE_LENGTH_METERS;
+ const reactGap=2*DF_V10_HORSE_LENGTH_METERS;
+ if(gap>=holdGap-.001)h.dfV10LeadGapArmed=true;
+ if(!h.dfV10LeadGapArmed)return 0;
+ // Gradually relinquish pacing control before the original final sprint.
+ const finalFade=clamp((remaining-120)/140,0,1);
+ if(gap>=holdGap-.001){
+  if(gap<=holdGap+.001)return 0;
+  // Conserve a little energy when safely ahead; a strong horse may still pull
+  // farther away, since this is a modest speed choice rather than a gap cap.
+  return -clamp((gap-holdGap)*.070,0,.40)*finalFade;
+ }
+ // The original sp/sta/kick are already realized for condition, stability,
+ // distance, weight and form in seedRace. Do not apply those twice.
+ const ability=.48*h.raceSp+.27*h.raceSta+.25*h.raceKick;
+ const available=clamp((ability-73)/42,0,1)*clamp((h.stamina-.20)/.62,0,1);
+ if(available<=0)return 0;
+ const trim=clamp((holdGap-gap)/(holdGap-reactGap),0,1)*.24;
+ const renewed=gap<=reactGap?(.48+.60*clamp((reactGap-gap)/reactGap,0,1)):0;
+ return (trim+renewed)*available*finalFade;
+}
+
 function doRace(dt){const previousElapsed=elapsed;elapsed+=dt;const order=ranks();const duelDrives=calculateDuelDrives();
 // DERBY COPY V14: one-time inner-lane activation only. COM plans before owner;
 // race speed, stamina and finishing updates still run in their original order.
@@ -8718,6 +8750,7 @@ target+=goingTacticFinishDrive(h,TOTAL-h.dist)*(currentGoing==='良'?1:currentGo
 target+=masterV2FinishDrive(h,order,TOTAL-h.dist);
 // Brief, ability-weighted exchanges of pace between adjacent horses in the last 400m.
 target+=duelDrives.get(h.no)||0;
+target+=dfV10LeaderGapDrive(h,order);
 // The minority-group bonus is intentionally small, and never cancels distance penalties.
 target+=h.tacticBalanceBonus*h.distanceFactor;
 // Rare upset conditions: late surge, pace collapse, wet-track fatigue.
