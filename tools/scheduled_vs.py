@@ -155,8 +155,16 @@ def build_game(card: dict) -> str:
           name:h.name,sex:h.sex,coatType:h.coatType,tactic:h.tactic,age,
           growth:h.growth,bestDistance:h.bestDistance,
           aptMin:h.aptMin,aptMax:h.aptMax,
-          speed:h.sp,sta:h.sta,kick:h.kick,early:h.early,
-          sustain:h.sustain,grit:h.grit,stability:h.stability,
+          // The game V98 normal-race COM snapshot uses the permanent
+          // DF37 seven-stat table, then applies the V67 race-only -10.
+          // Match by originalName, never by the displayed horse name.
+          ...(()=>{
+            const original=String(h.originalName||'');
+            const fixed=DF37_NORMAL_COM_STATS.find(row=>row[0]===original);
+            if(!fixed)throw Error('COM fixed race stats missing: '+original);
+            const keys=['speed','sta','kick','early','sustain','grit','stability'];
+            return Object.fromEntries(keys.map((key,i)=>[key,Math.max(0,Number(fixed[i+1])-10)]));
+          })(),
           health:h.health,temperament:h.temperament,
           going:{...h.goingAptitude},g1Wins:h.g1Wins,
           form:75,fatigue:0,earnedPrize:0,isCom:true
