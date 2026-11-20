@@ -3,8 +3,210 @@
   "timezone": "Asia/Tokyo",
   "weekStart": "2026-11-16",
   "weekEnd": "2026-11-22",
-  "top10": [],
-  "standings": [],
+  "top10": [
+    {
+      "horseName": "マイネルラブリー",
+      "ownerName": "",
+      "prizeYen": 170000000,
+      "starts": 1,
+      "raceResults": [
+        {
+          "slot": 1994626,
+          "raceName": "スプリンターズステークス",
+          "place": 1,
+          "prizeYen": 170000000,
+          "firstHorseName": "マイネルラブリー",
+          "secondHorseName": "ヒシアケボーノ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
+        }
+      ]
+    },
+    {
+      "horseName": "ヒシアケボーノ",
+      "ownerName": "",
+      "prizeYen": 68000000,
+      "starts": 1,
+      "raceResults": [
+        {
+          "slot": 1994626,
+          "raceName": "スプリンターズステークス",
+          "place": 2,
+          "prizeYen": 68000000,
+          "firstHorseName": "マイネルラブリー",
+          "secondHorseName": "ヒシアケボーノ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
+        }
+      ]
+    },
+    {
+      "horseName": "アーモンドアイス",
+      "ownerName": "",
+      "prizeYen": 42500000,
+      "starts": 1,
+      "raceResults": [
+        {
+          "slot": 1994626,
+          "raceName": "スプリンターズステークス",
+          "place": 3,
+          "prizeYen": 42500000,
+          "firstHorseName": "マイネルラブリー",
+          "secondHorseName": "ヒシアケボーノ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
+        }
+      ]
+    },
+    {
+      "horseName": "ロードカナリア",
+      "ownerName": "",
+      "prizeYen": 25500000,
+      "starts": 1,
+      "raceResults": [
+        {
+          "slot": 1994626,
+          "raceName": "スプリンターズステークス",
+          "place": 4,
+          "prizeYen": 25500000,
+          "firstHorseName": "マイネルラブリー",
+          "secondHorseName": "ヒシアケボーノ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
+        }
+      ]
+    },
+    {
+      "horseName": "グランアレグリラ",
+      "ownerName": "",
+      "prizeYen": 17000000,
+      "starts": 1,
+      "raceResults": [
+        {
+          "slot": 1994626,
+          "raceName": "スプリンターズステークス",
+          "place": 5,
+          "prizeYen": 17000000,
+          "firstHorseName": "マイネルラブリー",
+          "secondHorseName": "ヒシアケボーノ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
+        }
+      ]
+    },
+    {
+      "horseName": "グラスパンダー",
+      "ownerName": "",
+      "prizeYen": 0,
+      "starts": 1,
+      "raceResults": [
+        {
+          "slot": 1994626,
+          "raceName": "スプリンターズステークス",
+          "place": 8,
+          "prizeYen": 0,
+          "firstHorseName": "マイネルラブリー",
+          "secondHorseName": "ヒシアケボーノ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
+        }
+      ]
+    },
+    {
+      "horseName": "シンボリルドルフィ",
+      "ownerName": "",
+      "prizeYen": 0,
+      "starts": 1,
+      "raceResults": [
+        {
+          "slot": 1994626,
+          "raceName": "スプリンターズステークス",
+          "place": 7,
+          "prizeYen": 0,
+          "firstHorseName": "マイネルラブリー",
+          "secondHorseName": "ヒシアケボーノ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
+        }
+      ]
+    },
+    {
+      "horseName": "ソングライオン",
+      "ownerName": "",
+      "prizeYen": 0,
+      "starts": 1,
+      "raceResults": [
+        {
+          "slot": 1994626,
+          "raceName": "スプリンターズステークス",
+          "place": 6,
+          "prizeYen": 0,
+          "firstHorseName": "マイネルラブリー",
+          "secondHorseName": "ヒシアケボーノ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
+        }
+      ]
+    }
+  ],
+  "standings": [
+    {
+      "rank": 1,
+      "horseName": "マイネルラブリー",
+      "ownerName": "",
+      "prizeYen": 170000000
+    },
+    {
+      "rank": 2,
+      "horseName": "ヒシアケボーノ",
+      "ownerName": "",
+      "prizeYen": 68000000
+    },
+    {
+      "rank": 3,
+      "horseName": "アーモンドアイス",
+      "ownerName": "",
+      "prizeYen": 42500000
+    },
+    {
+      "rank": 4,
+      "horseName": "ロードカナリア",
+      "ownerName": "",
+      "prizeYen": 25500000
+    },
+    {
+      "rank": 5,
+      "horseName": "グランアレグリラ",
+      "ownerName": "",
+      "prizeYen": 17000000
+    },
+    {
+      "rank": 6,
+      "horseName": "グラスパンダー",
+      "ownerName": "",
+      "prizeYen": 0
+    },
+    {
+      "rank": 7,
+      "horseName": "シンボリルドルフィ",
+      "ownerName": "",
+      "prizeYen": 0
+    },
+    {
+      "rank": 8,
+      "horseName": "ソングライオン",
+      "ownerName": "",
+      "prizeYen": 0
+    }
+  ],
   "raceResults": [],
   "awards": []
 }
