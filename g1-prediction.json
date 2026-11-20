@@ -1,0 +1,958 @@
+{
+  "format": "dbf-g1-prediction-race",
+  "schema": 1,
+  "status": "trial",
+  "race": {
+    "name": "第174回 天皇賞（秋）",
+    "date": "2026-11-01",
+    "venue": "東京",
+    "surface": "芝",
+    "distance": 2000,
+    "direction": "左",
+    "raceNumber": 11,
+    "declaredStarters": 17
+  },
+  "source": {
+    "racecard": "https://www.jra.go.jp/keiba/g1/akiten/syutsuba.html",
+    "field": "https://www.jra.go.jp/keiba/rpdf/pdf/20261101-color01.pdf"
+  },
+  "abilityPolicy": "各馬の能力・脚質・距離適性はシミュレーション用の仮設定。実際のJRA能力やDBFゲーム公式値ではない。",
+  "integration": "予想レース専用のJSON。現行の公式VSアリーナ登録ファイル形式ではない。予想ページのローダー実装後に読み込み可能。",
+  "horses": [
+    {
+      "horseNumber": 1,
+      "gate": 1,
+      "name": "クロワデュノール",
+      "sex": "牡",
+      "age": 4,
+      "carriedWeightKg": 58,
+      "jockey": "C.デムーロ",
+      "jraPreRating": 122,
+      "tactic": "先行",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 120,
+      "sta": 121,
+      "kick": 120,
+      "early": 123,
+      "sustain": 122,
+      "grit": 119,
+      "stability": 86,
+      "raceStats": {
+        "sp": {
+          "total": 120
+        },
+        "sta": {
+          "total": 121
+        },
+        "kick": {
+          "total": 120
+        },
+        "early": {
+          "total": 123
+        },
+        "sustain": {
+          "total": 122
+        },
+        "grit": {
+          "total": 119
+        },
+        "stability": {
+          "total": 86
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 2,
+      "gate": 1,
+      "name": "エルトンバローズ",
+      "sex": "牡",
+      "age": 6,
+      "carriedWeightKg": 58,
+      "jockey": "松若風馬",
+      "jraPreRating": 111,
+      "tactic": "先行",
+      "bestDistance": 1800,
+      "aptMin": 1400,
+      "aptMax": 2200,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 108,
+      "sta": 107,
+      "kick": 108,
+      "early": 111,
+      "sustain": 110,
+      "grit": 108,
+      "stability": 87,
+      "raceStats": {
+        "sp": {
+          "total": 108
+        },
+        "sta": {
+          "total": 107
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 111
+        },
+        "sustain": {
+          "total": 110
+        },
+        "grit": {
+          "total": 108
+        },
+        "stability": {
+          "total": 87
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 3,
+      "gate": 2,
+      "name": "レガレイラ",
+      "sex": "牝",
+      "age": 5,
+      "carriedWeightKg": 56,
+      "jockey": "岩田望来",
+      "jraPreRating": 104,
+      "tactic": "差し",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 117,
+      "sta": 118,
+      "kick": 120,
+      "early": 115,
+      "sustain": 118,
+      "grit": 118,
+      "stability": 88,
+      "raceStats": {
+        "sp": {
+          "total": 117
+        },
+        "sta": {
+          "total": 118
+        },
+        "kick": {
+          "total": 120
+        },
+        "early": {
+          "total": 115
+        },
+        "sustain": {
+          "total": 118
+        },
+        "grit": {
+          "total": 118
+        },
+        "stability": {
+          "total": 88
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 4,
+      "gate": 2,
+      "name": "レディネス",
+      "sex": "牡",
+      "age": 4,
+      "carriedWeightKg": 58,
+      "jockey": "横山典弘",
+      "jraPreRating": null,
+      "tactic": "差し",
+      "bestDistance": 2000,
+      "aptMin": 1600,
+      "aptMax": 2400,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 105,
+      "sta": 105,
+      "kick": 108,
+      "early": 103,
+      "sustain": 106,
+      "grit": 107,
+      "stability": 89,
+      "raceStats": {
+        "sp": {
+          "total": 105
+        },
+        "sta": {
+          "total": 105
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 103
+        },
+        "sustain": {
+          "total": 106
+        },
+        "grit": {
+          "total": 107
+        },
+        "stability": {
+          "total": 89
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 5,
+      "gate": 3,
+      "name": "シャンパンカラー",
+      "sex": "牡",
+      "age": 6,
+      "carriedWeightKg": 58,
+      "jockey": "内田博幸",
+      "jraPreRating": 113,
+      "tactic": "追込",
+      "bestDistance": 1600,
+      "aptMin": 1200,
+      "aptMax": 2000,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 105,
+      "sta": 103,
+      "kick": 109,
+      "early": 101,
+      "sustain": 105,
+      "grit": 103,
+      "stability": 90,
+      "raceStats": {
+        "sp": {
+          "total": 105
+        },
+        "sta": {
+          "total": 103
+        },
+        "kick": {
+          "total": 109
+        },
+        "early": {
+          "total": 101
+        },
+        "sustain": {
+          "total": 105
+        },
+        "grit": {
+          "total": 103
+        },
+        "stability": {
+          "total": 90
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 6,
+      "gate": 3,
+      "name": "セイウンハーデス",
+      "sex": "牡",
+      "age": 7,
+      "carriedWeightKg": 58,
+      "jockey": "幸英明",
+      "jraPreRating": 116,
+      "tactic": "先行",
+      "bestDistance": 1800,
+      "aptMin": 1400,
+      "aptMax": 2200,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 114,
+      "sta": 113,
+      "kick": 114,
+      "early": 117,
+      "sustain": 116,
+      "grit": 113,
+      "stability": 91,
+      "raceStats": {
+        "sp": {
+          "total": 114
+        },
+        "sta": {
+          "total": 113
+        },
+        "kick": {
+          "total": 114
+        },
+        "early": {
+          "total": 117
+        },
+        "sustain": {
+          "total": 116
+        },
+        "grit": {
+          "total": 113
+        },
+        "stability": {
+          "total": 91
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 7,
+      "gate": 4,
+      "name": "マスカレードボール",
+      "sex": "牡",
+      "age": 4,
+      "carriedWeightKg": 58,
+      "jockey": "C.ルメール",
+      "jraPreRating": null,
+      "tactic": "差し",
+      "bestDistance": 2000,
+      "aptMin": 1600,
+      "aptMax": 2400,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 121,
+      "sta": 121,
+      "kick": 124,
+      "early": 119,
+      "sustain": 122,
+      "grit": 121,
+      "stability": 92,
+      "raceStats": {
+        "sp": {
+          "total": 121
+        },
+        "sta": {
+          "total": 121
+        },
+        "kick": {
+          "total": 124
+        },
+        "early": {
+          "total": 119
+        },
+        "sustain": {
+          "total": 122
+        },
+        "grit": {
+          "total": 121
+        },
+        "stability": {
+          "total": 92
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 8,
+      "gate": 4,
+      "name": "ジュンブロッサム",
+      "sex": "牡",
+      "age": 7,
+      "carriedWeightKg": 58,
+      "jockey": "杉原誠人",
+      "jraPreRating": 107,
+      "tactic": "追込",
+      "bestDistance": 1800,
+      "aptMin": 1400,
+      "aptMax": 2200,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 104,
+      "sta": 103,
+      "kick": 108,
+      "early": 100,
+      "sustain": 104,
+      "grit": 105,
+      "stability": 93,
+      "raceStats": {
+        "sp": {
+          "total": 104
+        },
+        "sta": {
+          "total": 103
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 100
+        },
+        "sustain": {
+          "total": 104
+        },
+        "grit": {
+          "total": 105
+        },
+        "stability": {
+          "total": 93
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 9,
+      "gate": 5,
+      "name": "ホウオウビスケッツ",
+      "sex": "牡",
+      "age": 6,
+      "carriedWeightKg": 58,
+      "jockey": "岩田康誠",
+      "jraPreRating": 114,
+      "tactic": "逃げ",
+      "bestDistance": 1800,
+      "aptMin": 1400,
+      "aptMax": 2200,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 111,
+      "sta": 110,
+      "kick": 109,
+      "early": 116,
+      "sustain": 112,
+      "grit": 113,
+      "stability": 94,
+      "raceStats": {
+        "sp": {
+          "total": 111
+        },
+        "sta": {
+          "total": 110
+        },
+        "kick": {
+          "total": 109
+        },
+        "early": {
+          "total": 116
+        },
+        "sustain": {
+          "total": 112
+        },
+        "grit": {
+          "total": 113
+        },
+        "stability": {
+          "total": 94
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 10,
+      "gate": 5,
+      "name": "ネブラディスク",
+      "sex": "牡",
+      "age": 4,
+      "carriedWeightKg": 58,
+      "jockey": "川田将雅",
+      "jraPreRating": null,
+      "tactic": "差し",
+      "bestDistance": 1800,
+      "aptMin": 1400,
+      "aptMax": 2200,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 109,
+      "sta": 108,
+      "kick": 112,
+      "early": 107,
+      "sustain": 110,
+      "grit": 107,
+      "stability": 95,
+      "raceStats": {
+        "sp": {
+          "total": 109
+        },
+        "sta": {
+          "total": 108
+        },
+        "kick": {
+          "total": 112
+        },
+        "early": {
+          "total": 107
+        },
+        "sustain": {
+          "total": 110
+        },
+        "grit": {
+          "total": 107
+        },
+        "stability": {
+          "total": 95
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 11,
+      "gate": 6,
+      "name": "シェイクユアハート",
+      "sex": "牡",
+      "age": 6,
+      "carriedWeightKg": 58,
+      "jockey": "古川吉洋",
+      "jraPreRating": 117,
+      "tactic": "差し",
+      "bestDistance": 2000,
+      "aptMin": 1600,
+      "aptMax": 2400,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 116,
+      "sta": 116,
+      "kick": 119,
+      "early": 114,
+      "sustain": 117,
+      "grit": 115,
+      "stability": 96,
+      "raceStats": {
+        "sp": {
+          "total": 116
+        },
+        "sta": {
+          "total": 116
+        },
+        "kick": {
+          "total": 119
+        },
+        "early": {
+          "total": 114
+        },
+        "sustain": {
+          "total": 117
+        },
+        "grit": {
+          "total": 115
+        },
+        "stability": {
+          "total": 96
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 12,
+      "gate": 6,
+      "name": "コスモキュランダ",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "丹内祐次",
+      "jraPreRating": 118,
+      "tactic": "先行",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 112,
+      "sta": 113,
+      "kick": 112,
+      "early": 115,
+      "sustain": 114,
+      "grit": 112,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 112
+        },
+        "sta": {
+          "total": 113
+        },
+        "kick": {
+          "total": 112
+        },
+        "early": {
+          "total": 115
+        },
+        "sustain": {
+          "total": 114
+        },
+        "grit": {
+          "total": 112
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 13,
+      "gate": 7,
+      "name": "リアライズシリウス",
+      "sex": "牡",
+      "age": 3,
+      "carriedWeightKg": 56,
+      "jockey": "津村明秀",
+      "jraPreRating": 117,
+      "tactic": "先行",
+      "bestDistance": 2000,
+      "aptMin": 1600,
+      "aptMax": 2400,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 114,
+      "sta": 114,
+      "kick": 114,
+      "early": 117,
+      "sustain": 116,
+      "grit": 115,
+      "stability": 86,
+      "raceStats": {
+        "sp": {
+          "total": 114
+        },
+        "sta": {
+          "total": 114
+        },
+        "kick": {
+          "total": 114
+        },
+        "early": {
+          "total": 117
+        },
+        "sustain": {
+          "total": 116
+        },
+        "grit": {
+          "total": 115
+        },
+        "stability": {
+          "total": 86
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 14,
+      "gate": 7,
+      "name": "タガノデュード",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "M.デムーロ",
+      "jraPreRating": null,
+      "tactic": "追込",
+      "bestDistance": 2000,
+      "aptMin": 1600,
+      "aptMax": 2400,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 104,
+      "sta": 104,
+      "kick": 108,
+      "early": 100,
+      "sustain": 104,
+      "grit": 106,
+      "stability": 87,
+      "raceStats": {
+        "sp": {
+          "total": 104
+        },
+        "sta": {
+          "total": 104
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 100
+        },
+        "sustain": {
+          "total": 104
+        },
+        "grit": {
+          "total": 106
+        },
+        "stability": {
+          "total": 87
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 15,
+      "gate": 8,
+      "name": "サクラファレル",
+      "sex": "牡",
+      "age": 4,
+      "carriedWeightKg": 58,
+      "jockey": "佐々木大輔",
+      "jraPreRating": 112,
+      "tactic": "先行",
+      "bestDistance": 2000,
+      "aptMin": 1600,
+      "aptMax": 2400,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 109,
+      "sta": 109,
+      "kick": 109,
+      "early": 112,
+      "sustain": 111,
+      "grit": 107,
+      "stability": 88,
+      "raceStats": {
+        "sp": {
+          "total": 109
+        },
+        "sta": {
+          "total": 109
+        },
+        "kick": {
+          "total": 109
+        },
+        "early": {
+          "total": 112
+        },
+        "sustain": {
+          "total": 111
+        },
+        "grit": {
+          "total": 107
+        },
+        "stability": {
+          "total": 88
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 16,
+      "gate": 8,
+      "name": "ジョバンニ",
+      "sex": "牡",
+      "age": 4,
+      "carriedWeightKg": 58,
+      "jockey": "松山弘平",
+      "jraPreRating": 116,
+      "tactic": "差し",
+      "bestDistance": 2000,
+      "aptMin": 1600,
+      "aptMax": 2400,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 114,
+      "sta": 114,
+      "kick": 117,
+      "early": 112,
+      "sustain": 115,
+      "grit": 113,
+      "stability": 89,
+      "raceStats": {
+        "sp": {
+          "total": 114
+        },
+        "sta": {
+          "total": 114
+        },
+        "kick": {
+          "total": 117
+        },
+        "early": {
+          "total": 112
+        },
+        "sustain": {
+          "total": 115
+        },
+        "grit": {
+          "total": 113
+        },
+        "stability": {
+          "total": 89
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    },
+    {
+      "horseNumber": 17,
+      "gate": 8,
+      "name": "ダノンデサイル",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "戸崎圭太",
+      "jraPreRating": null,
+      "tactic": "差し",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 120,
+      "sta": 122,
+      "kick": 123,
+      "early": 118,
+      "sustain": 121,
+      "grit": 120,
+      "stability": 90,
+      "raceStats": {
+        "sp": {
+          "total": 120
+        },
+        "sta": {
+          "total": 122
+        },
+        "kick": {
+          "total": 123
+        },
+        "early": {
+          "total": 118
+        },
+        "sustain": {
+          "total": 121
+        },
+        "grit": {
+          "total": 120
+        },
+        "stability": {
+          "total": 90
+        }
+      },
+      "abilityNote": "予想レース用の仮設定。JRA公式能力値ではありません。"
+    }
+  ]
+}
