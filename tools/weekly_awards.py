@@ -203,7 +203,11 @@ def update_com(token,row,slot,race_name,top_two):
     raw=previous.get('fields',{}) if previous else {}
     last_slot=int(raw.get('lastSlot',{}).get('integerValue','0'))
     if previous and slot<=last_slot:
-        raise ValueError('COM馬の古い開催枠を再加算しようとしました')
+        # A reset may clear race receipts while retaining COM career counters.
+        # Never credit the same or an older slot twice. Other horses in this
+        # race can still be processed and the new receipt stored atomically.
+        print(f'SKIP already counted COM slot={slot} lastSlot={last_slot} id={row["rankingId"]}',flush=True)
+        return None
     version=int(raw.get('comCycleVersion',{}).get('integerValue','0'))
     if version==2:
         count=int(raw.get('count',{}).get('integerValue','0'))
@@ -350,7 +354,10 @@ def commit_race(token,meta):
         if row['isCom']:
             # The previous implementation always incremented prizeYen here,
             # which displayed lifetime-within-week totals after 20 starts.
-            career,completed,completed_places,cycle_starts,completed_results=update_com(token,row,slot,race_name,top_two)
+            com_update=update_com(token,row,slot,race_name,top_two)
+            if com_update is None:
+                continue  # Already credited in persistent COM career; no double payment.
+            career,completed,completed_places,cycle_starts,completed_results=com_update
             writes.append(com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts,completed_results))
             writes.append(career)
             continue
