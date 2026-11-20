@@ -15077,6 +15077,7 @@ const dfOfficialVSProduction = (() => {
       const selectedPace=['normal','front','closer'].includes(options.pace)?options.pace:'normal';
       currentGoing=selectedGoing;
       const weightChanges=options.weights||{};
+      const conditionChanges=options.conditions||{};
       const src=payload.horses;
       if(src.length<2||src.length>18)throw Error('出走馬は2～18頭にしてください');
       const seen=new Set();
@@ -15092,6 +15093,10 @@ const dfOfficialVSProduction = (() => {
         // Prediction-only race modifiers; do not mutate the uploaded horse data.
         const delta=Math.max(-40,Math.min(40,Math.round(Number(weightChanges[no])||0)));
         const weightPenalty=Math.min(0.13,Math.abs(delta)*0.003);
+        // User-adjustable condition (100 = full ability, 0 = heavily reduced).
+        const rawCondition=conditionChanges[no];
+        const condition=rawCondition===undefined?100:Math.max(0,Math.min(100,Number(rawCondition)||0));
+        const conditionFactor=0.65+0.35*(condition/100);
         const kick=Number(h.kick);
         const goingSeverity={'良':0,'稍重':0.045,'重':0.105,'不良':0.18}[selectedGoing];
         const kickPenalty=goingSeverity*Math.max(0,Math.min(1,kick/120));
@@ -15104,8 +15109,8 @@ const dfOfficialVSProduction = (() => {
           tactic:h.tactic||'先行',growth:h.growth||'普通',
           bestDistance:Number(h.bestDistance)||2000,aptMin:Number(h.aptMin)||1600,
           aptMax:Number(h.aptMax)||2400,
-          speed:Number(h.speed)*(1-weightPenalty),sta:Number(h.sta)*(1-weightPenalty*.8),kick:kick*(1-kickPenalty)*(1-weightPenalty*.6)*closerPace,
-          early:Number(h.early)*(1-weightPenalty*.5)*frontPace,sustain:Number(h.sustain)*(1-weightPenalty*.7)*(selectedPace==='closer'&&isFront?.955:1),grit:Number(h.grit),
+          speed:Number(h.speed)*(1-weightPenalty)*conditionFactor,sta:Number(h.sta)*(1-weightPenalty*.8)*conditionFactor,kick:kick*(1-kickPenalty)*(1-weightPenalty*.6)*closerPace*conditionFactor,
+          early:Number(h.early)*(1-weightPenalty*.5)*frontPace*conditionFactor,sustain:Number(h.sustain)*(1-weightPenalty*.7)*(selectedPace==='closer'&&isFront?.955:1)*conditionFactor,grit:Number(h.grit),
           stability:Number(h.stability),health:Number(h.health??95),
           temperament:Number(h.temperament??90),going:h.going||{},
           form:Number(h.form??90),fatigue:Number(h.fatigue??0),
