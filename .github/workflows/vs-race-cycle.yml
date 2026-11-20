@@ -120,7 +120,7 @@ jobs:
           cp vs_replay_engine_part1.txt vs_replay_engine_part2.txt public_site/
           cp weekly_awards.json my-arena-stats.js public_site/
           cp visitor-counter.js public_site/
-          cp g1-prediction.html g1-prediction-engine.html g1-prediction.json public_site/
+          cp g1-prediction.html g1-prediction-engine.html g1-prediction.json g1-prediction-races.json g1-prediction-tenno-2026.json public_site/
           cp feedback-board.js public_site/
           # Publish Google Search Console verification and XML sitemap without changing the arena build.
           if [ -f sitemap.xml ]; then cp sitemap.xml public_site/; fi
