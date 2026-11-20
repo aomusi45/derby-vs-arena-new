@@ -9854,7 +9854,7 @@ const df90CameraHandoff={
  apply(instant){
   if(!this.active)return;
   // Photo-finish and initial camera setup must never be overlaid by a handoff.
-  if(instant||df78PhotoFinish.active){this.reset();return;}
+  if(instant||(typeof df78PhotoFinish!=='undefined'&&df78PhotoFinish.active)){this.reset();return;}
   this.targetEye=camera.position.clone();this.targetAim=viewTarget.clone();
   this.targetFov=camera.fov;
   const u=Math.max(0,Math.min(1,(performance.now()-this.startedAt)/this.durationMs));
@@ -10128,7 +10128,7 @@ const df26GoalCamera={
 window.df30GoalCameraLocked=()=>df26GoalCamera.active;
 function df90SetCamCore(instant=false){
  if(!camera||!runners.length)return;
- if(df78PhotoFinish.active){df78PhotoFinish.applyCamera();return;}
+ if(typeof df78PhotoFinish!=='undefined'&&df78PhotoFinish.active){df78PhotoFinish.applyCamera();return;}
  // Ver.93: at the last 100m, manual follow ends and the normal GOAL camera
  // takes over in this very frame, without the usual smoothing/handoff.
  dfFollowCamera.refresh();
