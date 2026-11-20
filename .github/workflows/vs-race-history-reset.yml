@@ -1,0 +1,43 @@
+name: DBF VS Race History and Rankings Reset (manual only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run preview first; delete resets only race records and rankings'
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - delete
+      confirmation:
+        description: 'For delete type DELETE_RACE_HISTORY_AND_RANKINGS_ONLY'
+        required: false
+        type: string
+
+concurrency:
+  group: official-vs-races-and-pages
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  reset-races-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Firestore client
+        run: python -m pip install 'google-cloud-firestore>=2.18,<3'
+      - name: Preview or reset race records and rankings ONLY
+        env:
+          FIREBASE_PROJECT_ID: derby-vs-arena
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          RESET_MODE: ${{ inputs.mode }}
+          RESET_CONFIRMATION: ${{ inputs.confirmation }}
+        run: python tools/reset_race_history_rankings_only.py --mode "$RESET_MODE" --confirm "$RESET_CONFIRMATION"
