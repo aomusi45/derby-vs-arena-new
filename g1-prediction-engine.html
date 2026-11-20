@@ -11318,13 +11318,20 @@ const dfOfficialVSPlayback = (() => {
     // Wall-time playback: all spectators use the recorded timeline, not local race physics.
     apply(ts-frameClock);
     if(positionMs>=current.durationMs){
+      // Prediction playback only: keep horses moving beyond the goal for 3.4 seconds.
+      // The recorded finishing order and times are unchanged.
+      const runoutSeconds=Math.max(0,(ts-frameClock-current.durationMs)/1000);
       const fixed=new Map(current.results.map(row=>[row.no,row]));
       for(const h of runners){
         const row=fixed.get(h.no);
         h.finishedAt=row.timeSeconds;
         h.dist=TOTAL;
-        h.runoutDist=Math.max(TOTAL,h.runoutDist||TOTAL);
+        const crossingDistance=Math.max(TOTAL,h.runoutDist||TOTAL);
+        if(h.dfPredictionRunoutBase==null)h.dfPredictionRunoutBase=crossingDistance;
+        h.runoutDist=Math.min(TOTAL+GOAL_RUNOUT_METERS,
+          h.dfPredictionRunoutBase+Math.max(10,h.velocity)*runoutSeconds);
       }
+      if(runoutSeconds<3.4)return true;
       finished=current.results.map(row=>runners.find(h=>h.no===row.no));
       race='runout';
       dfNormalPublishRaceResults(); // Existing results UI, no recalculation or normal-game save.
