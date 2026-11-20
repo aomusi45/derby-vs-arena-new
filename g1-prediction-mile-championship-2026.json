@@ -1,0 +1,1049 @@
+{
+  "format": "dbf-g1-prediction-race",
+  "schema": 1,
+  "status": "provisional",
+  "race": {
+    "name": "第43回 マイルチャンピオンシップ",
+    "date": "2026-11-22",
+    "venue": "京都",
+    "surface": "芝",
+    "distance": 1600,
+    "direction": "右・外",
+    "raceNumber": 11,
+    "declaredStarters": 18
+  },
+  "source": {
+    "racecard": "https://app.jra.jp/JRADB/accessD.html?CNAME=sw01ddd0108202605061120261122/1C",
+    "rating": "https://www.jra.go.jp/datafile/ranking/g1/2026/mile.html",
+    "profiles": "https://www.jra.go.jp/keiba/g1/mile/horse.html"
+  },
+  "abilityPolicy": "18頭の出走枠・斤量・プレレーティングと主な実績を照合。ゲーム用能力は推定。全戦歴を網羅した最終精査は未完了。",
+  "horses": [
+    {
+      "horseNumber": 1,
+      "gate": 1,
+      "name": "エルデナリ",
+      "sex": "せん",
+      "age": 3,
+      "carriedWeightKg": 57,
+      "jockey": "M.バルザローナ",
+      "jraPreRating": 124,
+      "tactic": "差し",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 114,
+      "sta": 112,
+      "kick": 118,
+      "early": 113,
+      "sustain": 115,
+      "grit": 114,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 114
+        },
+        "sta": {
+          "total": 112
+        },
+        "kick": {
+          "total": 118
+        },
+        "early": {
+          "total": 113
+        },
+        "sustain": {
+          "total": 115
+        },
+        "grit": {
+          "total": 114
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: ムーランドロンシャン賞G1優勝、コースレコード",
+      "researchNote": "ムーランドロンシャン賞G1優勝、コースレコード",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 2,
+      "gate": 1,
+      "name": "エンブロイダリー",
+      "sex": "牝",
+      "age": 4,
+      "carriedWeightKg": 56,
+      "jockey": "C.ルメール",
+      "jraPreRating": 117,
+      "tactic": "差し",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 112,
+      "sta": 110,
+      "kick": 116,
+      "early": 111,
+      "sustain": 113,
+      "grit": 112,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 112
+        },
+        "sta": {
+          "total": 110
+        },
+        "kick": {
+          "total": 116
+        },
+        "early": {
+          "total": 111
+        },
+        "sustain": {
+          "total": 113
+        },
+        "grit": {
+          "total": 112
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 桜花賞・秋華賞・阪神牝馬S・ヴィクトリアマイル優勝",
+      "researchNote": "桜花賞・秋華賞・阪神牝馬S・ヴィクトリアマイル優勝",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 3,
+      "gate": 2,
+      "name": "ドラゴンブースト",
+      "sex": "牡",
+      "age": 4,
+      "carriedWeightKg": 58,
+      "jockey": "浜中俊",
+      "jraPreRating": 110,
+      "tactic": "先行",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 107,
+      "sta": 105,
+      "kick": 107,
+      "early": 111,
+      "sustain": 108,
+      "grit": 107,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 107
+        },
+        "sta": {
+          "total": 105
+        },
+        "kick": {
+          "total": 107
+        },
+        "early": {
+          "total": 111
+        },
+        "sustain": {
+          "total": 108
+        },
+        "grit": {
+          "total": 107
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 読売マイラーズC2着",
+      "researchNote": "読売マイラーズC2着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 4,
+      "gate": 2,
+      "name": "シックスペンス",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "A.プーシャン",
+      "jraPreRating": 118,
+      "tactic": "先行",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 112,
+      "sta": 110,
+      "kick": 112,
+      "early": 116,
+      "sustain": 113,
+      "grit": 112,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 112
+        },
+        "sta": {
+          "total": 110
+        },
+        "kick": {
+          "total": 112
+        },
+        "early": {
+          "total": 116
+        },
+        "sustain": {
+          "total": 113
+        },
+        "grit": {
+          "total": 112
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 安田記念優勝、毎日王冠・中山記念優勝",
+      "researchNote": "安田記念優勝、毎日王冠・中山記念優勝",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 5,
+      "gate": 3,
+      "name": "アドマイヤズーム",
+      "sex": "牡",
+      "age": 4,
+      "carriedWeightKg": 58,
+      "jockey": "武豊",
+      "jraPreRating": 112,
+      "tactic": "先行",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 108,
+      "sta": 106,
+      "kick": 108,
+      "early": 112,
+      "sustain": 109,
+      "grit": 108,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 108
+        },
+        "sta": {
+          "total": 106
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 112
+        },
+        "sustain": {
+          "total": 109
+        },
+        "grit": {
+          "total": 108
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 読売マイラーズC優勝",
+      "researchNote": "読売マイラーズC優勝",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 6,
+      "gate": 3,
+      "name": "ピコローズ",
+      "sex": "牝",
+      "age": 4,
+      "carriedWeightKg": 56,
+      "jockey": "三浦皇成",
+      "jraPreRating": 102,
+      "tactic": "差し",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 102,
+      "sta": 100,
+      "kick": 106,
+      "early": 101,
+      "sustain": 103,
+      "grit": 102,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 102
+        },
+        "sta": {
+          "total": 100
+        },
+        "kick": {
+          "total": 106
+        },
+        "early": {
+          "total": 101
+        },
+        "sustain": {
+          "total": 103
+        },
+        "grit": {
+          "total": 102
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 京成杯オータムH優勝",
+      "researchNote": "京成杯オータムH優勝",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 7,
+      "gate": 4,
+      "name": "ココナッツブラウン",
+      "sex": "牝",
+      "age": 6,
+      "carriedWeightKg": 56,
+      "jockey": "北村友一",
+      "jraPreRating": 111,
+      "tactic": "差し",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 108,
+      "sta": 106,
+      "kick": 112,
+      "early": 107,
+      "sustain": 109,
+      "grit": 108,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 108
+        },
+        "sta": {
+          "total": 106
+        },
+        "kick": {
+          "total": 112
+        },
+        "early": {
+          "total": 107
+        },
+        "sustain": {
+          "total": 109
+        },
+        "grit": {
+          "total": 108
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: ヴィクトリアマイル5着",
+      "researchNote": "ヴィクトリアマイル5着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 8,
+      "gate": 4,
+      "name": "ロデオドライブ",
+      "sex": "牡",
+      "age": 3,
+      "carriedWeightKg": 57,
+      "jockey": "J.モレイラ",
+      "jraPreRating": 118,
+      "tactic": "先行",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 112,
+      "sta": 110,
+      "kick": 112,
+      "early": 116,
+      "sustain": 113,
+      "grit": 112,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 112
+        },
+        "sta": {
+          "total": 110
+        },
+        "kick": {
+          "total": 112
+        },
+        "early": {
+          "total": 116
+        },
+        "sustain": {
+          "total": 113
+        },
+        "grit": {
+          "total": 112
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: NHKマイルC優勝、新潟記念2着",
+      "researchNote": "NHKマイルC優勝、新潟記念2着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 9,
+      "gate": 5,
+      "name": "ジューンテイク",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "川田将雅",
+      "jraPreRating": 114,
+      "tactic": "先行",
+      "bestDistance": 2000,
+      "aptMin": 1600,
+      "aptMax": 2400,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 105,
+      "sta": 103,
+      "kick": 105,
+      "early": 109,
+      "sustain": 106,
+      "grit": 105,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 105
+        },
+        "sta": {
+          "total": 103
+        },
+        "kick": {
+          "total": 105
+        },
+        "early": {
+          "total": 109
+        },
+        "sustain": {
+          "total": 106
+        },
+        "grit": {
+          "total": 105
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 京都記念優勝、金鯱賞4着（レーティングは中距離）",
+      "researchNote": "京都記念優勝、金鯱賞4着（レーティングは中距離）",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 10,
+      "gate": 5,
+      "name": "ウォーターリヒト",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "幸英明",
+      "jraPreRating": 111,
+      "tactic": "追込",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 108,
+      "sta": 106,
+      "kick": 112,
+      "early": 105,
+      "sustain": 109,
+      "grit": 108,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 108
+        },
+        "sta": {
+          "total": 106
+        },
+        "kick": {
+          "total": 112
+        },
+        "early": {
+          "total": 105
+        },
+        "sustain": {
+          "total": 109
+        },
+        "grit": {
+          "total": 108
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 東京新聞杯3着",
+      "researchNote": "東京新聞杯3着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 11,
+      "gate": 6,
+      "name": "ガイアフォース",
+      "sex": "牡",
+      "age": 7,
+      "carriedWeightKg": 58,
+      "jockey": "西村淳也",
+      "jraPreRating": 117,
+      "tactic": "先行",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 112,
+      "sta": 110,
+      "kick": 112,
+      "early": 116,
+      "sustain": 113,
+      "grit": 112,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 112
+        },
+        "sta": {
+          "total": 110
+        },
+        "kick": {
+          "total": 112
+        },
+        "early": {
+          "total": 116
+        },
+        "sustain": {
+          "total": 113
+        },
+        "grit": {
+          "total": 112
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 安田記念2着",
+      "researchNote": "安田記念2着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 12,
+      "gate": 6,
+      "name": "ワールズエンド",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "C.デムーロ",
+      "jraPreRating": 117,
+      "tactic": "先行",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 114,
+      "sta": 112,
+      "kick": 114,
+      "early": 118,
+      "sustain": 115,
+      "grit": 114,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 114
+        },
+        "sta": {
+          "total": 112
+        },
+        "kick": {
+          "total": 114
+        },
+        "early": {
+          "total": 118
+        },
+        "sustain": {
+          "total": 115
+        },
+        "grit": {
+          "total": 114
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 安田記念2着、京都芝1600mで3戦3勝",
+      "researchNote": "安田記念2着、京都芝1600mで3戦3勝",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 13,
+      "gate": 7,
+      "name": "レザベーション",
+      "sex": "牡",
+      "age": 3,
+      "carriedWeightKg": 57,
+      "jockey": "田口貫太",
+      "jraPreRating": 110,
+      "tactic": "差し",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 107,
+      "sta": 105,
+      "kick": 111,
+      "early": 106,
+      "sustain": 108,
+      "grit": 107,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 107
+        },
+        "sta": {
+          "total": 105
+        },
+        "kick": {
+          "total": 111
+        },
+        "early": {
+          "total": 106
+        },
+        "sustain": {
+          "total": 108
+        },
+        "grit": {
+          "total": 107
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: ニュージーランドT優勝、NHKマイルC6着",
+      "researchNote": "ニュージーランドT優勝、NHKマイルC6着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 14,
+      "gate": 7,
+      "name": "スターアニス",
+      "sex": "牝",
+      "age": 3,
+      "carriedWeightKg": 55,
+      "jockey": "松山弘平",
+      "jraPreRating": 116,
+      "tactic": "先行",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 111,
+      "sta": 109,
+      "kick": 111,
+      "early": 115,
+      "sustain": 112,
+      "grit": 111,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 111
+        },
+        "sta": {
+          "total": 109
+        },
+        "kick": {
+          "total": 111
+        },
+        "early": {
+          "total": 115
+        },
+        "sustain": {
+          "total": 112
+        },
+        "grit": {
+          "total": 111
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 阪神JF・桜花賞優勝、スプリンターズS4着",
+      "researchNote": "阪神JF・桜花賞優勝、スプリンターズS4着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 15,
+      "gate": 8,
+      "name": "エコロブルーム",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "坂井瑠星",
+      "jraPreRating": 111,
+      "tactic": "先行",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 108,
+      "sta": 106,
+      "kick": 108,
+      "early": 112,
+      "sustain": 109,
+      "grit": 108,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 108
+        },
+        "sta": {
+          "total": 106
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 112
+        },
+        "sustain": {
+          "total": 109
+        },
+        "grit": {
+          "total": 108
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 京成杯オータムH2着",
+      "researchNote": "京成杯オータムH2着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 16,
+      "gate": 8,
+      "name": "スズハローム",
+      "sex": "牡",
+      "age": 6,
+      "carriedWeightKg": 58,
+      "jockey": "藤懸貴志",
+      "jraPreRating": 113,
+      "tactic": "差し",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 109,
+      "sta": 107,
+      "kick": 113,
+      "early": 108,
+      "sustain": 110,
+      "grit": 109,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 109
+        },
+        "sta": {
+          "total": 107
+        },
+        "kick": {
+          "total": 113
+        },
+        "early": {
+          "total": 108
+        },
+        "sustain": {
+          "total": 110
+        },
+        "grit": {
+          "total": 109
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: スワンS2着",
+      "researchNote": "スワンS2着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 17,
+      "gate": 9,
+      "name": "アンパドゥ",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "岩田望来",
+      "jraPreRating": 114,
+      "tactic": "差し",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 110,
+      "sta": 108,
+      "kick": 114,
+      "early": 109,
+      "sustain": 111,
+      "grit": 110,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 110
+        },
+        "sta": {
+          "total": 108
+        },
+        "kick": {
+          "total": 114
+        },
+        "early": {
+          "total": 109
+        },
+        "sustain": {
+          "total": 111
+        },
+        "grit": {
+          "total": 110
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 関屋記念優勝",
+      "researchNote": "関屋記念優勝",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    },
+    {
+      "horseNumber": 18,
+      "gate": 9,
+      "name": "オフトレイル",
+      "sex": "牡",
+      "age": 5,
+      "carriedWeightKg": 58,
+      "jockey": "菅原明良",
+      "jraPreRating": 115,
+      "tactic": "追込",
+      "bestDistance": 1600,
+      "aptMin": 1400,
+      "aptMax": 1800,
+      "health": 95,
+      "temperament": 90,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 100,
+        "重": 100,
+        "不良": 100
+      },
+      "speed": 110,
+      "sta": 108,
+      "kick": 114,
+      "early": 107,
+      "sustain": 111,
+      "grit": 110,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 110
+        },
+        "sta": {
+          "total": 108
+        },
+        "kick": {
+          "total": 114
+        },
+        "early": {
+          "total": 107
+        },
+        "sustain": {
+          "total": 111
+        },
+        "grit": {
+          "total": 110
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "abilityNote": "ゲーム用推定値。JRA公認能力値ではない。確認できた主な戦歴: 安田記念6着、スワンS3着",
+      "researchNote": "安田記念6着、スワンS3着",
+      "researchStatus": "主要実績とプレレーティング照合済み。全出走履歴・ラップ・馬場別成績は未照合。"
+    }
+  ]
+}

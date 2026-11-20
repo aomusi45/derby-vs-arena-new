@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "description": "表示するレースを自由に追加・削除・入れ替えできます。enabled:falseで非公開。",
+  "description": "2026年11月22日マイルチャンピオンシップ予想レース",
   "races": [
     {
-      "id": "tenno-2026",
-      "title": "天皇賞（秋）・試験データ",
-      "date": "2026-11-01",
-      "file": "g1-prediction-tenno-2026.json",
+      "id": "mile-championship-2026",
+      "title": "第43回 マイルチャンピオンシップ",
+      "date": "2026-11-22",
+      "file": "g1-prediction-mile-championship-2026.json",
       "enabled": true
     }
   ]
