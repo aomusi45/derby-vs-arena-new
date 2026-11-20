@@ -155,7 +155,12 @@ def board_snapshot() -> bytes | None:
     if not path.is_file():return None
     body=path.read_bytes()
     board=json.loads(body)
-    if board.get('version')!=1 or not isinstance(board.get('top10'),list) or not isinstance(board.get('awards'),list):
+    # The manual race-history reset writes [] until weekly_awards.py rebuilds
+    # the public ranking. Do not publish that placeholder as a ranking board.
+    if board == []:
+        print('Weekly ranking reset placeholder detected; skipping board snapshot.', flush=True)
+        return None
+    if not isinstance(board, dict) or board.get('version')!=1 or not isinstance(board.get('top10'),list) or not isinstance(board.get('awards'),list):
         raise ValueError('週間賞金ランキングの公開データが不正です')
     return body
 
