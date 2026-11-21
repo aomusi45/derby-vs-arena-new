@@ -7487,6 +7487,47 @@ function df26AdaptivePositionDrive(h,order,progress){
  return clamp((.18+.76*urgency)*ability*early*reserve,0,.88);
 }
 
+// Official VS Arena V15: all four running styles use live leader gap and remaining
+// distance to choose when to accelerate. This changes pacing, not horse stats.
+// The existing V13 lane planner still decides whether an outside pass is safe.
+function dfArenaV15PursuitDrive(h,order){
+ if(!dfV30VsActive||h.finishedAt!==null||elapsed<4||!order.length)return 0;
+ const leader=order[0];
+ const remaining=Math.max(0,TOTAL-h.dist);
+ if(remaining<100)return 0;
+ const own=.36*h.raceSp+.23*h.raceSta+.21*h.raceSustain+.20*h.raceKick;
+ const fitness=clamp((own-72)/37,0,1)*clamp(h.distanceFactor/.9,0,1);
+ const reserve=clamp((h.stamina-.22)/.62,0,1);
+ if(fitness<=.03||reserve<=.03)return 0;
+ const gap=Math.max(0,leader.dist-h.dist);
+ const style=h.tactic;
+ const closer=style==='差し'||style==='追込';
+ // The leader conserves enough energy for its own finish, without a free boost.
+ if(leader===h){
+  const next=order.find(o=>o!==h&&o.finishedAt===null);
+  if(!next)return 0;
+  const threat=Math.max(0,9-(h.dist-next.dist));
+  const start=Math.min(TOTAL*.65,style==='逃げ'?950:850);
+  const phase=clamp((start-remaining)/Math.max(180,start*.40),0,1);
+  return clamp(threat/9,0,1)*phase*fitness*reserve*.24;
+ }
+ const leadSpeed=Math.max(11,leader.velocity||16);
+ const secondsLeft=Math.max(1,remaining/leadSpeed);
+ const needed=gap/secondsLeft;
+ const edge=(.38*(h.raceSp-leader.raceSp)+.32*(h.raceKick-leader.raceKick)+
+  .30*(h.raceSustain-leader.raceSustain))*.038;
+ // Use actual ability and stamina, not an unconditional catch-up correction.
+ const closingCapacity=Math.max(.08,.28+edge)*fitness*reserve;
+ const start=Math.min(TOTAL*.85,Math.max(closer?950:780,
+  (closer?1050:860)+gap*(closer?9:6)));
+ if(remaining>start)return 0;
+ const phase=clamp((start-remaining)/Math.max(160,start*.43),0,1);
+ const urgency=clamp((needed-closingCapacity*.35)/Math.max(.25,closingCapacity),0,1);
+ const lateFade=clamp((remaining-100)/330,0,1);
+ const ceiling=closer?.78:.52;
+ return clamp((.12+.78*urgency)*phase*fitness*reserve*lateFade,0,ceiling);
+}
+
 // Master Ver.2 race influence. These are intentionally *small* additions to the
 // established speed/stamina/kick model, rather than replacing it or giving a
 // second full set of ability points to an already high-ranked horse.
@@ -8425,10 +8466,9 @@ function df28GritYieldStep(h,dt,order,side,max,scale){
 // Physical lateral coordinates are signed toward the inner rail. The inner
 // 30% therefore begins at 0.40*the usable half-width, not at 0.30*half-width.
 function df76FinalCornerFree(h){
- const remaining=TOTAL-h.dist;
- if(currentCourse?.straightOnly)return remaining<=Math.min(450,TOTAL*.42);
- const straight=Math.max(180,Number(dfV47World?.straightLength)||Number(currentCourse?.straight)||400);
- return remaining<=Math.min(TOTAL*.78,Math.max(700,straight+340));
+ // Official VS: inner 30% is mandatory until the last 600m, except
+ // for an active, physically clear overtaking maneuver.
+ return TOTAL-h.dist<=600;
 }
 function df76AbilityClosing(h,front,finalFree){
  // Estimate whether this horse can realistically catch a runner, rather
@@ -8490,6 +8530,12 @@ function df76NormalLanePlan(h,dt,order,p){
     elapsed>a.df76PassExpiry){a.df76PassNo=0;a.df76PassExpiry=0;}
  }
  const passing=imminent||!!a.df76PassNo;
+ // After a completed pass, return to the inner 30% until 600m remains.
+ // The existing lateral collision guard prevents unsafe cut-ins.
+ if(!passing&&!finalFree&&side*here<max*.40){
+  h.targetLane=innerTarget/scale;
+  a.decisionAt=Math.min(a.decisionAt,elapsed);
+ }
  const gapTargets=(passing||finalFree)?df76GapCandidates(h,order,max,side,frontGap):[];
  const haveGritGap=gapTargets.length>0;
  const phase=p>.77?1:clamp((p-.60)/.17,0,1);
@@ -8524,8 +8570,8 @@ function df76NormalLanePlan(h,dt,order,p){
    const innerPenalty=Math.max(0,max*.40-inside);
    if(!finalFree){
     score-=innerPenalty*(passing?.16:2.0);
-    if(!passing&&df76InsideBand(side,max,loc))score+=5.8;
-    if(!passing)score-=Math.abs(loc-innerTarget)*.48;
+    if(!passing&&df76InsideBand(side,max,loc))score+=12.0;
+    if(!passing)score-=Math.abs(loc-innerTarget)*1.6;
    }else{
     // Final bend/home stretch: optimize the individual horse's race line,
     // not a forced outer drift. Inner saves ground; open space lets its
@@ -8783,6 +8829,8 @@ if(!Number.isFinite(h.tacticPositionRank))assignTacticPositions(runners);
 target+=tacticPositionDrive(h,order,p);
 // V26: regular races only; live leader-gap anticipation for both COM and owner.
 target+=df26AdaptivePositionDrive(h,order,p);
+// Official VS arena: V14-equivalent early pursuit for all four tactics.
+target+=dfArenaV15PursuitDrive(h,order);
 // DBF V20: good-going equal-strength physical pace balancing (all race modes).
 target+=df20GoodEqualStrengthDrive(h,order,p);
 // DBF18: small temporary pace choice to open a safe outside passing gap.
