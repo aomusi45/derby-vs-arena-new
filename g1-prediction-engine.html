@@ -8427,10 +8427,8 @@ function df28GritYieldStep(h,dt,order,side,max,scale){
 // Physical lateral coordinates are signed toward the inner rail. The inner
 // 30% therefore begins at 0.40*the usable half-width, not at 0.30*half-width.
 function df76FinalCornerFree(h){
- const remaining=TOTAL-h.dist;
- if(currentCourse?.straightOnly)return remaining<=Math.min(450,TOTAL*.42);
- const straight=Math.max(180,Number(dfV47World?.straightLength)||Number(currentCourse?.straight)||400);
- return remaining<=Math.min(TOTAL*.78,Math.max(700,straight+340));
+ // The inner-30% rule applies until exactly 600m remain, on every course.
+ return TOTAL-h.dist<=600;
 }
 function df76AbilityClosing(h,front,finalFree){
  // Estimate whether this horse can realistically catch a runner, rather
@@ -8554,6 +8552,25 @@ function df76NormalLanePlan(h,dt,order,p){
    score-=Math.abs(loc-(a.df76PassLane||here))*(a.df76PassNo?.09:0);
    if(score>bestScore){best=loc;bestScore=score;bestFront=obstacle;}
   }
+  // When a genuinely faster runner is boxed in, choose a collision-free
+  // outside passing corridor rather than remaining behind the blocker.
+  // Never grant a free pass through an occupied corridor.
+  if(imminent&&front&&!a.df76PassNo){
+   const outside=[];
+   for(let loc=here-side*1.9;side*(loc-here)<-.1;loc-=side*1.9){
+    if(loc < -max||loc > max)break;
+    if(!df150LateralFree(h,loc,order))continue;
+    const next=here+clamp(loc-here,-.23,.23);
+    if(!df150LateralFree(h,next,order))continue;
+    const blocker=df150Front(h,order,loc,52);
+    if(!blocker||blocker.dist-h.dist>frontGap+4)outside.push(loc);
+   }
+   if(outside.length){
+    // The closest usable outside corridor minimizes lateral travel.
+    best=outside[0];bestFront=df150Front(h,order,best,52);
+   }
+  }
+  if(!finalFree&&!passing&&side*best<max*.40)best=innerTarget;
   h.targetLane=best/scale;
   a.decisionAt=elapsed+(passing?.14:finalFree?.20:.33);
   if(imminent&&Math.abs(best-here)>.60&&
