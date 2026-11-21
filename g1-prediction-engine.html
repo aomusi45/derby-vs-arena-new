@@ -11149,7 +11149,7 @@ const dfOfficialVSRecorder = (() => {
       raceId:'dfvs-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10),
       createdAt:new Date().toISOString(),status:'recording',
       race:{name:String(currentRace?.name||'VS対戦レース'),venue:String(currentRace?.venue||'東京'),
-        surface:String(currentRace?.surface||'芝'),distance:Number(currentRace?.distance)||TOTAL,
+        surface:String(currentRace?.surface||'芝'),layout:String(currentRace?.layout||'本'),distance:Number(currentRace?.distance)||TOTAL,
         going:String(currentGoing||'良'),weather:String(currentWeather||'晴れ')},
       field:copy(dfV136VsField||[]),
       starters:runners.map(horseState),
@@ -11269,7 +11269,24 @@ const dfOfficialVSPlayback = (() => {
     }
     clear();arming=true;
     let outcome;
-    try{outcome=dfV30VsPrepareField(value.field,value.race.distance,value.race.going,false,!!value.newspaper);}
+    try{// Replays must rebuild the venue from the recorded race, not the ordinary VS Tokyo default.
+      const recordedVenue=String(value.race?.venue||'');
+      const recordedSurface=String(value.race?.surface||'');
+      const recordedLayout=String(value.race?.layout||'本');
+      if(value.newspaper && (!Object.prototype.hasOwnProperty.call(VENUES_V78,recordedVenue) ||
+          !['芝','ダート'].includes(recordedSurface) || !['本','外','直線'].includes(recordedLayout)))
+        throw Error('保存済みレースの競馬場・コース情報が不正です。');
+      const recordedCard=value.newspaper?{
+        name:String(value.race?.name||'GⅠ予想レース'),venue:recordedVenue,
+        surface:recordedSurface,layout:recordedLayout,
+        date:String(value.createdAt||'2026-11-01')
+      }:null;
+      outcome=dfV30VsPrepareField(value.field,value.race.distance,value.race.going,
+        false,!!value.newspaper,recordedCard);
+      if(outcome?.ok && recordedCard && (currentRace.venue!==recordedVenue ||
+          currentCourse.direction!==VENUES_V78[recordedVenue].direction ||
+          currentRace.layout!==recordedLayout || !dfV47World))
+        throw Error('再生コースの生成が開催競馬場と一致しません。');}
     finally{arming=false;}
     if(!outcome?.ok)throw Error(outcome?.error||'再生画面の準備に失敗しました。');
     current=value;frameIndex=0;positionMs=0;
