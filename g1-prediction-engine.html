@@ -8611,7 +8611,14 @@ function df76NormalLanePlan(h,dt,order,p){
     best=outside[0];bestFront=df150Front(h,order,best,52);
    }
   }
-  if(!finalFree&&!passing&&side*best<max*.40)best=innerTarget;
+  // V15: once a pass is complete, return to the inner 30% before 600m.
+  // Do not force a cut-in through an occupied corridor.
+  if(!finalFree&&!passing){
+   const safeInner=side*max*.73;
+   const nextStep=here+clamp(safeInner-here,-.23,.23);
+   if(df150LateralFree(h,nextStep,order))best=safeInner;
+   else if(side*best<max*.40)best=here;
+  }
   h.targetLane=best/scale;
   a.decisionAt=elapsed+(passing?.14:finalFree?.20:.33);
   if(imminent&&Math.abs(best-here)>.60&&
@@ -15192,11 +15199,16 @@ const dfOfficialVSProduction = (() => {
         const isCloser=tactic==='差し'||tactic==='追込';
         const frontPace=selectedPace==='front'&&isFront?1.055:selectedPace==='closer'&&isFront?0.95:1;
         const closerPace=selectedPace==='closer'&&isCloser?1.065:selectedPace==='front'&&isCloser?0.95:1;
+        // V15: small, prediction-only market prior. Apply once to base stats;
+        // do not use live predicted odds (which already include form/going/pace).
+        const marketRank=Number(h.popularity);
+        const marketFactor=Number.isInteger(marketRank)&&marketRank>=1&&marketRank<=3?1.035:
+          Number.isInteger(marketRank)&&marketRank<=6&&marketRank>=4?1.018:1;
         return {name,sex:h.sex||'牡',age:Number(h.age)||4,coatType:h.coatType||'鹿毛',
           tactic:h.tactic||'先行',growth:h.growth||'普通',
           bestDistance:Number(h.bestDistance)||2000,aptMin:Number(h.aptMin)||1600,
           aptMax:Number(h.aptMax)||2400,
-          speed:Number(h.speed)*(1-weightPenalty)*conditionFactor,sta:Number(h.sta)*(1-weightPenalty*.8)*conditionFactor,kick:kick*(1-kickPenalty)*(1-weightPenalty*.6)*closerPace*conditionFactor,
+          speed:Number(h.speed)*(1-weightPenalty)*conditionFactor*marketFactor,sta:Number(h.sta)*(1-weightPenalty*.8)*conditionFactor,kick:kick*(1-kickPenalty)*(1-weightPenalty*.6)*closerPace*conditionFactor*marketFactor,
           early:Number(h.early)*(1-weightPenalty*.5)*frontPace*conditionFactor,sustain:Number(h.sustain)*(1-weightPenalty*.7)*(selectedPace==='closer'&&isFront?.955:1)*conditionFactor,grit:Number(h.grit),
           stability:Number(h.stability),health:Number(h.health??95),
           temperament:Number(h.temperament??90),going:h.going||{},
