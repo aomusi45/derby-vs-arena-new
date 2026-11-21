@@ -14852,7 +14852,7 @@ async function main(){
 
 
 // ===== Ver.30: shared engine adapter for VS mode (no duplicate race physics). =====
-function dfV30VsPrepareField(rawField,distance,going,replacing=false,officialNewspaper=false){
+function dfV30VsPrepareField(rawField,distance,going,replacing=false,officialNewspaper=false,predictionRaceCard=null){
  if(dfV30VsActive&&!replacing)return {ok:false,error:'VSレースを終了してから、出走馬を選び直してください。'};
  if(!window.__raceReady3D||!renderer||!scene)return {ok:false,error:'通常の3Dレースの読み込みが完了していません。'};
  if(race==='running'||race==='paused'||race==='runout'||(replacing&&race!=='idle'))return {ok:false,error:'レースの発走前に変更してください。'};
@@ -14897,7 +14897,14 @@ function dfV30VsPrepareField(rawField,distance,going,replacing=false,officialNew
   camMode='auto';speed=2;
   document.querySelectorAll('[data-camera]').forEach(b=>b.classList.toggle('active',b.dataset.camera==='auto'));
   document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b.dataset.speed==='2'));
-  currentRace={name:"天皇賞（秋）",venue:"東京",surface:'芝',grade:'GⅠ',distance,
+  // Prediction races use their published racecard's actual venue and layout.
+  // Ordinary VS races retain their existing Tokyo default.
+  const predictionCard=officialNewspaper&&predictionRaceCard?predictionRaceCard:null;
+  currentRace=predictionCard?{
+   name:predictionCard.name,venue:predictionCard.venue,surface:predictionCard.surface,
+   grade:'GⅠ',distance,month:Number(predictionCard.date.slice(5,7))||11,
+   layout:predictionCard.layout,weightRule:'定量',ages:'3+',female:false,classType:'vs'
+  }:{name:"天皇賞（秋）",venue:"東京",surface:'芝',grade:'GⅠ',distance,
    month:11,layout:"本",weightRule:"定量",ages:"3+",female:false,classType:'vs'};
   TOTAL=distance;STARTERS=picked.length;currentGoing=going;
   currentWeather=['重','不良'].includes(going)?'雨':'晴れ';
@@ -14910,8 +14917,8 @@ function dfV30VsPrepareField(rawField,distance,going,replacing=false,officialNew
    runners.push({...h,...model,no:i+1,dist:0,velocity:0,lane:df75RaceGateLane(i),
     targetLane:df75RaceGateLane(i),stamina:1,finishedAt:null,phase:0,variant:0,decision:0});
   }
-  $('courseInfo').textContent=`東京競馬場｜芝${distance}m｜馬場：${going}｜${STARTERS}頭`;
-  document.querySelector('.race-title').firstChild.textContent="天皇賞（秋）"+' ';
+  $('courseInfo').textContent=`${currentRace.venue}競馬場｜${currentRace.surface}${distance}m${currentRace.layout==='外'?'（外回り）':''}｜${currentCourse.direction}回り｜馬場：${going}｜${STARTERS}頭`;
+  document.querySelector('.race-title').firstChild.textContent=currentRace.name+' ';
   document.querySelector('.race-title .g1').textContent='GⅠ';
   seedRace();
    // Ver.180: VS uses the SAME df171CloserKickPlan/tacticPositionDrive/
@@ -15120,8 +15127,23 @@ const dfOfficialVSProduction = (() => {
           earnedPrize:0,isCom:false,ownerName:'GⅠ予想'};
       });
     })();
-    const distance=Number(currentRace?.distance),going=currentGoing;
-    const prepared=dfV30VsPrepareField(field,distance,going,false,true);
+    // Derive course geometry from the selected prediction race, never from
+    // the engine's default Tenno Sho (Tokyo) race. Fail closed on unknown venues.
+    const payloadRace=window.parent.__dfPredictionData?.race||{};
+    const raceVenue=String(payloadRace.venue||'').trim();
+    const raceSurface=String(payloadRace.surface||'').trim();
+    const raceDirection=String(payloadRace.direction||'').trim();
+    const raceLayout=raceDirection.includes('外')?'外':raceDirection.includes('直線')?'直線':'本';
+    const raceDistance=Number(payloadRace.distance);
+    if(!Object.prototype.hasOwnProperty.call(VENUES_V78,raceVenue))throw Error('開催競馬場が不明です：'+raceVenue);
+    if(!['芝','ダート'].includes(raceSurface))throw Error('馬場種別が不正です：'+raceSurface);
+    if(!Number.isInteger(raceDistance)||raceDistance<1000||raceDistance>4000)throw Error('レース距離が不正です');
+    const declaredTurn=raceDirection.includes('左')?'左':raceDirection.includes('右')?'右':null;
+    if(declaredTurn&&declaredTurn!==VENUES_V78[raceVenue].direction)throw Error('開催競馬場と回り方向が一致しません');
+    const predictionRaceCard={name:String(payloadRace.name||payloadRace.raceName||'GⅠ予想レース'),
+      venue:raceVenue,surface:raceSurface,layout:raceLayout,date:String(payloadRace.date||'2026-11-01')};
+    const distance=raceDistance,going=currentGoing;
+    const prepared=dfV30VsPrepareField(field,distance,going,false,true,predictionRaceCard);
     if(!prepared?.ok)throw Error(prepared?.error||'VSレースを準備できませんでした。');
     $('newspaperRaceStart').disabled=true;
     show('競馬新聞を保存しています…');
