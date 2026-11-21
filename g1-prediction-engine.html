@@ -7487,6 +7487,47 @@ function df26AdaptivePositionDrive(h,order,progress){
  return clamp((.18+.76*urgency)*ability*early*reserve,0,.88);
 }
 
+// Prediction VS V14: all four running styles use live leader gap and remaining
+// distance to choose when to accelerate. This changes pacing, not horse stats.
+// The existing V13 lane planner still decides whether an outside pass is safe.
+function dfPredictionV14PursuitDrive(h,order){
+ if(!dfV30VsActive||h.finishedAt!==null||elapsed<4||!order.length)return 0;
+ const leader=order[0];
+ const remaining=Math.max(0,TOTAL-h.dist);
+ if(remaining<100)return 0;
+ const own=.36*h.raceSp+.23*h.raceSta+.21*h.raceSustain+.20*h.raceKick;
+ const fitness=clamp((own-72)/37,0,1)*clamp(h.distanceFactor/.9,0,1);
+ const reserve=clamp((h.stamina-.22)/.62,0,1);
+ if(fitness<=.03||reserve<=.03)return 0;
+ const gap=Math.max(0,leader.dist-h.dist);
+ const style=h.tactic;
+ const closer=style==='差し'||style==='追込';
+ // The leader conserves enough energy for its own finish, without a free boost.
+ if(leader===h){
+  const next=order.find(o=>o!==h&&o.finishedAt===null);
+  if(!next)return 0;
+  const threat=Math.max(0,9-(h.dist-next.dist));
+  const start=Math.min(TOTAL*.65,style==='逃げ'?950:850);
+  const phase=clamp((start-remaining)/Math.max(180,start*.40),0,1);
+  return clamp(threat/9,0,1)*phase*fitness*reserve*.24;
+ }
+ const leadSpeed=Math.max(11,leader.velocity||16);
+ const secondsLeft=Math.max(1,remaining/leadSpeed);
+ const needed=gap/secondsLeft;
+ const edge=(.38*(h.raceSp-leader.raceSp)+.32*(h.raceKick-leader.raceKick)+
+  .30*(h.raceSustain-leader.raceSustain))*.038;
+ // Use actual ability and stamina, not an unconditional catch-up correction.
+ const closingCapacity=Math.max(.08,.28+edge)*fitness*reserve;
+ const start=Math.min(TOTAL*.85,Math.max(closer?950:780,
+  (closer?1050:860)+gap*(closer?9:6)));
+ if(remaining>start)return 0;
+ const phase=clamp((start-remaining)/Math.max(160,start*.43),0,1);
+ const urgency=clamp((needed-closingCapacity*.35)/Math.max(.25,closingCapacity),0,1);
+ const lateFade=clamp((remaining-100)/330,0,1);
+ const ceiling=closer?.78:.52;
+ return clamp((.12+.78*urgency)*phase*fitness*reserve*lateFade,0,ceiling);
+}
+
 // Master Ver.2 race influence. These are intentionally *small* additions to the
 // established speed/stamina/kick model, rather than replacing it or giving a
 // second full set of ability points to an already high-ranked horse.
@@ -8802,6 +8843,8 @@ if(!Number.isFinite(h.tacticPositionRank))assignTacticPositions(runners);
 target+=tacticPositionDrive(h,order,p);
 // V26: regular races only; live leader-gap anticipation for both COM and owner.
 target+=df26AdaptivePositionDrive(h,order,p);
+// V14: prediction VS horses also make ability-based early pursuit decisions.
+target+=dfPredictionV14PursuitDrive(h,order);
 // DBF V20: good-going equal-strength physical pace balancing (all race modes).
 target+=df20GoodEqualStrengthDrive(h,order,p);
 // DBF18: small temporary pace choice to open a safe outside passing gap.
