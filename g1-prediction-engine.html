@@ -2679,7 +2679,7 @@ body[data-game-screen] .shell > #df197RaceConfirm:not([hidden]){display:flex!imp
 <section aria-label="購入した馬券の結果" class="bet-result" hidden="" id="betResultPanel"><h2>購入馬券の結果</h2><div id="betResultRows"></div></section>
 <button id="resultToRaceHome" type="button">📅 レースホームへ戻る・次のレースを選ぶ</button><button hidden="" id="dfV30VsReturnResult" type="button">⚔ VS出走馬選択へ戻る</button>
 </section>
-<div class="control-strip"><button class="pill" hidden="" id="dfV30VsReturn" type="button">⚔ VS出走馬選択へ</button><strong>速度</strong><button class="pill" data-speed="1">1×</button><button class="pill active" data-speed="2">2×</button><button class="pill" data-speed="4">4×</button><button class="pill df105-pause-control" disabled="" id="viewportPauseBtn" type="button">Ⅱ 一時停止</button><button type="button" id="dfNormalFinishButton" class="df182-finish-control is-primary" hidden aria-label="レースを終了して確定着順へ進む">終了</button></div>
+<div class="control-strip"><button class="pill" hidden="" id="dfV30VsReturn" type="button">⚔ VS出走馬選択へ</button><strong>速度</strong><button class="pill active" data-speed="1">1×</button><button class="pill" data-speed="2">2×</button><button class="pill" data-speed="4">4×</button><button class="pill df105-pause-control" disabled="" id="viewportPauseBtn" type="button">Ⅱ 一時停止</button><button type="button" id="dfNormalFinishButton" class="df182-finish-control is-primary" hidden aria-label="レースを終了して確定着順へ進む">終了</button></div>
 <section class="entry-setup" id="starterPanel"><p class="auto-entry-notice">出走馬は毎レース8〜18頭を抽選。レース名・距離はゲーム内カレンダーから選択。登録馬は得意距離±100m、または史実の出走記録がある距離から選ばれます。</p>
 <details class="manual-runner-panel" id="manualRunnerPanel" open="">
 <summary>出走する馬を選ぶ</summary>
@@ -5303,7 +5303,7 @@ let DEF=INITIAL_STARTERS.map((n,i)=>makeStarter(n,i));
 // Ver.30: VS races run through this same normal Three.js race engine.
 let dfV30VsActive=false,dfV30VsRestore=null,dfV136VsField=null;
 // ===== Ver.90 source section: 08_live_state_track_geometry.js | 進行状態・座標・コース形状 =====
-let renderer,scene,camera,horseData=null,runners=[],race='idle',elapsed=0,realTime=0,last=0,uiLast=0,speed=2,camMode='auto',finished=[],raceNo=0,motionStarted=false,pauseResumeState='running';
+let renderer,scene,camera,horseData=null,runners=[],race='idle',elapsed=0,realTime=0,last=0,uiLast=0,speed=1,camMode='auto',finished=[],raceNo=0,motionStarted=false,pauseResumeState='running';
 let resultRevealStart=null,resultVisibleRows=0;
 let targetPos=new THREE.Vector3(),viewTarget=new THREE.Vector3();const tmpV=new THREE.Vector3();const mats={};
 const clamp=(x,min,max)=>Math.max(min,Math.min(max,x));
@@ -8233,9 +8233,9 @@ function df132PrepareSecretaryAdvice(){
 }
 
 function seedRace(){
- // Updated: every new race starts at 2x; playback controls remain selectable.
- speed=2;
- document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b.dataset.speed==='2'));
+ // Updated: every new race starts at 1x; playback controls remain selectable.
+ speed=1;
+ document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b.dataset.speed==='1'));
  dfV62EndHoldUntil=0;
  dfV61GateFollow.reset();
  dfV59Focus.no=null;dfV59Focus.holdUntil=0;dfV59Focus.phaseAt=performance.now();
@@ -15060,9 +15060,9 @@ function dfV30VsPrepareField(rawField,distance,going,replacing=false,officialNew
  // No access to the normal roster or calendar save keys is needed for this temporary field.
  if(!replacing){dfV30VsRestore=prev;dfV30VsActive=true;}
  try{
-  camMode='auto';speed=2;
+  camMode='auto';speed=1;
   document.querySelectorAll('[data-camera]').forEach(b=>b.classList.toggle('active',b.dataset.camera==='auto'));
-  document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b.dataset.speed==='2'));
+  document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b.dataset.speed==='1'));
   // Prediction races use their published racecard's actual venue and layout.
   // Ordinary VS races retain their existing Tokyo default.
   const predictionCard=officialNewspaper&&predictionRaceCard?predictionRaceCard:null;
