@@ -8530,14 +8530,20 @@ function df76NormalLanePlan(h,dt,order,p){
  }
  // A mandatory existing grit-yield is still a physical lane movement, never
  // a teleport or a free speed bonus. It is limited to NORMAL races already.
- if(df28GritYieldStep(h,dt,order,side,max,scale))return;
+ // V18: yielding is never allowed to bypass the shared inner-band guard.
+ // The yield routine previously returned early after moving the real lane,
+ // allowing a horse to remain outside without running the return controller.
+ // While the inner-band rule is active, use the same collision-safe planner.
+ if(finalFree && df28GritYieldStep(h,dt,order,side,max,scale))return;
  const priority=order.find(o=>o.df150?.df28YieldFor===h.no&&
    o.finishedAt===null&&o.dist>h.dist&&o.dist-h.dist<24);
  if(priority&&Math.abs(df150RealLane(priority)-here)<DF150_MIN_SIDE_GAP+.38){
   h.targetLane=here/scale;a.lastReal=here;return;
  }
- // Do not move between occupied starting stalls while the gate is opening.
- if(elapsed<2.2){a.lastReal=here;return;}
+ // V18: even during gate opening, converge toward the inner band as soon
+ // as a safe adjacent corridor exists; never skip the lane controller.
+ // Initial gate stalls may lie outside the band, so physical convergence
+ // cannot be instantaneous without teleporting horses through one another.
  const front=df150Front(h,order,here,56);
  const frontGap=front?front.dist-h.dist:Infinity;
  const closing=front?df76AbilityClosing(h,front,finalFree):0;
@@ -8553,7 +8559,10 @@ function df76NormalLanePlan(h,dt,order,p){
  // Do not start another pass while returning to the inner corridor.
  // V17: a passing exception is temporary. A blocked or unsuccessful
  // pass cannot keep an outside corridor indefinitely; returning wins.
- const passing=!a.dfV16ReturnLock&&(imminent||!!a.df76PassNo);
+ // V18: a genuine, currently blocked pass is the ONLY reason to leave
+ // the inner band before 600m. An expired pass flag cannot renew itself.
+ const passing=!a.dfV16ReturnLock&&(finalFree||(imminent&&frontGap<54)||
+   (a.df76PassNo&&elapsed<a.df76PassExpiry));
  const gapTargets=(!a.dfV16ReturnLock&&(passing||finalFree))?
    df76GapCandidates(h,order,max,side,frontGap):[];
  const haveGritGap=gapTargets.length>0;
@@ -8692,6 +8701,8 @@ function df76NormalLanePlan(h,dt,order,p){
  if(!finalFree && elapsed>=2.2){
   const real=df150RealLane(h);
   if(side*real<max*.40){
+   // Every outside horse is tracked, including those blocked by traffic.
+   // Never silently treat an expired pass as permission to cruise outside.
    if(!passing||a.dfV16ReturnLock){
     a.dfV16ReturnLock=true;
     a.df76PassNo=0;a.df76PassExpiry=0;
@@ -8712,6 +8723,16 @@ function df76NormalLanePlan(h,dt,order,p){
  }else if(a.blockedTime>.75){
   df150Event(h,'clear');a.blockedTime=0;a.blockedNoted=false;
  }else{a.blockedTime=0;a.blockedNoted=false;}
+ // V18 runtime diagnostics: inspect every horse's actual physical lane,
+ // not its registration data or target lane. A nonzero violation counter
+ // indicates that safe convergence is still pending (e.g. crowded gates).
+ if(!finalFree && elapsed>=2.2){
+  const measured=df150RealLane(h);
+  if(side*measured<max*.40-.001){
+   a.dfV18OutsideTicks=(a.dfV18OutsideTicks||0)+1;
+   a.dfV18OutsideSeconds=(a.dfV18OutsideSeconds||0)+dt;
+  }
+ }
  a.lastReal=df150RealLane(h);
 }
 // Ver.80: one predictive/collision-safe lane selector, no VS-only fork.
