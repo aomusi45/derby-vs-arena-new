@@ -1,12 +1,15 @@
 <!doctype html>
 <html lang="ja">
 <head>
+<title>競馬ゲーム・競馬予想・競馬予想ツール | Derby Fantasy</title>
+<meta name="description" content="競馬ゲーム、競馬予想、競馬予想ツール - Derby Fantasy">
+<meta name="keywords" content="競馬ゲーム, 競馬予想, 競馬予想ツール">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#071a19">
   <!-- Official DBF SEO metadata. No arena behavior changes. -->
-  <title>無料の競走馬育成ゲーム・競馬シミュレーションゲーム｜ダービーファンタジー公式</title>
-  <meta name="description" content="競走馬育成ゲームを無料で楽しめる「ダービーファンタジー」。血統配合・牧場経営・GⅠレースに挑戦するAndroid向け競馬シミュレーションゲーム。公式VSアリーナでは対戦結果・リプレイ・賞金ランキングを公開。現在クローズドテスト実施中。">
+  
+  
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="https://aomusi45.github.io/derby-vs-arena-new/">
   <meta property="og:type" content="website">
@@ -708,7 +711,10 @@ window.DFOfficialViewerBridge=Object.freeze({
         body[data-game-screen="race-view"] .shell{margin:0!important;max-width:none!important;border-radius:0!important}
       }
     </style>`;
-    return html.replace(/<head[^>]*>/i,tag=>tag+shim+spectatorStyle);
+    return html.replace(/<head[^>
+<title>競馬ゲーム・競馬予想・競馬予想ツール | Derby Fantasy</title>
+<meta name="description" content="競馬ゲーム、競馬予想、競馬予想ツール - Derby Fantasy">
+<meta name="keywords" content="競馬ゲーム, 競馬予想, 競馬予想ツール">]*>/i,tag=>tag+shim+spectatorStyle);
   }
   async function loadEngine(){
     if(!state.enginePromise)state.enginePromise=Promise.all(['vs_replay_engine_part1.txt','vs_replay_engine_part2.txt']
