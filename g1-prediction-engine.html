@@ -8521,7 +8521,7 @@ function df76NormalLanePlan(h,dt,order,p){
  if(finalFree){a.dfV16ReturnLock=false;a.dfV16OutsideSince=0;}
  else if(outside){
   if(!a.dfV16OutsideSince)a.dfV16OutsideSince=elapsed;
-  if(elapsed-a.dfV16OutsideSince>=2.4){
+  if(elapsed-a.dfV16OutsideSince>=0.85){
    a.dfV16ReturnLock=true;
    a.df76PassNo=0;a.df76PassExpiry=0;
   }
@@ -8551,6 +8551,8 @@ function df76NormalLanePlan(h,dt,order,p){
     elapsed>a.df76PassExpiry){a.df76PassNo=0;a.df76PassExpiry=0;}
  }
  // Do not start another pass while returning to the inner corridor.
+ // V17: a passing exception is temporary. A blocked or unsuccessful
+ // pass cannot keep an outside corridor indefinitely; returning wins.
  const passing=!a.dfV16ReturnLock&&(imminent||!!a.df76PassNo);
  const gapTargets=(!a.dfV16ReturnLock&&(passing||finalFree))?
    df76GapCandidates(h,order,max,side,frontGap):[];
@@ -8618,7 +8620,7 @@ function df76NormalLanePlan(h,dt,order,p){
   // When a genuinely faster runner is boxed in, choose a collision-free
   // outside passing corridor rather than remaining behind the blocker.
   // Never grant a free pass through an occupied corridor.
-  if(imminent&&front&&!a.df76PassNo){
+  if(imminent&&front&&!a.df76PassNo&&!a.dfV16ReturnLock){
    const outside=[];
    for(let loc=here-side*1.9;side*(loc-here)<-.1;loc-=side*1.9){
     if(loc < -max||loc > max)break;
@@ -8671,7 +8673,10 @@ function df76NormalLanePlan(h,dt,order,p){
  const desired=clamp(Number(h.targetLane)*scale,-max,max);
  // Hard priority: return inside even if the previous passing target was
  // retained. No teleporting or passing through another horse.
- const returning=!finalFree&&side*here<max*.40&&(!passing||a.dfV16ReturnLock);
+ // V17: the actual outside coordinate, not a stale passing target,
+ // determines mandatory return. Never let a new pass cancel the return.
+ const returning=!finalFree&&side*here<max*.40&&
+   (a.dfV16ReturnLock||!passing);
  if(returning){
   const toInner=here+clamp(innerTarget-here,-.23,.23);
   if(df150LateralFree(h,toInner,order))h.targetLane=innerTarget/scale;
@@ -8681,6 +8686,23 @@ function df76NormalLanePlan(h,dt,order,p){
  const actualDesired=returning?clamp(Number(h.targetLane)*scale,-max,max):desired;
  const next=here+clamp(actualDesired-here,-lateralRate,lateralRate);
  if(df150LateralFree(h,next,order))h.lane=next/scale;
+ // V17 final-coordinate audit: outside is permitted only for a live,
+ // time-limited pass. Do not teleport through traffic. If blocked, retain
+ // return lock until a safe corridor opens and suppress new passes.
+ if(!finalFree && elapsed>=2.2){
+  const real=df150RealLane(h);
+  if(side*real<max*.40){
+   if(!passing||a.dfV16ReturnLock){
+    a.dfV16ReturnLock=true;
+    a.df76PassNo=0;a.df76PassExpiry=0;
+    h.targetLane=innerTarget/scale;
+    const correction=real+clamp(innerTarget-real,-Math.max(.18,6.5*dt),Math.max(.18,6.5*dt));
+    if(df150LateralFree(h,correction,order))h.lane=correction/scale;
+   }
+  }else{
+   a.dfV16ReturnLock=false;a.dfV16OutsideSince=0;
+  }
+ }
  const moved=Math.abs(df150RealLane(h)-here);
  if(side*df150RealLane(h)<max*.10)a.outerTotal+=moved;
  const blocking=df150Front(h,order,df150RealLane(h),5.5);
