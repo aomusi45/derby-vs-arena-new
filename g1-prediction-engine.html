@@ -8349,6 +8349,7 @@ function df150Seed(h){
   dfV17BreakoutUntil:0,
   df28YieldFor:0,df28YieldTarget:null,df28YieldBrake:0,df28YieldNoted:false,
   df76PassNo:0,df76PassLane:0,df76PassExpiry:0,
+  dfV16OutsideSince:0,dfV16ReturnLock:false,
   response:clamp(.80+(form-65)*.006+(temperament-65)*.003+(riderPosition-1)*.20,.62,1.30)};
  if(stumble)df150Event(h,'slow-start');
  else if(Math.random()<.11)df150Event(h,'good-start');
@@ -8498,6 +8499,11 @@ function df76GapCandidates(h,order,max,side,leadGap){
   if(gap < -max || gap > max)continue;
   if(Math.abs(gap-l)<DF150_MIN_SIDE_GAP+.23||
      Math.abs(gap-r)<DF150_MIN_SIDE_GAP+.23)continue;
+  // Every horse occupying the intended corridor must be weaker; a stronger
+  // third runner cannot be bypassed by comparing only the two edge horses.
+  const blockers=near.filter(o=>Math.abs(o.dist-(x.dist+y.dist)*.5)<9&&
+    Math.abs(df150RealLane(o)-gap)<DF150_MIN_SIDE_GAP+.25);
+  if(blockers.some(o=>Number(h.raceGrit)<=Number(o.raceGrit)))continue;
   ans.push(gap);
  }
  return ans;
@@ -8508,6 +8514,20 @@ function df76NormalLanePlan(h,dt,order,p){
  const here=df150RealLane(h);
  const finalFree=df76FinalCornerFree(h);
  const innerTarget=side*max*.73;
+ // V16: the inner 30% is the default corridor. Outside is a short-lived
+ // passing exception, not a place to cruise. An unsuccessful attempt must
+ // return inside just as a successful one does.
+ const outside=side*here<max*.40;
+ if(finalFree){a.dfV16ReturnLock=false;a.dfV16OutsideSince=0;}
+ else if(outside){
+  if(!a.dfV16OutsideSince)a.dfV16OutsideSince=elapsed;
+  if(elapsed-a.dfV16OutsideSince>=2.4){
+   a.dfV16ReturnLock=true;
+   a.df76PassNo=0;a.df76PassExpiry=0;
+  }
+ }else{
+  a.dfV16OutsideSince=0;a.dfV16ReturnLock=false;
+ }
  // A mandatory existing grit-yield is still a physical lane movement, never
  // a teleport or a free speed bonus. It is limited to NORMAL races already.
  if(df28GritYieldStep(h,dt,order,side,max,scale))return;
@@ -8530,8 +8550,10 @@ function df76NormalLanePlan(h,dt,order,p){
   if(!old||h.dist>old.dist+DF150_MIN_LONG_GAP+2.0||
     elapsed>a.df76PassExpiry){a.df76PassNo=0;a.df76PassExpiry=0;}
  }
- const passing=imminent||!!a.df76PassNo;
- const gapTargets=(passing||finalFree)?df76GapCandidates(h,order,max,side,frontGap):[];
+ // Do not start another pass while returning to the inner corridor.
+ const passing=!a.dfV16ReturnLock&&(imminent||!!a.df76PassNo);
+ const gapTargets=(!a.dfV16ReturnLock&&(passing||finalFree))?
+   df76GapCandidates(h,order,max,side,frontGap):[];
  const haveGritGap=gapTargets.length>0;
  const phase=p>.77?1:clamp((p-.60)/.17,0,1);
  const speed=clamp(Number(h.raceSp)/120,.3,1.6);
@@ -8611,9 +8633,9 @@ function df76NormalLanePlan(h,dt,order,p){
     best=outside[0];bestFront=df150Front(h,order,best,52);
    }
   }
-  // V15: once a pass is complete, return to the inner 30% before 600m.
-  // Do not force a cut-in through an occupied corridor.
-  if(!finalFree&&!passing){
+  // V16: mandatory return after a successful OR unsuccessful outside pass.
+  // Never force a cut-in through an occupied corridor.
+  if(!finalFree&&(!passing||a.dfV16ReturnLock)){
    const safeInner=side*max*.73;
    const nextStep=here+clamp(safeInner-here,-.23,.23);
    if(df150LateralFree(h,nextStep,order))best=safeInner;
@@ -8621,7 +8643,7 @@ function df76NormalLanePlan(h,dt,order,p){
   }
   h.targetLane=best/scale;
   a.decisionAt=elapsed+(passing?.14:finalFree?.20:.33);
-  if(imminent&&Math.abs(best-here)>.60&&
+  if(!a.dfV16ReturnLock&&imminent&&Math.abs(best-here)>.60&&
       (!bestFront||bestFront.dist-h.dist>frontGap+4)){
    a.df76PassNo=front.no;
    a.df76PassLane=best;
@@ -8647,9 +8669,17 @@ function df76NormalLanePlan(h,dt,order,p){
   }
  }
  const desired=clamp(Number(h.targetLane)*scale,-max,max);
- const returning=!passing&&!finalFree&&side*here<max*.40;
- const lateralRate=clamp((passing?5.0:finalFree?4.5:returning?3.8:3.2)*a.response,1.7,6.8)*dt;
- const next=here+clamp(desired-here,-lateralRate,lateralRate);
+ // Hard priority: return inside even if the previous passing target was
+ // retained. No teleporting or passing through another horse.
+ const returning=!finalFree&&side*here<max*.40&&(!passing||a.dfV16ReturnLock);
+ if(returning){
+  const toInner=here+clamp(innerTarget-here,-.23,.23);
+  if(df150LateralFree(h,toInner,order))h.targetLane=innerTarget/scale;
+  else h.targetLane=here/scale;
+ }
+ const lateralRate=clamp((returning?5.8:passing?5.0:finalFree?4.5:3.2)*a.response,1.7,7.2)*dt;
+ const actualDesired=returning?clamp(Number(h.targetLane)*scale,-max,max):desired;
+ const next=here+clamp(actualDesired-here,-lateralRate,lateralRate);
  if(df150LateralFree(h,next,order))h.lane=next/scale;
  const moved=Math.abs(df150RealLane(h)-here);
  if(side*df150RealLane(h)<max*.10)a.outerTotal+=moved;
