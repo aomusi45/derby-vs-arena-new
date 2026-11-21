@@ -11316,20 +11316,28 @@ const dfOfficialVSPlayback = (() => {
   function tick(ts){
     if(!current || race!=='running')return false;
     // Wall-time playback: all spectators use the recorded timeline, not local race physics.
-    apply(ts-frameClock);
-    if(positionMs>=current.durationMs){
-      const fixed=new Map(current.results.map(row=>[row.no,row]));
-      for(const h of runners){
-        const row=fixed.get(h.no);
-        h.finishedAt=row.timeSeconds;
+    const playbackMs=Math.max(0,ts-frameClock);
+    apply(playbackMs);
+    // Visual-only continuation: each horse runs through its own finish time.
+    // Recorded frames, official finishing order and times are never rewritten.
+    const fixed=new Map(current.results.map(row=>[row.no,row]));
+    for(const h of runners){
+      const row=fixed.get(h.no);
+      if(!row||!Number.isFinite(Number(row.timeSeconds)))continue;
+      const sinceGoal=playbackMs/1000-Number(row.timeSeconds);
+      if(sinceGoal>=0){
+        h.finishedAt=Number(row.timeSeconds);
         h.dist=TOTAL;
-        h.runoutDist=Math.max(TOTAL,h.runoutDist||TOTAL);
+        const crossingSpeed=Math.max(10,Number(h.velocity)||0);
+        h.runoutDist=Math.max(TOTAL,Math.min(TOTAL+GOAL_RUNOUT_METERS+100,
+          TOTAL+crossingSpeed*sinceGoal));
       }
-      finished=current.results.map(row=>runners.find(h=>h.no===row.no));
-      race='runout';
-      dfNormalPublishRaceResults(); // Existing results UI, no recalculation or normal-game save.
-      return true;
     }
+    // Keep the video running after the last recorded frame; no freeze at GOAL.
+    if(playbackMs<current.durationMs+3400)return true;
+    finished=current.results.map(row=>runners.find(h=>h.no===row.no));
+    race='runout';
+    dfNormalPublishRaceResults(); // Existing results UI, no recalculation or normal-game save.
     return true;
   }
   function seek(ms){
