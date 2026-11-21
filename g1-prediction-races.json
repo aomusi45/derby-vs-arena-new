@@ -1,13 +1,12 @@
 {
-    "schema":  1,
-    "description":  "2026年11月22日マイルチャンピオンシップ予想レース",
-    "races":  [
-                  {
-                      "id":  "mile-championship-2026",
-                      "title":  "2026年 マイルチャンピオンシップ",
-                      "date":  "2026-11-22",
-                      "file":  "g1-prediction-mile-championship-2026.json",
-                      "enabled":  true
-                  }
-              ]
+  "schema": 1,
+  "races": [
+    {
+      "id": "mile-championship-2026",
+      "title": "マイルチャンピオンシップ 2026",
+      "date": "2026-11-22",
+      "file": "g1-prediction-mile-championship-2026.json",
+      "enabled": true
+    }
+  ]
 }

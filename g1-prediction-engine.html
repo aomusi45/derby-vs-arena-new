@@ -2211,7 +2211,7 @@ body[data-game-screen="race-view"] .shell > .control-strip #dfNormalFinishButton
 .dfns-photo-name.dfns-unknown{color:#777;font-weight:500}
 </style><style>.df57-parent{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:5px 0}.df57-parent .df39-breeder-emblems img{width:24px;height:24px;object-fit:contain}.df57-honor-effects{margin-top:8px}.df57-honor-effects .df39-pair-label{display:inline-block;margin:4px}</style><style id="dfOfficialVSNewspaperBootStyle">#dfV42Welcome,#derbyOpening{display:none!important}
 body.df-official-local-production #newspaperRaceStart,
-body.df-official-local-production #df170RaceWarning{display:none!important}</style></head><body class="boot-farm">
+body.df-official-local-production #df170RaceWarning{display:none!important}</style><style id="dbf-prediction-v3-viewport">html,body{margin:0!important;max-width:100vw!important;overflow:hidden!important}body.df-official-local-production{height:100dvh!important;overflow:hidden!important}body.df-official-local-production #preRacePanel,body.df-official-local-production #postRacePanel{max-height:100dvh;overflow:hidden!important}body.df-official-local-production #dfOfficialProductionControls{margin:2px 0!important;padding:4px!important}body.df-official-local-production #dfOfficialProductionStatus{font-size:12px!important;margin:0 0 3px!important}</style></head><body class="boot-farm">
 <section aria-label="ダービーファンタジーへようこそ" aria-modal="true" id="dfV42Welcome" class="is-visible is-ready" role="dialog" tabindex="0">
 <div class="df-v42-welcome-content">
 <h1>ダービーファンタジーへようこそ</h1>
@@ -11318,20 +11318,13 @@ const dfOfficialVSPlayback = (() => {
     // Wall-time playback: all spectators use the recorded timeline, not local race physics.
     apply(ts-frameClock);
     if(positionMs>=current.durationMs){
-      // Prediction playback only: keep horses moving beyond the goal for 3.4 seconds.
-      // The recorded finishing order and times are unchanged.
-      const runoutSeconds=Math.max(0,(ts-frameClock-current.durationMs)/1000);
       const fixed=new Map(current.results.map(row=>[row.no,row]));
       for(const h of runners){
         const row=fixed.get(h.no);
         h.finishedAt=row.timeSeconds;
         h.dist=TOTAL;
-        const crossingDistance=Math.max(TOTAL,h.runoutDist||TOTAL);
-        if(h.dfPredictionRunoutBase==null)h.dfPredictionRunoutBase=crossingDistance;
-        h.runoutDist=Math.min(TOTAL+GOAL_RUNOUT_METERS,
-          h.dfPredictionRunoutBase+Math.max(10,h.velocity)*runoutSeconds);
+        h.runoutDist=Math.max(TOTAL,h.runoutDist||TOTAL);
       }
-      if(runoutSeconds<3.4)return true;
       finished=current.results.map(row=>runners.find(h=>h.no===row.no));
       race='runout';
       dfNormalPublishRaceResults(); // Existing results UI, no recalculation or normal-game save.
@@ -15027,7 +15020,7 @@ const dfOfficialVSProduction = (() => {
     paperButton=document.createElement('button');
     paperButton.id='dfOfficialSavedReplay';
     paperButton.type='button';
-    paperButton.textContent='▶ 保存済みの競馬新聞・レースを再生';
+    paperButton.textContent='▶ レーススタート';
     paperButton.disabled=true;
     paperButton.style.cssText='padding:12px 18px;border:0;border-radius:8px;background:#e4c377;color:#15231c;font-size:16px;font-weight:900;cursor:pointer';
     box.append(statusNode,paperButton);
@@ -15072,12 +15065,6 @@ const dfOfficialVSProduction = (() => {
     const field=(()=>{
       const payload=window.parent!==window?window.parent.__dfPredictionData:null;
       if(!payload||!Array.isArray(payload.horses))throw Error('GⅠ予想馬データがありません');
-      const options=window.parent.__dfPredictionOptions||{};
-      const selectedGoing=['良','稍重','重','不良'].includes(options.going)?options.going:'良';
-      const selectedPace=['normal','front','closer'].includes(options.pace)?options.pace:'normal';
-      currentGoing=selectedGoing;
-      const weightChanges=options.weights||{};
-      const conditionChanges=options.conditions||{};
       const src=payload.horses;
       if(src.length<2||src.length>18)throw Error('出走馬は2～18頭にしてください');
       const seen=new Set();
@@ -15090,27 +15077,12 @@ const dfOfficialVSProduction = (() => {
         if(!name)throw Error('馬名がありません');
         const stats=['speed','sta','kick','early','sustain','grit','stability'];
         for(const k of stats)if(!Number.isFinite(Number(h[k]))||Number(h[k])<0||Number(h[k])>250)throw Error(name+' の能力 '+k+' が不正');
-        // Prediction-only race modifiers; do not mutate the uploaded horse data.
-        const delta=Math.max(-40,Math.min(40,Math.round(Number(weightChanges[no])||0)));
-        const weightPenalty=Math.min(0.13,Math.abs(delta)*0.003);
-        // User-adjustable condition (100 = full ability, 0 = heavily reduced).
-        const rawCondition=conditionChanges[no];
-        const condition=rawCondition===undefined?100:Math.max(0,Math.min(100,Number(rawCondition)||0));
-        const conditionFactor=0.65+0.35*(condition/100);
-        const kick=Number(h.kick);
-        const goingSeverity={'良':0,'稍重':0.045,'重':0.105,'不良':0.18}[selectedGoing];
-        const kickPenalty=goingSeverity*Math.max(0,Math.min(1,kick/120));
-        const tactic=String(h.tactic||'先行');
-        const isFront=tactic==='逃げ'||tactic==='先行';
-        const isCloser=tactic==='差し'||tactic==='追込';
-        const frontPace=selectedPace==='front'&&isFront?1.055:selectedPace==='closer'&&isFront?0.95:1;
-        const closerPace=selectedPace==='closer'&&isCloser?1.065:selectedPace==='front'&&isCloser?0.95:1;
         return {name,sex:h.sex||'牡',age:Number(h.age)||4,coatType:h.coatType||'鹿毛',
           tactic:h.tactic||'先行',growth:h.growth||'普通',
           bestDistance:Number(h.bestDistance)||2000,aptMin:Number(h.aptMin)||1600,
           aptMax:Number(h.aptMax)||2400,
-          speed:Number(h.speed)*(1-weightPenalty)*conditionFactor,sta:Number(h.sta)*(1-weightPenalty*.8)*conditionFactor,kick:kick*(1-kickPenalty)*(1-weightPenalty*.6)*closerPace*conditionFactor,
-          early:Number(h.early)*(1-weightPenalty*.5)*frontPace*conditionFactor,sustain:Number(h.sustain)*(1-weightPenalty*.7)*(selectedPace==='closer'&&isFront?.955:1)*conditionFactor,grit:Number(h.grit),
+          speed:Number(h.speed),sta:Number(h.sta),kick:Number(h.kick),
+          early:Number(h.early),sustain:Number(h.sustain),grit:Number(h.grit),
           stability:Number(h.stability),health:Number(h.health??95),
           temperament:Number(h.temperament??90),going:h.going||{},
           form:Number(h.form??90),fatigue:Number(h.fatigue??0),
@@ -15149,6 +15121,10 @@ const dfOfficialVSProduction = (() => {
     race='finished';
     show(`競馬新聞とレースを保存しました（${stored.results.length}頭、記録${stored.frames.length}場面）。再生できます。`);
     displayButtons(true);
+    // V3: user has already pressed Start in the parent page; replay as soon as recording completes.
+    if(window.parent!==window && window.parent.__dfPredictionAutoStart===true){
+      await replay();
+    }
   }
   async function replay(){
     if(recording||countingDown)return;
@@ -15161,18 +15137,7 @@ const dfOfficialVSProduction = (() => {
       dfOfficialVSSnapshotRestore(record.newspaper);
       $('newspaperRaceStart').disabled=true;
       dfV2SetGameScreenNow('newspaper');
-      const began=performance.now();
-      // Countdown is monotonic, not 30 independent 1-second timer callbacks.
-      await new Promise((resolve,reject)=>{
-        const check=()=>{
-          if(ticket!==generation){reject(Error('再生が中断されました。'));return;}
-          const remain=Math.max(0,Math.ceil((30000-(performance.now()-began))/1000));
-          show(`保存した競馬新聞を表示中：あと${remain}秒でレース自動再生`);
-          if(performance.now()-began>=30000){resolve();return;}
-          setTimeout(check,Math.min(250,Math.max(1,30000-(performance.now()-began))));
-        };
-        check();
-      });
+      // V3: no 30-second newspaper wait; start saved playback immediately.
       if(!dfOfficialVSPlayback.isPrepared()||race!=='idle')throw Error('レースの再生準備が解除されました。');
       dfV2SetGameScreenNow('race-view');
       if(document.body.dataset.gameScreen!=='race-view')throw Error('レース画面へ切り替えられませんでした。');
