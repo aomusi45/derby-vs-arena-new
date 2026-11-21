@@ -1,7 +1,7 @@
 {
   "format": "dbf-g1-prediction-race",
   "schema": 1,
-  "status": "provisional",
+  "status": "racecard-confirmed-odds-snapshot",
   "race": {
     "name": "第43回 マイルチャンピオンシップ",
     "date": "2026-11-22",
@@ -13,11 +13,11 @@
     "declaredStarters": 18
   },
   "source": {
-    "racecard": "https://app.jra.jp/JRADB/accessD.html?CNAME=sw01ddd0108202605061120261122/1C",
-    "odds": "https://race.sp.netkeiba.com/?id=0119&pid=special"
+    "racecard": "https://jra.jp/JRADB/accessD.html?cname=pw01dde0108202605061120261122%2F55",
+    "odds": "https://sports.yahoo.co.jp/keiba/race/odds/tfw/2608050611"
   },
-  "abilityPolicy": "実際の単勝中間オッズ（取得時点のスナップショット）とゲーム用推定能力を分離。能力値・脚質・馬場適性は公式データではない。",
-  "oddsNote": "2026-11-21参照の単勝中間オッズ。投票状況により変動する。",
+  "abilityPolicy": "VS用能力は既存推定値を基礎に、2026-11-21時点の単勝市場評価と既知の競走実績を考慮して控えめに補正。公式能力値ではない。人気順位は単勝オッズの昇順。",
+  "oddsNote": "2026-11-21 09:41 JST スポーツナビ掲載の単勝中間オッズ。固定スナップショットであり、当日オッズではない。入力条件によりゲーム内予想人気は変動する。",
   "horses": [
     {
       "horseNumber": 1,
@@ -71,12 +71,12 @@
           "total": 84
         }
       },
-      "popularity": 4,
-      "odds": 8.4,
-      "winOdds": 8.4,
-      "abilityNote": "ゲーム用推定能力。仏G1勝ちの遠征馬。日本の馬場適性は不確実。単勝人気とは独立した評価。",
+      "popularity": 5,
+      "odds": 7.1,
+      "winOdds": 7.1,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "仏G1勝ちの遠征馬。日本の馬場適性は不確実",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 2,
@@ -100,42 +100,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 117,
-      "sta": 115,
-      "kick": 121,
-      "early": 116,
-      "sustain": 118,
-      "grit": 117,
+      "speed": 118,
+      "sta": 116,
+      "kick": 122,
+      "early": 117,
+      "sustain": 119,
+      "grit": 118,
       "stability": 85,
       "raceStats": {
         "sp": {
-          "total": 117
-        },
-        "sta": {
-          "total": 115
-        },
-        "kick": {
-          "total": 121
-        },
-        "early": {
-          "total": 116
-        },
-        "sustain": {
           "total": 118
         },
-        "grit": {
+        "sta": {
+          "total": 116
+        },
+        "kick": {
+          "total": 122
+        },
+        "early": {
           "total": 117
+        },
+        "sustain": {
+          "total": 119
+        },
+        "grit": {
+          "total": 118
         },
         "stability": {
           "total": 85
         }
       },
-      "popularity": 1,
-      "odds": 4.2,
-      "winOdds": 4.2,
-      "abilityNote": "ゲーム用推定能力。マイルG1実績豊富。単勝人気とは独立した評価。",
+      "popularity": 2,
+      "odds": 6.4,
+      "winOdds": 6.4,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "マイルG1実績豊富",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 3,
@@ -159,42 +159,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 102,
-      "sta": 100,
-      "kick": 102,
-      "early": 106,
-      "sustain": 103,
-      "grit": 102,
+      "speed": 101,
+      "sta": 99,
+      "kick": 101,
+      "early": 105,
+      "sustain": 102,
+      "grit": 101,
       "stability": 86,
       "raceStats": {
         "sp": {
-          "total": 102
+          "total": 101
         },
         "sta": {
-          "total": 100
+          "total": 99
         },
         "kick": {
-          "total": 102
+          "total": 101
         },
         "early": {
-          "total": 106
+          "total": 105
         },
         "sustain": {
-          "total": 103
+          "total": 102
         },
         "grit": {
-          "total": 102
+          "total": 101
         },
         "stability": {
           "total": 86
         }
       },
       "popularity": 17,
-      "odds": 63.5,
-      "winOdds": 63.5,
-      "abilityNote": "ゲーム用推定能力。近走成績を踏まえ控えめ。単勝人気とは独立した評価。",
+      "odds": 114.3,
+      "winOdds": 114.3,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "近走成績を踏まえ控えめ",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 4,
@@ -248,12 +248,12 @@
           "total": 87
         }
       },
-      "popularity": 9,
-      "odds": 17.4,
-      "winOdds": 17.4,
-      "abilityNote": "ゲーム用推定能力。安田記念G1勝ちの実績。単勝人気とは独立した評価。",
+      "popularity": 11,
+      "odds": 31.4,
+      "winOdds": 31.4,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "安田記念G1勝ちの実績",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 5,
@@ -277,42 +277,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 111,
-      "sta": 109,
-      "kick": 111,
-      "early": 115,
-      "sustain": 112,
-      "grit": 111,
+      "speed": 114,
+      "sta": 112,
+      "kick": 114,
+      "early": 118,
+      "sustain": 115,
+      "grit": 114,
       "stability": 88,
       "raceStats": {
         "sp": {
-          "total": 111
+          "total": 114
         },
         "sta": {
-          "total": 109
-        },
-        "kick": {
-          "total": 111
-        },
-        "early": {
-          "total": 115
-        },
-        "sustain": {
           "total": 112
         },
+        "kick": {
+          "total": 114
+        },
+        "early": {
+          "total": 118
+        },
+        "sustain": {
+          "total": 115
+        },
         "grit": {
-          "total": 111
+          "total": 114
         },
         "stability": {
           "total": 88
         }
       },
-      "popularity": 5,
-      "odds": 10.0,
-      "winOdds": 10.0,
-      "abilityNote": "ゲーム用推定能力。マイル重賞実績。単勝人気とは独立した評価。",
+      "popularity": 4,
+      "odds": 7.0,
+      "winOdds": 7.0,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "マイル重賞実績",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 6,
@@ -336,42 +336,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 101,
-      "sta": 99,
-      "kick": 105,
-      "early": 100,
-      "sustain": 102,
-      "grit": 101,
+      "speed": 100,
+      "sta": 98,
+      "kick": 104,
+      "early": 99,
+      "sustain": 101,
+      "grit": 100,
       "stability": 89,
       "raceStats": {
         "sp": {
-          "total": 101
-        },
-        "sta": {
-          "total": 99
-        },
-        "kick": {
-          "total": 105
-        },
-        "early": {
           "total": 100
         },
+        "sta": {
+          "total": 98
+        },
+        "kick": {
+          "total": 104
+        },
+        "early": {
+          "total": 99
+        },
         "sustain": {
-          "total": 102
+          "total": 101
         },
         "grit": {
-          "total": 101
+          "total": 100
         },
         "stability": {
           "total": 89
         }
       },
-      "popularity": 18,
-      "odds": 85.1,
-      "winOdds": 85.1,
-      "abilityNote": "ゲーム用推定能力。格上挑戦の評価。単勝人気とは独立した評価。",
+      "popularity": 15,
+      "odds": 80.4,
+      "winOdds": 80.4,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "格上挑戦の評価",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 7,
@@ -395,42 +395,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 110,
-      "sta": 108,
-      "kick": 114,
-      "early": 109,
-      "sustain": 111,
-      "grit": 110,
+      "speed": 109,
+      "sta": 107,
+      "kick": 113,
+      "early": 108,
+      "sustain": 110,
+      "grit": 109,
       "stability": 90,
       "raceStats": {
         "sp": {
-          "total": 110
-        },
-        "sta": {
-          "total": 108
-        },
-        "kick": {
-          "total": 114
-        },
-        "early": {
           "total": 109
         },
+        "sta": {
+          "total": 107
+        },
+        "kick": {
+          "total": 113
+        },
+        "early": {
+          "total": 108
+        },
         "sustain": {
-          "total": 111
+          "total": 110
         },
         "grit": {
-          "total": 110
+          "total": 109
         },
         "stability": {
           "total": 90
         }
       },
-      "popularity": 10,
-      "odds": 19.4,
-      "winOdds": 19.4,
-      "abilityNote": "ゲーム用推定能力。末脚と牝馬重賞実績。単勝人気とは独立した評価。",
+      "popularity": 12,
+      "odds": 35.7,
+      "winOdds": 35.7,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "末脚と牝馬重賞実績",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 8,
@@ -454,42 +454,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 115,
-      "sta": 113,
-      "kick": 115,
-      "early": 119,
-      "sustain": 116,
-      "grit": 115,
+      "speed": 116,
+      "sta": 114,
+      "kick": 116,
+      "early": 120,
+      "sustain": 117,
+      "grit": 116,
       "stability": 91,
       "raceStats": {
         "sp": {
-          "total": 115
-        },
-        "sta": {
-          "total": 113
-        },
-        "kick": {
-          "total": 115
-        },
-        "early": {
-          "total": 119
-        },
-        "sustain": {
           "total": 116
         },
+        "sta": {
+          "total": 114
+        },
+        "kick": {
+          "total": 116
+        },
+        "early": {
+          "total": 120
+        },
+        "sustain": {
+          "total": 117
+        },
         "grit": {
-          "total": 115
+          "total": 116
         },
         "stability": {
           "total": 91
         }
       },
-      "popularity": 2,
-      "odds": 4.6,
-      "winOdds": 4.6,
-      "abilityNote": "ゲーム用推定能力。上昇度と先行力を評価。単勝人気とは独立した評価。",
+      "popularity": 3,
+      "odds": 6.5,
+      "winOdds": 6.5,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "上昇度と先行力を評価",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 9,
@@ -513,42 +513,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 107,
-      "sta": 105,
-      "kick": 107,
-      "early": 111,
-      "sustain": 108,
-      "grit": 107,
+      "speed": 106,
+      "sta": 104,
+      "kick": 106,
+      "early": 110,
+      "sustain": 107,
+      "grit": 106,
       "stability": 83,
       "raceStats": {
         "sp": {
-          "total": 107
+          "total": 106
         },
         "sta": {
-          "total": 105
+          "total": 104
         },
         "kick": {
-          "total": 107
+          "total": 106
         },
         "early": {
-          "total": 111
+          "total": 110
         },
         "sustain": {
-          "total": 108
+          "total": 107
         },
         "grit": {
-          "total": 107
+          "total": 106
         },
         "stability": {
           "total": 83
         }
       },
-      "popularity": 13,
-      "odds": 38.4,
-      "winOdds": 38.4,
-      "abilityNote": "ゲーム用推定能力。中距離寄りの実績も考慮。単勝人気とは独立した評価。",
+      "popularity": 14,
+      "odds": 69.1,
+      "winOdds": 69.1,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "中距離寄りの実績も考慮",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 10,
@@ -572,42 +572,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 108,
-      "sta": 106,
-      "kick": 112,
-      "early": 105,
-      "sustain": 109,
-      "grit": 108,
+      "speed": 107,
+      "sta": 105,
+      "kick": 111,
+      "early": 104,
+      "sustain": 108,
+      "grit": 107,
       "stability": 84,
       "raceStats": {
         "sp": {
-          "total": 108
+          "total": 107
         },
         "sta": {
-          "total": 106
-        },
-        "kick": {
-          "total": 112
-        },
-        "early": {
           "total": 105
         },
+        "kick": {
+          "total": 111
+        },
+        "early": {
+          "total": 104
+        },
         "sustain": {
-          "total": 109
+          "total": 108
         },
         "grit": {
-          "total": 108
+          "total": 107
         },
         "stability": {
           "total": 84
         }
       },
-      "popularity": 15,
-      "odds": 53.0,
-      "winOdds": 53.0,
-      "abilityNote": "ゲーム用推定能力。差し脚が武器。単勝人気とは独立した評価。",
+      "popularity": 13,
+      "odds": 57.0,
+      "winOdds": 57.0,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "差し脚が武器",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 11,
@@ -631,42 +631,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 114,
-      "sta": 112,
-      "kick": 114,
-      "early": 118,
-      "sustain": 115,
-      "grit": 114,
+      "speed": 115,
+      "sta": 113,
+      "kick": 115,
+      "early": 119,
+      "sustain": 116,
+      "grit": 115,
       "stability": 85,
       "raceStats": {
         "sp": {
-          "total": 114
-        },
-        "sta": {
-          "total": 112
-        },
-        "kick": {
-          "total": 114
-        },
-        "early": {
-          "total": 118
-        },
-        "sustain": {
           "total": 115
         },
+        "sta": {
+          "total": 113
+        },
+        "kick": {
+          "total": 115
+        },
+        "early": {
+          "total": 119
+        },
+        "sustain": {
+          "total": 116
+        },
         "grit": {
-          "total": 114
+          "total": 115
         },
         "stability": {
           "total": 85
         }
       },
-      "popularity": 8,
-      "odds": 17.2,
-      "winOdds": 17.2,
-      "abilityNote": "ゲーム用推定能力。G1級の地力と先行力。単勝人気とは独立した評価。",
+      "popularity": 6,
+      "odds": 10.3,
+      "winOdds": 10.3,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "G1級の地力と先行力",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 12,
@@ -690,42 +690,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 112,
-      "sta": 110,
-      "kick": 112,
-      "early": 116,
-      "sustain": 113,
-      "grit": 112,
+      "speed": 113,
+      "sta": 111,
+      "kick": 113,
+      "early": 117,
+      "sustain": 114,
+      "grit": 113,
       "stability": 86,
       "raceStats": {
         "sp": {
-          "total": 112
-        },
-        "sta": {
-          "total": 110
-        },
-        "kick": {
-          "total": 112
-        },
-        "early": {
-          "total": 116
-        },
-        "sustain": {
           "total": 113
         },
+        "sta": {
+          "total": 111
+        },
+        "kick": {
+          "total": 113
+        },
+        "early": {
+          "total": 117
+        },
+        "sustain": {
+          "total": 114
+        },
         "grit": {
-          "total": 112
+          "total": 113
         },
         "stability": {
           "total": 86
         }
       },
-      "popularity": 6,
-      "odds": 11.7,
-      "winOdds": 11.7,
-      "abilityNote": "ゲーム用推定能力。マイル適性と先行力。単勝人気とは独立した評価。",
+      "popularity": 7,
+      "odds": 13.5,
+      "winOdds": 13.5,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "マイル適性と先行力",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 13,
@@ -749,42 +749,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 105,
-      "sta": 103,
-      "kick": 109,
-      "early": 104,
-      "sustain": 106,
-      "grit": 105,
+      "speed": 103,
+      "sta": 101,
+      "kick": 107,
+      "early": 102,
+      "sustain": 104,
+      "grit": 103,
       "stability": 87,
       "raceStats": {
         "sp": {
-          "total": 105
-        },
-        "sta": {
           "total": 103
         },
+        "sta": {
+          "total": 101
+        },
         "kick": {
-          "total": 109
+          "total": 107
         },
         "early": {
-          "total": 104
+          "total": 102
         },
         "sustain": {
-          "total": 106
+          "total": 104
         },
         "grit": {
-          "total": 105
+          "total": 103
         },
         "stability": {
           "total": 87
         }
       },
-      "popularity": 14,
-      "odds": 45.1,
-      "winOdds": 45.1,
-      "abilityNote": "ゲーム用推定能力。3歳馬の成長余地。単勝人気とは独立した評価。",
+      "popularity": 18,
+      "odds": 125.8,
+      "winOdds": 125.8,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "3歳馬の成長余地",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 14,
@@ -808,42 +808,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 114,
-      "sta": 112,
-      "kick": 118,
-      "early": 113,
-      "sustain": 115,
-      "grit": 114,
+      "speed": 117,
+      "sta": 115,
+      "kick": 121,
+      "early": 116,
+      "sustain": 118,
+      "grit": 117,
       "stability": 88,
       "raceStats": {
         "sp": {
-          "total": 114
+          "total": 117
         },
         "sta": {
-          "total": 112
-        },
-        "kick": {
-          "total": 118
-        },
-        "early": {
-          "total": 113
-        },
-        "sustain": {
           "total": 115
         },
+        "kick": {
+          "total": 121
+        },
+        "early": {
+          "total": 116
+        },
+        "sustain": {
+          "total": 118
+        },
         "grit": {
-          "total": 114
+          "total": 117
         },
         "stability": {
           "total": 88
         }
       },
-      "popularity": 3,
-      "odds": 7.3,
-      "winOdds": 7.3,
-      "abilityNote": "ゲーム用推定能力。3歳牝馬G1実績。単勝人気とは独立した評価。",
+      "popularity": 1,
+      "odds": 4.7,
+      "winOdds": 4.7,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "3歳牝馬G1実績",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 15,
@@ -867,42 +867,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 109,
-      "sta": 107,
-      "kick": 109,
-      "early": 113,
-      "sustain": 110,
-      "grit": 109,
+      "speed": 108,
+      "sta": 106,
+      "kick": 108,
+      "early": 112,
+      "sustain": 109,
+      "grit": 108,
       "stability": 89,
       "raceStats": {
         "sp": {
-          "total": 109
+          "total": 108
         },
         "sta": {
-          "total": 107
+          "total": 106
         },
         "kick": {
-          "total": 109
+          "total": 108
         },
         "early": {
-          "total": 113
+          "total": 112
         },
         "sustain": {
-          "total": 110
+          "total": 109
         },
         "grit": {
-          "total": 109
+          "total": 108
         },
         "stability": {
           "total": 89
         }
       },
-      "popularity": 11,
-      "odds": 21.1,
-      "winOdds": 21.1,
-      "abilityNote": "ゲーム用推定能力。マイル重賞実績。単勝人気とは独立した評価。",
+      "popularity": 16,
+      "odds": 86.0,
+      "winOdds": 86.0,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "マイル重賞実績",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 16,
@@ -926,42 +926,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 106,
-      "sta": 104,
-      "kick": 110,
-      "early": 103,
-      "sustain": 107,
-      "grit": 106,
+      "speed": 109,
+      "sta": 107,
+      "kick": 113,
+      "early": 106,
+      "sustain": 110,
+      "grit": 109,
       "stability": 90,
       "raceStats": {
         "sp": {
-          "total": 106
+          "total": 109
         },
         "sta": {
-          "total": 104
-        },
-        "kick": {
-          "total": 110
-        },
-        "early": {
-          "total": 103
-        },
-        "sustain": {
           "total": 107
         },
-        "grit": {
+        "kick": {
+          "total": 113
+        },
+        "early": {
           "total": 106
+        },
+        "sustain": {
+          "total": 110
+        },
+        "grit": {
+          "total": 109
         },
         "stability": {
           "total": 90
         }
       },
-      "popularity": 16,
-      "odds": 53.3,
-      "winOdds": 53.3,
-      "abilityNote": "ゲーム用推定能力。末脚と展開待ち。単勝人気とは独立した評価。",
+      "popularity": 9,
+      "odds": 19.2,
+      "winOdds": 19.2,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "末脚と展開待ち",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 17,
@@ -985,42 +985,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 111,
-      "sta": 109,
-      "kick": 115,
-      "early": 110,
-      "sustain": 112,
-      "grit": 111,
+      "speed": 112,
+      "sta": 110,
+      "kick": 116,
+      "early": 111,
+      "sustain": 113,
+      "grit": 112,
       "stability": 91,
       "raceStats": {
         "sp": {
-          "total": 111
-        },
-        "sta": {
-          "total": 109
-        },
-        "kick": {
-          "total": 115
-        },
-        "early": {
-          "total": 110
-        },
-        "sustain": {
           "total": 112
         },
-        "grit": {
+        "sta": {
+          "total": 110
+        },
+        "kick": {
+          "total": 116
+        },
+        "early": {
           "total": 111
+        },
+        "sustain": {
+          "total": 113
+        },
+        "grit": {
+          "total": 112
         },
         "stability": {
           "total": 91
         }
       },
-      "popularity": 7,
-      "odds": 12.9,
-      "winOdds": 12.9,
-      "abilityNote": "ゲーム用推定能力。マイル重賞実績。単勝人気とは独立した評価。",
+      "popularity": 8,
+      "odds": 17.4,
+      "winOdds": 17.4,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "マイル重賞実績",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     },
     {
       "horseNumber": 18,
@@ -1044,42 +1044,42 @@
         "重": 100,
         "不良": 100
       },
-      "speed": 110,
-      "sta": 108,
-      "kick": 114,
-      "early": 107,
-      "sustain": 111,
-      "grit": 110,
+      "speed": 111,
+      "sta": 109,
+      "kick": 115,
+      "early": 108,
+      "sustain": 112,
+      "grit": 111,
       "stability": 83,
       "raceStats": {
         "sp": {
-          "total": 110
-        },
-        "sta": {
-          "total": 108
-        },
-        "kick": {
-          "total": 114
-        },
-        "early": {
-          "total": 107
-        },
-        "sustain": {
           "total": 111
         },
+        "sta": {
+          "total": 109
+        },
+        "kick": {
+          "total": 115
+        },
+        "early": {
+          "total": 108
+        },
+        "sustain": {
+          "total": 112
+        },
         "grit": {
-          "total": 110
+          "total": 111
         },
         "stability": {
           "total": 83
         }
       },
-      "popularity": 12,
-      "odds": 26.0,
-      "winOdds": 26.0,
-      "abilityNote": "ゲーム用推定能力。追込の末脚。単勝人気とは独立した評価。",
+      "popularity": 10,
+      "odds": 25.0,
+      "winOdds": 25.0,
+      "abilityNote": "ゲーム用推定能力。近走実績・マイル適性・脚質・市場評価を総合し調整。単勝人気のみで勝敗を決めない。",
       "researchNote": "追込の末脚",
-      "researchStatus": "出馬表照合済み。脚質・能力はゲーム用推定値。"
+      "researchStatus": "出走情報と2026-11-21 09:41時点の中間単勝オッズを照合。能力・脚質・馬場適性はゲーム用推定値。"
     }
   ]
 }
