@@ -7724,8 +7724,38 @@ function df23VisibleMarks(entrants){
  },0));
  return {ranks,scores};
 }
+// Prediction-only frozen market: the preview screen is the single source of truth.
+function dfPredictionFrozenMarket(entrants){
+ if(!dfV30VsActive||window.parent===window)return null;
+ const market=window.parent.__dfPredictionOptions?.market;
+ if(!Array.isArray(market)||market.length!==entrants.length)return null;
+ const byNo=new Map();
+ for(const item of market){
+  const no=Number(item.no),rank=Number(item.rank),odds=Number(item.odds),prob=Number(item.probability);
+  if(!Number.isInteger(no)||no<1||no>entrants.length||byNo.has(no)||!Number.isInteger(rank)||rank<1||rank>entrants.length||!Number.isFinite(odds)||odds<1.1||!Number.isFinite(prob)||prob<=0)return null;
+  byNo.set(no,{no,rank,odds,probability:prob});
+ }
+ if(new Set([...byNo.values()].map(x=>x.rank)).size!==entrants.length)return null;
+ return byNo;
+}
 function computePreRaceOdds(entrants){
  if(entrants.length===1)return {umaren:[],wakuren:[],horse:[{no:1,frameNo:entrants[0].frameNo,weight:1,winProbability:1,score:racePaperRating(entrants[0]),h:entrants[0]}]};
+ const frozen=dfPredictionFrozenMarket(entrants);
+ if(frozen){
+  const ordered=entrants.map((h,i)=>({...frozen.get(i+1),frameNo:h.frameNo,h,weight:frozen.get(i+1).probability,score:0})).sort((a,b)=>a.rank-b.rank);
+  const probs=entrants.map((h,i)=>frozen.get(i+1).probability);
+  const sum=probs.reduce((a,b)=>a+b,0);
+  const umaren=[],frameMap=new Map();
+  for(let i=0;i<entrants.length;i++)for(let j=i+1;j<entrants.length;j++){
+   const wi=probs[i],wj=probs[j],prob=(wi/sum)*(wj/(sum-wi))+(wj/sum)*(wi/(sum-wj));
+   umaren.push({numbers:[i+1,j+1],prob,odds:oddsMoney(prob)});
+   const a=entrants[i].frameNo,b=entrants[j].frameNo,key=[a,b].sort((x,y)=>x-y).join('-');
+   const old=frameMap.get(key)||{numbers:[Math.min(a,b),Math.max(a,b)],prob:0};old.prob+=prob;frameMap.set(key,old);
+  }
+  umaren.sort((a,b)=>b.prob-a.prob);
+  const wakuren=[...frameMap.values()].map(o=>({...o,odds:oddsMoney(o.prob)})).sort((a,b)=>b.prob-a.prob);
+  return {horse:ordered,umaren,wakuren};
+ }
  const scores=df23VisibleMarks(entrants).scores,hi=Math.max(...scores);
  // More conservative than the former /3.8: race-day pace, stability and
  // tactical interactions make small point advantages uncertain.
@@ -7803,7 +7833,7 @@ function renderPreRaceGuide(){
   const popText=Number.isInteger(rank)?`単勝 ${rank+1}番人気`:'―';
   const singleQuote=odds.horse.find(entry=>entry.no===no);
   const popOddsText=Number.isInteger(rank)
-   ?`単勝 ${rank+1}番人気 ${marketRow?Number(marketRow.odds).toFixed(1):singleQuote?oddsMoney(singleQuote.winProbability).toFixed(1):'―'}倍`:'単勝 ―';
+   ?`単勝 ${rank+1}番人気 ${marketRow?Number(marketRow.odds).toFixed(1):singleQuote?(Number.isFinite(singleQuote.odds)?singleQuote.odds:oddsMoney(singleQuote.winProbability)).toFixed(1):'―'}倍`:'単勝 ―';
   return `<tr><td><span class="paper-frame" style="background:${FRAME_COLORS[frameNo-1]};color:${ink}">${frameNo}</span><b class="paper-no">${no}</b></td><td class="paper-pick-cell"><div class="paper-picks">${marksHtml}</div><small class="paper-popularity">${predictionMarketMap.size?'':popText}</small><small class="df102-pop-odds">${popOddsText}</small></td><td class="paper-name"><div class="paper-horsehead"><span class="paper-horsename">${paperEscape(paperHorseName(h))}</span></div><span class="paper-horsemeta"><span>${paperEscape(ageSex)}</span><span>${paperEscape(weight)}</span><span>${jockey}</span></span></td><td class="paper-tactic">${paperEscape(h.tactic||'―')}</td></tr>`;
  }).join('');
  const showTop=(items,frame=false)=>items.slice(0,7).map((r,i)=>`<div class="odds-row"><span>${i+1}</span><span class="odds-pair">${r.numbers[0]}－${r.numbers[1]}${frame?' 枠':''}</span><span class="odds-value">${r.odds.toFixed(1)}倍</span></div>`).join('');
@@ -9049,11 +9079,11 @@ function renderRacePayouts(){
  const yen=(p)=>dfFormatAmount(Math.floor(p.odds*100/10)*10*100);
  const payoutRow=(kind,pairLabel,amount)=>`<div class="payout-row"><strong class="payout-type">${kind}</strong><span class="payout-combination">${pairLabel}</span><strong class="payout-amount">${amount}</strong></div>`;
   const winSingle=currentPreRaceOdds.horse.find(o=>o.no===first.no);
-  $('payoutRows').innerHTML=payoutRow('単勝',`${first.no}`,winSingle?yen({odds:oddsMoney(winSingle.winProbability)}):'計算対象外')+
+  $('payoutRows').innerHTML=payoutRow('単勝',`${first.no}`,winSingle?yen({odds:Number.isFinite(winSingle.odds)?winSingle.odds:oddsMoney(winSingle.winProbability)}):'計算対象外')+
    payoutRow('馬連',second?`${a}－${b}`:'発売なし',winPair?yen(winPair):'―')+
   (STARTERS<=8?payoutRow('枠連','発売なし','―'):
    payoutRow('枠連',`${fa}－${fb}`,framePair?yen(framePair):'計算対象外'));
- const payout100=Math.max(winSingle?roundTicketPayout(oddsMoney(winSingle.winProbability)):0,
+ const payout100=Math.max(winSingle?roundTicketPayout(Number.isFinite(winSingle.odds)?winSingle.odds:oddsMoney(winSingle.winProbability)):0,
   winPair?roundTicketPayout(winPair.odds):0,framePair?roundTicketPayout(framePair.odds):0);
  const banner=$('upsetReport');
  banner.hidden=payout100<10000;
@@ -15283,7 +15313,7 @@ const dfOfficialVSProduction = (() => {
         const closerPace=selectedPace==='closer'&&isCloser?1.065:selectedPace==='front'&&isCloser?0.95:1;
         // V15: small, prediction-only market prior. Apply once to base stats;
         // do not use live predicted odds (which already include form/going/pace).
-        const marketRank=Number(h.popularity);
+        const marketRank=Number((Array.isArray(options.market)?options.market.find(row=>Number(row.no)===no)?.rank:undefined)??h.popularity);
         const marketFactor=Number.isInteger(marketRank)&&marketRank>=1&&marketRank<=3?1.035:
           Number.isInteger(marketRank)&&marketRank<=6&&marketRank>=4?1.018:1;
         return {name,sex:h.sex||'牡',age:Number(h.age)||4,coatType:h.coatType||'鹿毛',
