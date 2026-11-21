@@ -7491,41 +7491,50 @@ function df26AdaptivePositionDrive(h,order,progress){
 // distance to choose when to accelerate. This changes pacing, not horse stats.
 // The existing V13 lane planner still decides whether an outside pass is safe.
 function dfPredictionV14PursuitDrive(h,order){
- if(!dfV30VsActive||h.finishedAt!==null||elapsed<4||!order.length)return 0;
- const leader=order[0];
+ // V19: all four styles assess the LIVE leader gap every simulation tick.
+ // This is a bounded speed decision, never a change to stored abilities,
+ // travelled distance, placing, lane selection, or race-result calculation.
+ if(!dfV30VsActive||h.finishedAt!==null||!order.length)return 0;
  const remaining=Math.max(0,TOTAL-h.dist);
- if(remaining<100)return 0;
+ if(remaining<=90)return 0;
+ const leader=order.find(o=>o.finishedAt===null);
+ if(!leader)return 0;
+ const style=h.tactic;
+ const closer=style==='差し'||style==='追込';
  const own=.36*h.raceSp+.23*h.raceSta+.21*h.raceSustain+.20*h.raceKick;
  const fitness=clamp((own-72)/37,0,1)*clamp(h.distanceFactor/.9,0,1);
  const reserve=clamp((h.stamina-.22)/.62,0,1);
  if(fitness<=.03||reserve<=.03)return 0;
+ // Race distance, not the elapsed clock, controls launch preparation.
+ // Start earlier for long races, large deficits, and stronger stamina reserves.
  const gap=Math.max(0,leader.dist-h.dist);
- const style=h.tactic;
- const closer=style==='差し'||style==='追込';
- // The leader conserves enough energy for its own finish, without a free boost.
- if(leader===h){
-  const next=order.find(o=>o!==h&&o.finishedAt===null);
-  if(!next)return 0;
-  const threat=Math.max(0,9-(h.dist-next.dist));
-  const start=Math.min(TOTAL*.65,style==='逃げ'?950:850);
-  const phase=clamp((start-remaining)/Math.max(180,start*.40),0,1);
-  return clamp(threat/9,0,1)*phase*fitness*reserve*.24;
- }
+ const abilityEdge=(.38*(h.raceSp-leader.raceSp)+.32*(h.raceKick-leader.raceKick)+
+  .30*(h.raceSustain-leader.raceSustain))*.038;
  const leadSpeed=Math.max(11,leader.velocity||16);
  const secondsLeft=Math.max(1,remaining/leadSpeed);
  const needed=gap/secondsLeft;
- const edge=(.38*(h.raceSp-leader.raceSp)+.32*(h.raceKick-leader.raceKick)+
-  .30*(h.raceSustain-leader.raceSustain))*.038;
- // Use actual ability and stamina, not an unconditional catch-up correction.
- const closingCapacity=Math.max(.08,.28+edge)*fitness*reserve;
- const start=Math.min(TOTAL*.85,Math.max(closer?950:780,
-  (closer?1050:860)+gap*(closer?9:6)));
+ const closingCapacity=Math.max(.08,.28+abilityEdge)*fitness*reserve;
+ const base=style==='逃げ'?Math.min(1100,TOTAL*.60):
+  style==='先行'?Math.min(1250,TOTAL*.64):
+  style==='差し'?Math.min(1450,TOTAL*.72):Math.min(1600,TOTAL*.77);
+ const gapAdvance=gap*(closer?13:9);
+ const start=clamp(base+gapAdvance*clamp(.45+reserve*.55,.45,1),
+  Math.min(350,TOTAL*.40),TOTAL*.88);
  if(remaining>start)return 0;
- const phase=clamp((start-remaining)/Math.max(160,start*.43),0,1);
- const urgency=clamp((needed-closingCapacity*.35)/Math.max(.25,closingCapacity),0,1);
- const lateFade=clamp((remaining-100)/330,0,1);
- const ceiling=closer?.78:.52;
- return clamp((.12+.78*urgency)*phase*fitness*reserve*lateFade,0,ceiling);
+ const phase=clamp((start-remaining)/Math.max(150,start*.42),0,1);
+ const lateFade=clamp((remaining-90)/310,0,1);
+ // The current leader reacts to challengers rather than receiving a free
+ // constant speed increase. Every style can defend its lead before 600m.
+ if(leader===h){
+  const next=order.find(o=>o!==h&&o.finishedAt===null);
+  if(!next)return 0;
+  const leadGap=Math.max(0,h.dist-next.dist);
+  const threat=clamp((14-leadGap)/14,0,1);
+  return clamp(threat*phase*fitness*reserve*lateFade*.40,0,.40);
+ }
+ const urgency=clamp((needed-closingCapacity*.28)/Math.max(.24,closingCapacity),0,1);
+ const ceiling=style==='逃げ'?.52:style==='先行'?.62:style==='差し'?.80:.86;
+ return clamp((.16+.84*urgency)*phase*fitness*reserve*lateFade,0,ceiling);
 }
 
 // Master Ver.2 race influence. These are intentionally *small* additions to the
