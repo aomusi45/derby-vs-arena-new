@@ -15121,10 +15121,12 @@ const dfOfficialVSProduction = (() => {
     race='finished';
     show(`競馬新聞とレースを保存しました（${stored.results.length}頭、記録${stored.frames.length}場面）。再生できます。`);
     displayButtons(true);
-    // V3: user has already pressed Start in the parent page; replay as soon as recording completes.
-    if(window.parent!==window && window.parent.__dfPredictionAutoStart===true){
-      await replay();
-    }
+    // V4: show the recorded race newspaper and wait for an explicit click.
+    // The existing #dfOfficialSavedReplay button calls replay() without a countdown.
+    dfOfficialVSPlayback.prepare(stored);
+    dfOfficialVSSnapshotRestore(stored.newspaper);
+    dfV2SetGameScreenNow('newspaper');
+    show('競馬新聞を確認し、「レーススタート」を押してください。');
   }
   async function replay(){
     if(recording||countingDown)return;
