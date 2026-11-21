@@ -9,6 +9,16 @@ async function loadPublic(){++requestId;resetRace();status.className='sub';statu
 function launchPrediction(){
   if(!window.__dfPredictionData)return;
   window.__dfPredictionAutoStart=false;
+  // Read the live inputs at launch so the last edited value is not lost.
+  const rows=Array.from($('horses').querySelectorAll('tr'));
+  for(const tr of rows){
+    const no=Number(tr.children[1]?.textContent);
+    const inputs=tr.querySelectorAll('input[type=number]');
+    if(!Number.isInteger(no)||inputs.length!==2)continue;
+    const condition=Number(inputs[0].value), delta=Number(inputs[1].value);
+    window.__dfHorseConditions[no]=Math.max(0,Math.min(100,Number.isFinite(condition)?Math.round(condition):100));
+    window.__dfWeightChanges[no]=Math.max(-40,Math.min(40,Number.isFinite(delta)?Math.round(delta):0));
+  }
   window.__dfPredictionOptions={going:$('goingSelect').value,pace:$('paceSelect').value,weights:{...window.__dfWeightChanges},conditions:{...window.__dfHorseConditions}};
   const frame=$('raceFrame');frame.style.display='block';
   $('dbfExitRace').hidden=false;
