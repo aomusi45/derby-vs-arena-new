@@ -1,12 +1,19 @@
-{
-  "schema": 1,
-  "races": [
-    {
-      "id": "mile-championship-2026",
-      "title": "マイルチャンピオンシップ 2026",
-      "date": "2026-11-22",
-      "file": "g1-prediction-mile-championship-2026.json",
-      "enabled": true
-    }
-  ]
+﻿{
+    "schema":  1,
+    "races":  [
+                  {
+                      "id":  "mile-championship-2026",
+                      "title":  "マイルチャンピオンシップ 2026",
+                      "date":  "2026-11-22",
+                      "file":  "g1-prediction-mile-championship-2026.json",
+                      "enabled":  true
+                  },
+                  {
+                      "id":  "japan-cup-2026",
+                      "title":  "2026年 ジャパンカップ（50音順・仮枠順）",
+                      "date":  "2026-11-29",
+                      "file":  "g1-prediction-japan-cup-2026.json",
+                      "enabled":  true
+                  }
+              ]
 }

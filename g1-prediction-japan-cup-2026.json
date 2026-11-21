@@ -1,0 +1,1140 @@
+{
+  "format": "dbf-g1-prediction-race",
+  "schema": 1,
+  "status": "provisional",
+  "race": {
+    "name": "第46回 ジャパンカップ（50音順・仮枠順）",
+    "date": "2026-11-29",
+    "venue": "東京",
+    "surface": "芝",
+    "distance": 2400,
+    "direction": "左",
+    "raceNumber": 12,
+    "declaredStarters": 18
+  },
+  "source": {
+    "registration": "https://www.jra.go.jp/keiba/tokubetsu/pdf/2026/jc.pdf",
+    "foreignProfiles": "https://www.jra.go.jp/news/gaikokuba/2026/jc01.html",
+    "previousResults": "https://www.jra.go.jp/keiba/g1/jc.html"
+  },
+  "abilityPolicy": "能力・脚質・人気・単勝オッズはゲーム用推定値。公式オッズではない。登録馬18頭を馬名50音順に並べた仮枠順。",
+  "oddsNote": "2026-11-21時点で公式の当日オッズは未公開。表示オッズは能力評価に基づく仮の推定値であり実際の投票オッズではない。",
+  "horses": [
+    {
+      "horseNumber": 1,
+      "gate": 1,
+      "frame": 1,
+      "name": "アーバンシック",
+      "sex": "牡",
+      "age": 5,
+      "trainer": "武井亮",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2500,
+      "aptMin": 2100,
+      "aptMax": 2900,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 111,
+      "sta": 119,
+      "kick": 111,
+      "early": 106,
+      "sustain": 116,
+      "grit": 111,
+      "stability": 84,
+      "raceStats": {
+        "sp": {
+          "total": 111
+        },
+        "sta": {
+          "total": 119
+        },
+        "kick": {
+          "total": 111
+        },
+        "early": {
+          "total": 106
+        },
+        "sustain": {
+          "total": 116
+        },
+        "grit": {
+          "total": 111
+        },
+        "stability": {
+          "total": 84
+        }
+      },
+      "popularity": 10,
+      "odds": 52.8,
+      "winOdds": 52.8,
+      "abilityNote": "ゲーム用推定能力。長距離GⅠ実績。2400mは守備範囲と推定",
+      "researchNote": "長距離GⅠ実績。2400mは守備範囲と推定",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 2,
+      "gate": 1,
+      "frame": 1,
+      "name": "ヴェルテンベルク",
+      "sex": "牡",
+      "age": 6,
+      "trainer": "宮本博",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 101,
+      "sta": 108,
+      "kick": 104,
+      "early": 99,
+      "sustain": 105,
+      "grit": 103,
+      "stability": 81,
+      "raceStats": {
+        "sp": {
+          "total": 101
+        },
+        "sta": {
+          "total": 108
+        },
+        "kick": {
+          "total": 104
+        },
+        "early": {
+          "total": 99
+        },
+        "sustain": {
+          "total": 105
+        },
+        "grit": {
+          "total": 103
+        },
+        "stability": {
+          "total": 81
+        }
+      },
+      "popularity": 17,
+      "odds": 302.8,
+      "winOdds": 302.8,
+      "abilityNote": "ゲーム用推定能力。登録馬。GⅠ上位馬との実績差を考慮",
+      "researchNote": "登録馬。GⅠ上位馬との実績差を考慮",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 3,
+      "gate": 2,
+      "frame": 2,
+      "name": "エキサイトバイオ",
+      "sex": "牡",
+      "age": 4,
+      "trainer": "今野貞一",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "先行",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 100,
+      "sta": 105,
+      "kick": 102,
+      "early": 103,
+      "sustain": 103,
+      "grit": 104,
+      "stability": 82,
+      "raceStats": {
+        "sp": {
+          "total": 100
+        },
+        "sta": {
+          "total": 105
+        },
+        "kick": {
+          "total": 102
+        },
+        "early": {
+          "total": 103
+        },
+        "sustain": {
+          "total": 103
+        },
+        "grit": {
+          "total": 104
+        },
+        "stability": {
+          "total": 82
+        }
+      },
+      "popularity": 18,
+      "odds": 416.0,
+      "winOdds": 416.0,
+      "abilityNote": "ゲーム用推定能力。登録馬。重賞実績を控えめに評価",
+      "researchNote": "登録馬。重賞実績を控えめに評価",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 4,
+      "gate": 2,
+      "frame": 2,
+      "name": "エシカルダイヤモンド",
+      "sex": "せん",
+      "age": 6,
+      "trainer": "W.マリンズ",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "坂井瑠星",
+      "tactic": "差し",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 110,
+      "sta": 120,
+      "kick": 110,
+      "early": 104,
+      "sustain": 117,
+      "grit": 113,
+      "stability": 80,
+      "raceStats": {
+        "sp": {
+          "total": 110
+        },
+        "sta": {
+          "total": 120
+        },
+        "kick": {
+          "total": 110
+        },
+        "early": {
+          "total": 104
+        },
+        "sustain": {
+          "total": 117
+        },
+        "grit": {
+          "total": 113
+        },
+        "stability": {
+          "total": 80
+        }
+      },
+      "popularity": 11,
+      "odds": 55.1,
+      "winOdds": 55.1,
+      "abilityNote": "ゲーム用推定能力。海外実績。芝2400mと日本の高速馬場は不確実",
+      "researchNote": "海外実績。芝2400mと日本の高速馬場は不確実",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 5,
+      "gate": 3,
+      "frame": 3,
+      "name": "オンブズマン",
+      "sex": "牡",
+      "age": 5,
+      "trainer": "J&T.ゴスデン",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 120,
+      "sta": 117,
+      "kick": 122,
+      "early": 111,
+      "sustain": 119,
+      "grit": 120,
+      "stability": 88,
+      "raceStats": {
+        "sp": {
+          "total": 120
+        },
+        "sta": {
+          "total": 117
+        },
+        "kick": {
+          "total": 122
+        },
+        "early": {
+          "total": 111
+        },
+        "sustain": {
+          "total": 119
+        },
+        "grit": {
+          "total": 120
+        },
+        "stability": {
+          "total": 88
+        }
+      },
+      "popularity": 5,
+      "odds": 17.7,
+      "winOdds": 17.7,
+      "abilityNote": "ゲーム用推定能力。欧州GⅠ級の中距離実績。2400m延長適性は推定",
+      "researchNote": "欧州GⅠ級の中距離実績。2400m延長適性は推定",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 6,
+      "gate": 3,
+      "frame": 3,
+      "name": "カランダガン",
+      "sex": "せん",
+      "age": 5,
+      "trainer": "F.グラファール",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 125,
+      "sta": 123,
+      "kick": 126,
+      "early": 115,
+      "sustain": 124,
+      "grit": 124,
+      "stability": 92,
+      "raceStats": {
+        "sp": {
+          "total": 125
+        },
+        "sta": {
+          "total": 123
+        },
+        "kick": {
+          "total": 126
+        },
+        "early": {
+          "total": 115
+        },
+        "sustain": {
+          "total": 124
+        },
+        "grit": {
+          "total": 124
+        },
+        "stability": {
+          "total": 92
+        }
+      },
+      "popularity": 2,
+      "odds": 7.2,
+      "winOdds": 7.2,
+      "abilityNote": "ゲーム用推定能力。2025年ジャパンC優勝。東京芝2400m実績を高評価",
+      "researchNote": "2025年ジャパンC優勝。東京芝2400m実績を高評価",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 7,
+      "gate": 4,
+      "frame": 4,
+      "name": "クロワデュノール",
+      "sex": "牡",
+      "age": 4,
+      "trainer": "斉藤崇史",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "先行",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 122,
+      "sta": 122,
+      "kick": 120,
+      "early": 120,
+      "sustain": 121,
+      "grit": 121,
+      "stability": 89,
+      "raceStats": {
+        "sp": {
+          "total": 122
+        },
+        "sta": {
+          "total": 122
+        },
+        "kick": {
+          "total": 120
+        },
+        "early": {
+          "total": 120
+        },
+        "sustain": {
+          "total": 121
+        },
+        "grit": {
+          "total": 121
+        },
+        "stability": {
+          "total": 89
+        }
+      },
+      "popularity": 4,
+      "odds": 12.8,
+      "winOdds": 12.8,
+      "abilityNote": "ゲーム用推定能力。東京優駿優勝。東京芝2400m適性を高評価",
+      "researchNote": "東京優駿優勝。東京芝2400m適性を高評価",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 8,
+      "gate": 4,
+      "frame": 4,
+      "name": "コスモキュランダ",
+      "sex": "牡",
+      "age": 5,
+      "trainer": "加藤士津八",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "先行",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 108,
+      "sta": 113,
+      "kick": 108,
+      "early": 110,
+      "sustain": 111,
+      "grit": 112,
+      "stability": 82,
+      "raceStats": {
+        "sp": {
+          "total": 108
+        },
+        "sta": {
+          "total": 113
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 110
+        },
+        "sustain": {
+          "total": 111
+        },
+        "grit": {
+          "total": 112
+        },
+        "stability": {
+          "total": 82
+        }
+      },
+      "popularity": 12,
+      "odds": 107.1,
+      "winOdds": 107.1,
+      "abilityNote": "ゲーム用推定能力。中長距離重賞実績。上位GⅠ勢との比較で評価",
+      "researchNote": "中長距離重賞実績。上位GⅠ勢との比較で評価",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 9,
+      "gate": 5,
+      "frame": 5,
+      "name": "ゴリアット",
+      "sex": "せん",
+      "age": 6,
+      "trainer": "F.グラファール",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 116,
+      "sta": 121,
+      "kick": 116,
+      "early": 109,
+      "sustain": 119,
+      "grit": 116,
+      "stability": 82,
+      "raceStats": {
+        "sp": {
+          "total": 116
+        },
+        "sta": {
+          "total": 121
+        },
+        "kick": {
+          "total": 116
+        },
+        "early": {
+          "total": 109
+        },
+        "sustain": {
+          "total": 119
+        },
+        "grit": {
+          "total": 116
+        },
+        "stability": {
+          "total": 82
+        }
+      },
+      "popularity": 8,
+      "odds": 25.7,
+      "winOdds": 25.7,
+      "abilityNote": "ゲーム用推定能力。海外2400m級実績。東京の速い芝への対応は不確実",
+      "researchNote": "海外2400m級実績。東京の速い芝への対応は不確実",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 10,
+      "gate": 5,
+      "frame": 5,
+      "name": "シェイクユアハート",
+      "sex": "牡",
+      "age": 6,
+      "trainer": "宮徹",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 106,
+      "sta": 111,
+      "kick": 108,
+      "early": 104,
+      "sustain": 110,
+      "grit": 109,
+      "stability": 84,
+      "raceStats": {
+        "sp": {
+          "total": 106
+        },
+        "sta": {
+          "total": 111
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 104
+        },
+        "sustain": {
+          "total": 110
+        },
+        "grit": {
+          "total": 109
+        },
+        "stability": {
+          "total": 84
+        }
+      },
+      "popularity": 14,
+      "odds": 138.0,
+      "winOdds": 138.0,
+      "abilityNote": "ゲーム用推定能力。中距離重賞実績。東京2400mは適性推定",
+      "researchNote": "中距離重賞実績。東京2400mは適性推定",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 11,
+      "gate": 6,
+      "frame": 6,
+      "name": "タガノデュード",
+      "sex": "牡",
+      "age": 5,
+      "trainer": "宮徹",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "追込",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 101,
+      "sta": 107,
+      "kick": 105,
+      "early": 99,
+      "sustain": 106,
+      "grit": 105,
+      "stability": 82,
+      "raceStats": {
+        "sp": {
+          "total": 101
+        },
+        "sta": {
+          "total": 107
+        },
+        "kick": {
+          "total": 105
+        },
+        "early": {
+          "total": 99
+        },
+        "sustain": {
+          "total": 106
+        },
+        "grit": {
+          "total": 105
+        },
+        "stability": {
+          "total": 82
+        }
+      },
+      "popularity": 16,
+      "odds": 293.2,
+      "winOdds": 293.2,
+      "abilityNote": "ゲーム用推定能力。登録馬。差し脚を想定したゲーム用評価",
+      "researchNote": "登録馬。差し脚を想定したゲーム用評価",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 12,
+      "gate": 6,
+      "frame": 6,
+      "name": "ダノンデサイル",
+      "sex": "牡",
+      "age": 5,
+      "trainer": "安田翔伍",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 123,
+      "sta": 124,
+      "kick": 124,
+      "early": 113,
+      "sustain": 122,
+      "grit": 122,
+      "stability": 91,
+      "raceStats": {
+        "sp": {
+          "total": 123
+        },
+        "sta": {
+          "total": 124
+        },
+        "kick": {
+          "total": 124
+        },
+        "early": {
+          "total": 113
+        },
+        "sustain": {
+          "total": 122
+        },
+        "grit": {
+          "total": 122
+        },
+        "stability": {
+          "total": 91
+        }
+      },
+      "popularity": 3,
+      "odds": 9.3,
+      "winOdds": 9.3,
+      "abilityNote": "ゲーム用推定能力。東京優駿優勝、2025年ジャパンC3着。2400m実績を高評価",
+      "researchNote": "東京優駿優勝、2025年ジャパンC3着。2400m実績を高評価",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 13,
+      "gate": 7,
+      "frame": 7,
+      "name": "テアオ",
+      "sex": "牡",
+      "age": 4,
+      "trainer": "J.サドラー",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "先行",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 106,
+      "sta": 110,
+      "kick": 108,
+      "early": 110,
+      "sustain": 107,
+      "grit": 107,
+      "stability": 75,
+      "raceStats": {
+        "sp": {
+          "total": 106
+        },
+        "sta": {
+          "total": 110
+        },
+        "kick": {
+          "total": 108
+        },
+        "early": {
+          "total": 110
+        },
+        "sustain": {
+          "total": 107
+        },
+        "grit": {
+          "total": 107
+        },
+        "stability": {
+          "total": 75
+        }
+      },
+      "popularity": 15,
+      "odds": 157.5,
+      "winOdds": 157.5,
+      "abilityNote": "ゲーム用推定能力。南米での実績を考慮。日本初挑戦の適性は不確実",
+      "researchNote": "南米での実績を考慮。日本初挑戦の適性は不確実",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 14,
+      "gate": 7,
+      "frame": 7,
+      "name": "ファイアンクランツ",
+      "sex": "牡",
+      "age": 4,
+      "trainer": "堀宣行",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 106,
+      "sta": 111,
+      "kick": 110,
+      "early": 102,
+      "sustain": 108,
+      "grit": 107,
+      "stability": 82,
+      "raceStats": {
+        "sp": {
+          "total": 106
+        },
+        "sta": {
+          "total": 111
+        },
+        "kick": {
+          "total": 110
+        },
+        "early": {
+          "total": 102
+        },
+        "sustain": {
+          "total": 108
+        },
+        "grit": {
+          "total": 107
+        },
+        "stability": {
+          "total": 82
+        }
+      },
+      "popularity": 13,
+      "odds": 137.0,
+      "winOdds": 137.0,
+      "abilityNote": "ゲーム用推定能力。中長距離の実績を考慮。GⅠ級との比較は推定",
+      "researchNote": "中長距離の実績を考慮。GⅠ級との比較は推定",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 15,
+      "gate": 7,
+      "frame": 7,
+      "name": "ヘデントール",
+      "sex": "牡",
+      "age": 5,
+      "trainer": "木村哲也",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 3000,
+      "aptMin": 2600,
+      "aptMax": 3400,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 116,
+      "sta": 125,
+      "kick": 115,
+      "early": 106,
+      "sustain": 121,
+      "grit": 117,
+      "stability": 85,
+      "raceStats": {
+        "sp": {
+          "total": 116
+        },
+        "sta": {
+          "total": 125
+        },
+        "kick": {
+          "total": 115
+        },
+        "early": {
+          "total": 106
+        },
+        "sustain": {
+          "total": 121
+        },
+        "grit": {
+          "total": 117
+        },
+        "stability": {
+          "total": 85
+        }
+      },
+      "popularity": 7,
+      "odds": 21.6,
+      "winOdds": 21.6,
+      "abilityNote": "ゲーム用推定能力。長距離GⅠ級実績。2400mの流れへの対応を推定",
+      "researchNote": "長距離GⅠ級実績。2400mの流れへの対応を推定",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 16,
+      "gate": 8,
+      "frame": 8,
+      "name": "マスカレードボール",
+      "sex": "牡",
+      "age": 4,
+      "trainer": "手塚貴久",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "差し",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 126,
+      "sta": 122,
+      "kick": 128,
+      "early": 113,
+      "sustain": 125,
+      "grit": 123,
+      "stability": 92,
+      "raceStats": {
+        "sp": {
+          "total": 126
+        },
+        "sta": {
+          "total": 122
+        },
+        "kick": {
+          "total": 128
+        },
+        "early": {
+          "total": 113
+        },
+        "sustain": {
+          "total": 125
+        },
+        "grit": {
+          "total": 123
+        },
+        "stability": {
+          "total": 92
+        }
+      },
+      "popularity": 1,
+      "odds": 6.3,
+      "winOdds": 6.3,
+      "abilityNote": "ゲーム用推定能力。2025年ジャパンC2着、東京芝で高い実績",
+      "researchNote": "2025年ジャパンC2着、東京芝で高い実績",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 17,
+      "gate": 8,
+      "frame": 8,
+      "name": "ミニーホーク",
+      "sex": "牝",
+      "age": 4,
+      "trainer": "A.オブライエン",
+      "carriedWeightKg": 56,
+      "weight": 56,
+      "jockey": "未定",
+      "tactic": "先行",
+      "bestDistance": 2400,
+      "aptMin": 2000,
+      "aptMax": 2800,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 119,
+      "sta": 122,
+      "kick": 118,
+      "early": 117,
+      "sustain": 120,
+      "grit": 119,
+      "stability": 87,
+      "raceStats": {
+        "sp": {
+          "total": 119
+        },
+        "sta": {
+          "total": 122
+        },
+        "kick": {
+          "total": 118
+        },
+        "early": {
+          "total": 117
+        },
+        "sustain": {
+          "total": 120
+        },
+        "grit": {
+          "total": 119
+        },
+        "stability": {
+          "total": 87
+        }
+      },
+      "popularity": 6,
+      "odds": 17.8,
+      "winOdds": 17.8,
+      "abilityNote": "ゲーム用推定能力。欧州牝馬クラシック実績。日本の高速芝への適性は推定",
+      "researchNote": "欧州牝馬クラシック実績。日本の高速芝への適性は推定",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    },
+    {
+      "horseNumber": 18,
+      "gate": 8,
+      "frame": 8,
+      "name": "メイショウタバル",
+      "sex": "牡",
+      "age": 5,
+      "trainer": "石橋守",
+      "carriedWeightKg": 58,
+      "weight": 58,
+      "jockey": "未定",
+      "tactic": "逃げ",
+      "bestDistance": 2200,
+      "aptMin": 1800,
+      "aptMax": 2600,
+      "health": 95,
+      "temperament": 89,
+      "form": 90,
+      "fatigue": 0,
+      "going": {
+        "良": 100,
+        "稍重": 99,
+        "重": 97,
+        "不良": 94
+      },
+      "speed": 117,
+      "sta": 115,
+      "kick": 110,
+      "early": 126,
+      "sustain": 114,
+      "grit": 118,
+      "stability": 78,
+      "raceStats": {
+        "sp": {
+          "total": 117
+        },
+        "sta": {
+          "total": 115
+        },
+        "kick": {
+          "total": 110
+        },
+        "early": {
+          "total": 126
+        },
+        "sustain": {
+          "total": 114
+        },
+        "grit": {
+          "total": 118
+        },
+        "stability": {
+          "total": 78
+        }
+      },
+      "popularity": 9,
+      "odds": 42.9,
+      "winOdds": 42.9,
+      "abilityNote": "ゲーム用推定能力。先手を取る競馬を高評価。東京2400mでの粘りは展開依存",
+      "researchNote": "先手を取る競馬を高評価。東京2400mでの粘りは展開依存",
+      "researchStatus": "2026-11-15 JRA特別登録馬と既知の実績を照合。能力・脚質・想定人気・オッズはゲーム用推定。"
+    }
+  ]
+}
