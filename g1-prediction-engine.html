@@ -7726,6 +7726,8 @@ function dfV88RenderTrialNotice(card){
 function renderPreRaceGuide(){
  const panel=$('preRacePanel');if(!panel)return;
  const odds=currentPreRaceOdds=computePreRaceOdds(DEF);
+ const predictionMarket=dfV30VsActive&&window.parent!==window?window.parent.__dfPredictionOptions?.market:null;
+ const predictionMarketMap=new Map(Array.isArray(predictionMarket)?predictionMarket.map(r=>[r.no,r]):[]);
  const ranking=new Map(odds.horse.map((row,i)=>[row.no,i]));
  const marks=['◎','○','▲','△'];
  // Newspaper-only ratings: keep the existing overall prediction / popularity as the first mark.
@@ -7740,7 +7742,7 @@ function renderPreRaceGuide(){
  // not themselves called trial races. The qualifying rules are unchanged.
  dfV88RenderTrialNotice(currentRace);
  $('paperEntries').innerHTML=DEF.map((h,i)=>{
-  const no=i+1,rank=ranking.get(no),frameNo=h.frameNo;
+  const no=i+1,marketRow=predictionMarketMap.get(no),rank=marketRow?marketRow.rank-1:ranking.get(no),frameNo=h.frameNo;
   const ink=[1,5,7,8].includes(frameNo)?'#19202b':'#ffffff';
   // Horse age/sex and race-assigned weight already belong to DEF; racing stats stay private.
   const ageSex=Number.isInteger(h.age)&&h.age>=0?`${h.age}${h.sex||''}`:'―';
@@ -7750,9 +7752,9 @@ function renderPreRaceGuide(){
   const marksHtml=columns.map((place,idx)=>`<span class="paper-pick-mark ${Number.isInteger(place)&&place<4?'active':'blank'}" title="${['既存予想','総合評価','4能力合計','残り3能力合計'][idx]}" aria-label="${['既存予想','総合評価','4能力合計','残り3能力合計'][idx]} ${Number.isInteger(place)&&place<4?marks[place]:'印なし'}">${Number.isInteger(place)&&place<4?marks[place]:'&nbsp;'}</span>`).join('');
   const popText=Number.isInteger(rank)?`単勝 ${rank+1}番人気`:'―';
   const singleQuote=odds.horse.find(entry=>entry.no===no);
-  const popOddsText=Number.isInteger(rank)&&singleQuote
-   ?`単勝 ${rank+1}人気 ${oddsMoney(singleQuote.winProbability).toFixed(1)}倍`:'単勝 ―';
-  return `<tr><td><span class="paper-frame" style="background:${FRAME_COLORS[frameNo-1]};color:${ink}">${frameNo}</span><b class="paper-no">${no}</b></td><td class="paper-pick-cell"><div class="paper-picks">${marksHtml}</div><small class="paper-popularity">${popText}</small><small class="df102-pop-odds">${popOddsText}</small></td><td class="paper-name"><div class="paper-horsehead"><span class="paper-horsename">${paperEscape(paperHorseName(h))}</span></div><span class="paper-horsemeta"><span>${paperEscape(ageSex)}</span><span>${paperEscape(weight)}</span><span>${jockey}</span></span></td><td class="paper-tactic">${paperEscape(h.tactic||'―')}</td></tr>`;
+  const popOddsText=Number.isInteger(rank)
+   ?`単勝 ${rank+1}番人気 ${marketRow?Number(marketRow.odds).toFixed(1):singleQuote?oddsMoney(singleQuote.winProbability).toFixed(1):'―'}倍`:'単勝 ―';
+  return `<tr><td><span class="paper-frame" style="background:${FRAME_COLORS[frameNo-1]};color:${ink}">${frameNo}</span><b class="paper-no">${no}</b></td><td class="paper-pick-cell"><div class="paper-picks">${marksHtml}</div><small class="paper-popularity">${predictionMarketMap.size?'':popText}</small><small class="df102-pop-odds">${popOddsText}</small></td><td class="paper-name"><div class="paper-horsehead"><span class="paper-horsename">${paperEscape(paperHorseName(h))}</span></div><span class="paper-horsemeta"><span>${paperEscape(ageSex)}</span><span>${paperEscape(weight)}</span><span>${jockey}</span></span></td><td class="paper-tactic">${paperEscape(h.tactic||'―')}</td></tr>`;
  }).join('');
  const showTop=(items,frame=false)=>items.slice(0,7).map((r,i)=>`<div class="odds-row"><span>${i+1}</span><span class="odds-pair">${r.numbers[0]}－${r.numbers[1]}${frame?' 枠':''}</span><span class="odds-value">${r.odds.toFixed(1)}倍</span></div>`).join('');
  $('umarenOdds').innerHTML=showTop(odds.umaren);
