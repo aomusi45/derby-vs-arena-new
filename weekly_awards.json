@@ -7,20 +7,9 @@
     {
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 10836500000,
-      "starts": 83,
+      "prizeYen": 10966500000,
+      "starts": 84,
       "raceResults": [
-        {
-          "slot": 1994933,
-          "raceName": "秋華賞",
-          "place": 5,
-          "prizeYen": 11000000,
-          "firstHorseName": "エアグルービー",
-          "secondHorseName": "クロノジェネシア",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "ハナ"
-        },
         {
           "slot": 1994935,
           "raceName": "天皇賞（秋）",
@@ -229,6 +218,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "8 1/2馬身"
+        },
+        {
+          "slot": 1994962,
+          "raceName": "NHKマイルカップ",
+          "place": 1,
+          "prizeYen": 130000000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "ウオッカナ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "4馬身"
         }
       ]
     },
@@ -464,19 +464,8 @@
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
       "prizeYen": 5265000000,
-      "starts": 58,
+      "starts": 59,
       "raceResults": [
-        {
-          "slot": 1994921,
-          "raceName": "有馬記念",
-          "place": 1,
-          "prizeYen": 500000000,
-          "firstHorseName": "シンボリルドルフィ",
-          "secondHorseName": "テイエムオペラオン",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "3/4馬身"
-        },
         {
           "slot": 1994924,
           "raceName": "皐月賞",
@@ -685,6 +674,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "大差"
+        },
+        {
+          "slot": 1994962,
+          "raceName": "NHKマイルカップ",
+          "place": 12,
+          "prizeYen": 0,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "ウオッカナ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "4馬身"
         }
       ]
     },
@@ -1148,19 +1148,8 @@
       "horseName": "ナリタブライワン",
       "ownerName": "",
       "prizeYen": 2585000000,
-      "starts": 51,
+      "starts": 52,
       "raceResults": [
-        {
-          "slot": 1994919,
-          "raceName": "マイルチャンピオンシップ",
-          "place": 11,
-          "prizeYen": 0,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ジャンタルマンダル",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "9 1/2馬身"
-        },
         {
           "slot": 1994920,
           "raceName": "ジャパンカップ",
@@ -1369,6 +1358,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "大差"
+        },
+        {
+          "slot": 1994962,
+          "raceName": "NHKマイルカップ",
+          "place": 10,
+          "prizeYen": 0,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "ウオッカナ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "4馬身"
         }
       ]
     },
@@ -2290,7 +2290,7 @@
       "rank": 1,
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 10836500000
+      "prizeYen": 10966500000
     },
     {
       "rank": 2,
@@ -2350,13 +2350,13 @@
       "rank": 11,
       "horseName": "ウオッカナ",
       "ownerName": "",
-      "prizeYen": 1435000000
+      "prizeYen": 1487000000
     },
     {
       "rank": 12,
       "horseName": "マイネルラブリー",
       "ownerName": "",
-      "prizeYen": 1362500000
+      "prizeYen": 1375500000
     },
     {
       "rank": 13,
@@ -2368,7 +2368,7 @@
       "rank": 14,
       "horseName": "グランアレグリラ",
       "ownerName": "",
-      "prizeYen": 971000000
+      "prizeYen": 1003500000
     },
     {
       "rank": 15,
@@ -2434,7 +2434,7 @@
       "rank": 25,
       "horseName": "ロードカナリア",
       "ownerName": "",
-      "prizeYen": 324500000
+      "prizeYen": 344000000
     },
     {
       "rank": 26,
