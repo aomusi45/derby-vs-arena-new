@@ -235,20 +235,9 @@
     {
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 7535500000,
-      "starts": 60,
+      "prizeYen": 7562500000,
+      "starts": 61,
       "raceResults": [
-        {
-          "slot": 1994905,
-          "raceName": "桜花賞",
-          "place": 1,
-          "prizeYen": 140000000,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ウオッカナ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "7 1/4馬身"
-        },
         {
           "slot": 1994906,
           "raceName": "皐月賞",
@@ -457,6 +446,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "ハナ"
+        },
+        {
+          "slot": 1994930,
+          "raceName": "安田記念",
+          "place": 4,
+          "prizeYen": 27000000,
+          "firstHorseName": "ジャンタルマンダル",
+          "secondHorseName": "グランアレグリラ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
         }
       ]
     },
@@ -1148,19 +1148,8 @@
       "horseName": "ナリタブライワン",
       "ownerName": "",
       "prizeYen": 1395000000,
-      "starts": 36,
+      "starts": 37,
       "raceResults": [
-        {
-          "slot": 1994885,
-          "raceName": "有馬記念",
-          "place": 4,
-          "prizeYen": 75000000,
-          "firstHorseName": "シンボリルドルフィ",
-          "secondHorseName": "テイエムオペラオン",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "ハナ"
-        },
         {
           "slot": 1994886,
           "raceName": "大阪杯",
@@ -1369,6 +1358,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "ハナ"
+        },
+        {
+          "slot": 1994930,
+          "raceName": "安田記念",
+          "place": 14,
+          "prizeYen": 0,
+          "firstHorseName": "ジャンタルマンダル",
+          "secondHorseName": "グランアレグリラ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
         }
       ]
     },
@@ -1832,19 +1832,8 @@
       "horseName": "ダイワスカーレッタ",
       "ownerName": "",
       "prizeYen": 1320500000,
-      "starts": 44,
+      "starts": 45,
       "raceResults": [
-        {
-          "slot": 1994888,
-          "raceName": "皐月賞",
-          "place": 3,
-          "prizeYen": 50000000,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ディープインパルス",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "2 3/4馬身"
-        },
         {
           "slot": 1994890,
           "raceName": "NHKマイルカップ",
@@ -2053,6 +2042,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "2 1/4馬身"
+        },
+        {
+          "slot": 1994930,
+          "raceName": "安田記念",
+          "place": 7,
+          "prizeYen": 0,
+          "firstHorseName": "ジャンタルマンダル",
+          "secondHorseName": "グランアレグリラ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
         }
       ]
     },
@@ -2060,19 +2060,8 @@
       "horseName": "ブエナビスター",
       "ownerName": "",
       "prizeYen": 1146500000,
-      "starts": 56,
+      "starts": 57,
       "raceResults": [
-        {
-          "slot": 1994902,
-          "raceName": "ジャパンカップ",
-          "place": 17,
-          "prizeYen": 0,
-          "firstHorseName": "キタサンブラッキー",
-          "secondHorseName": "ナリタブライワン",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "3 1/2馬身"
-        },
         {
           "slot": 1994903,
           "raceName": "有馬記念",
@@ -2281,6 +2270,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "ハナ"
+        },
+        {
+          "slot": 1994930,
+          "raceName": "安田記念",
+          "place": 12,
+          "prizeYen": 0,
+          "firstHorseName": "ジャンタルマンダル",
+          "secondHorseName": "グランアレグリラ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/2馬身"
         }
       ]
     }
@@ -2296,7 +2296,7 @@
       "rank": 2,
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 7535500000
+      "prizeYen": 7562500000
     },
     {
       "rank": 3,
@@ -2356,19 +2356,19 @@
       "rank": 12,
       "horseName": "マイネルラブリー",
       "ownerName": "",
-      "prizeYen": 964500000
+      "prizeYen": 982500000
     },
     {
       "rank": 13,
-      "horseName": "リバティアイラン",
+      "horseName": "グランアレグリラ",
       "ownerName": "",
-      "prizeYen": 745000000
+      "prizeYen": 752500000
     },
     {
       "rank": 14,
-      "horseName": "グランアレグリラ",
+      "horseName": "リバティアイラン",
       "ownerName": "",
-      "prizeYen": 680500000
+      "prizeYen": 745000000
     },
     {
       "rank": 15,
@@ -2380,7 +2380,7 @@
       "rank": 16,
       "horseName": "ラッキーライラッキ",
       "ownerName": "",
-      "prizeYen": 600500000
+      "prizeYen": 645500000
     },
     {
       "rank": 17,
@@ -2408,45 +2408,45 @@
     },
     {
       "rank": 21,
+      "horseName": "ジャンタルマンダル",
+      "ownerName": "",
+      "prizeYen": 369000000
+    },
+    {
+      "rank": 22,
       "horseName": "イクイノマックス",
       "ownerName": "",
       "prizeYen": 328000000
     },
     {
-      "rank": 22,
+      "rank": 23,
       "horseName": "コントレイン",
       "ownerName": "",
       "prizeYen": 280000000
     },
     {
-      "rank": 23,
+      "rank": 24,
       "horseName": "ロードカナリア",
       "ownerName": "",
       "prizeYen": 273500000
     },
     {
-      "rank": 24,
+      "rank": 25,
       "horseName": "リスグラシュガー",
       "ownerName": "",
       "prizeYen": 270000000
     },
     {
-      "rank": 25,
+      "rank": 26,
       "horseName": "スペシャルウインク",
       "ownerName": "",
       "prizeYen": 235000000
     },
     {
-      "rank": 26,
+      "rank": 27,
       "horseName": "ドウデュースト",
       "ownerName": "",
       "prizeYen": 195000000
-    },
-    {
-      "rank": 27,
-      "horseName": "ジャンタルマンダル",
-      "ownerName": "",
-      "prizeYen": 189000000
     },
     {
       "rank": 28,
