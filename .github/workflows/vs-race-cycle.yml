@@ -33,6 +33,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: official-vs-races-and-pages
@@ -134,7 +135,19 @@ jobs:
         with:
           path: './public_site'
       - name: Wait for Pages artifact availability
-        run: sleep 30
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 18); do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" --paginate --jq '.artifacts[] | select(.name == "github-pages" and .expired == false and .size_in_bytes > 0) | .id' | grep -q '^[0-9]'; then
+              echo "Pages artifact is available"
+              exit 0
+            fi
+            echo "Waiting for Pages artifact: $attempt/18"
+            sleep 10
+          done
+          echo "::error::Pages artifact was not available within 180 seconds"
+          exit 1
       - name: Deploy site and recorded race
         id: deploy
         uses: actions/deploy-pages@v4
