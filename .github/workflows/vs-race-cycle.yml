@@ -43,9 +43,6 @@ jobs:
   record-and-publish:
     runs-on: ubuntu-24.04
     timeout-minutes: 14
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Check out existing game and website
         uses: actions/checkout@v4
@@ -148,6 +145,15 @@ jobs:
           done
           echo "::error::Pages artifact was not available within 180 seconds"
           exit 1
+
+  deploy-pages:
+    needs: record-and-publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - name: Deploy site and recorded race
         id: deploy
         uses: actions/deploy-pages@v4
