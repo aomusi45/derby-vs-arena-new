@@ -235,20 +235,9 @@
     {
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 14498000000,
-      "starts": 115,
+      "prizeYen": 14566000000,
+      "starts": 116,
       "raceResults": [
-        {
-          "slot": 1994981,
-          "raceName": "ヴィクトリアマイル",
-          "place": 1,
-          "prizeYen": 150000000,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ブエナビスター",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "6 1/4馬身"
-        },
         {
           "slot": 1994982,
           "raceName": "オークス",
@@ -457,6 +446,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "1 1/2馬身"
+        },
+        {
+          "slot": 1995004,
+          "raceName": "スプリンターズステークス",
+          "place": 2,
+          "prizeYen": 68000000,
+          "firstHorseName": "ロードカナリア",
+          "secondHorseName": "アーモンドアイス",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/4馬身"
         }
       ]
     },
@@ -464,19 +464,8 @@
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
       "prizeYen": 6600000000,
-      "starts": 80,
+      "starts": 81,
       "raceResults": [
-        {
-          "slot": 1994967,
-          "raceName": "宝塚記念",
-          "place": 2,
-          "prizeYen": 120000000,
-          "firstHorseName": "ディープインパルス",
-          "secondHorseName": "シンボリルドルフィ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "4 3/4馬身"
-        },
         {
           "slot": 1994968,
           "raceName": "スプリンターズステークス",
@@ -685,6 +674,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "1 1/2馬身"
+        },
+        {
+          "slot": 1995004,
+          "raceName": "スプリンターズステークス",
+          "place": 8,
+          "prizeYen": 0,
+          "firstHorseName": "ロードカナリア",
+          "secondHorseName": "アーモンドアイス",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/4馬身"
         }
       ]
     },
@@ -2296,7 +2296,7 @@
       "rank": 2,
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 14498000000
+      "prizeYen": 14566000000
     },
     {
       "rank": 3,
@@ -2350,7 +2350,7 @@
       "rank": 11,
       "horseName": "マイネルラブリー",
       "ownerName": "",
-      "prizeYen": 1904000000
+      "prizeYen": 1946500000
     },
     {
       "rank": 12,
@@ -2368,7 +2368,7 @@
       "rank": 14,
       "horseName": "グランアレグリラ",
       "ownerName": "",
-      "prizeYen": 1264500000
+      "prizeYen": 1281500000
     },
     {
       "rank": 15,
@@ -2390,15 +2390,15 @@
     },
     {
       "rank": 18,
-      "horseName": "シンボリクリスマス",
+      "horseName": "ヒシアケボーノ",
       "ownerName": "",
-      "prizeYen": 830000000
+      "prizeYen": 836500000
     },
     {
       "rank": 19,
-      "horseName": "ヒシアケボーノ",
+      "horseName": "シンボリクリスマス",
       "ownerName": "",
-      "prizeYen": 811000000
+      "prizeYen": 830000000
     },
     {
       "rank": 20,
@@ -2420,21 +2420,21 @@
     },
     {
       "rank": 23,
+      "horseName": "ロードカナリア",
+      "ownerName": "",
+      "prizeYen": 565000000
+    },
+    {
+      "rank": 24,
       "horseName": "リスグラシュガー",
       "ownerName": "",
       "prizeYen": 442500000
     },
     {
-      "rank": 24,
+      "rank": 25,
       "horseName": "モーリスコ",
       "ownerName": "",
       "prizeYen": 423500000
-    },
-    {
-      "rank": 25,
-      "horseName": "ロードカナリア",
-      "ownerName": "",
-      "prizeYen": 395000000
     },
     {
       "rank": 26,
