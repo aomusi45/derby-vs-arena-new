@@ -133,6 +133,8 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: './public_site'
+      - name: Wait for Pages artifact availability
+        run: sleep 30
       - name: Deploy site and recorded race
         id: deploy
         uses: actions/deploy-pages@v4
