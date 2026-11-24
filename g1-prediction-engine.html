@@ -15081,7 +15081,7 @@ function dfV30VsPrepareField(rawField,distance,going,replacing=false,officialNew
   TOTAL=distance;STARTERS=picked.length;currentGoing=going;
   currentWeather=['重','不良'].includes(going)?'雨':'晴れ';
   updateTrackShape();rebuildCourse();removeRunners();
-  assignRaceRiders(picked,currentRace);
+  if(predictionCard){const source=window.parent.__dfPredictionData;const entries=source.horses||source.entries||source.runners||source.race?.horses;const used=new Set();for(const horse of picked){const raw=entries.find(e=>String(e.horseName??e.name).trim()===String(horse.name).trim());const name=String(raw?.jockey||horse.jockey||"").trim();const j=JOCKEYS_V78.find(r=>r.name===name);if(!j||used.has(name))throw Error("予想騎手データ不一致: "+horse.name+" / "+name);used.add(name);horse.jockey=name;horse.jockeyHistory=false;horse.jockeySkills={...j};}}else{assignRaceRiders(picked,currentRace);}
   DEF=picked.map((h,i)=>({...makeStarter(h.name,i,h),age:h.age,weight:weightForRace(h,currentRace,h.age),
     jockey:h.jockey,jockeyHistory:h.jockeyHistory,jockeySkills:h.jockeySkills}));
   for(let i=0;i<DEF.length;i++){
@@ -15301,7 +15301,7 @@ const dfOfficialVSProduction = (() => {
           stability:Number(h.stability),health:Number(h.health??95),
           temperament:Number(h.temperament??90),going:h.going||{},
           form:Number(h.form??90),fatigue:Number(h.fatigue??0),
-          earnedPrize:0,isCom:false,ownerName:'GⅠ予想'};
+          jockey:String(h.jockey||'').trim(),earnedPrize:0,isCom:false,ownerName:'GⅠ予想'};
       });
     })();
     // Derive course geometry from the selected prediction race, never from
