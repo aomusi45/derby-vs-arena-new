@@ -711,10 +711,7 @@ window.DFOfficialViewerBridge=Object.freeze({
         body[data-game-screen="race-view"] .shell{margin:0!important;max-width:none!important;border-radius:0!important}
       }
     </style>`;
-    return html.replace(/<head[^>
-<title>競馬ゲーム・競馬予想・競馬予想ツール | Derby Fantasy</title>
-<meta name="description" content="競馬ゲーム、競馬予想、競馬予想ツール - Derby Fantasy">
-<meta name="keywords" content="競馬ゲーム, 競馬予想, 競馬予想ツール">]*>/i,tag=>tag+shim+spectatorStyle);
+    return html.replace(/<head[^>]*>/i,tag=>tag+shim+spectatorStyle);
   }
   async function loadEngine(){
     if(!state.enginePromise)state.enginePromise=Promise.all(['vs_replay_engine_part1.txt','vs_replay_engine_part2.txt']
