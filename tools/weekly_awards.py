@@ -139,7 +139,15 @@ def request(token,url,body=None):
     headers={'Authorization':'Bearer '+token,'Accept':'application/json'}
     if data is not None:headers['Content-Type']='application/json'
     req=Request(API+url,data=data,headers=headers,method='POST' if data is not None else 'GET')
-    with urlopen(req,timeout=35) as resp:return json.load(resp)
+    import time
+    for attempt in range(4):
+        try:
+            with urlopen(req,timeout=35) as resp:return json.load(resp)
+        except HTTPError as exc:
+            if exc.code!=429 or attempt==3:raise
+            delay=5*(2**attempt)
+            print(f"Firestore HTTP 429: retry in {delay}s",flush=True)
+            time.sleep(delay)
 
 
 def doc_get(token,path):
@@ -304,7 +312,26 @@ def com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts
             'currentDocument':{'updateTime':previous['updateTime']} if previous else {'exists':False}}
 
 
-def commit_race(token,meta):
+def load_race_receipts(token,records):
+    names=[BASE+f"/vs_weekly_race_receipts/{m['slot']}" for m in records if m.get("intervalMinutes")==15 and type(m.get("slot")) is int]
+    if not names:return {}
+    names=list(dict.fromkeys(names))
+    receipts={}
+    for start in range(0,len(names),100):
+        batch=names[start:start+100]
+        response=request(token,BASE+":batchGet",{"documents":batch})
+        seen=set()
+        for item in response:
+            found=item.get("found")
+            name=found["name"] if found else item["missing"]
+            if name not in batch or name in seen:raise RuntimeError("Invalid receipt response")
+            seen.add(name)
+            receipts[name]=found
+        if seen!=set(batch):raise RuntimeError("Incomplete receipt response")
+    return receipts
+
+
+def commit_race(token,meta,receipts=None):
     rows=race_rows(meta)
     if not rows:return False
     slot=meta['slot']
@@ -322,7 +349,7 @@ def commit_race(token,meta):
         return {'fieldPath':'raceResults','appendMissingElements':{'values':[
             {'mapValue':{'fields':fields(race_history_entry(slot,race_name,row,top_two))}}
         ]}}
-    prior=doc_get(token,receipt_path)
+    prior=receipts[BASE+"/"+receipt_path] if receipts is not None and BASE+"/"+receipt_path in receipts else doc_get(token,receipt_path)
     if prior:
         if prior['fields'].get('digest',{}).get('stringValue')!=digest:
             raise RuntimeError('同じ開催枠の賞金記録が変更されました。再加算を中止します')
@@ -584,8 +611,10 @@ def main():
     raw=json.loads((ROOT/'race_playlist.json').read_text(encoding='utf-8'))
     if raw.get('version')!=2:raise ValueError('開催一覧が不正です')
     count=0
-    for meta in sorted(raw['records'],key=lambda x:x['slot']):
-        if commit_race(token,meta):count+=1
+    records=sorted(raw['records'],key=lambda x:x['slot'])
+    receipts=load_race_receipts(token,records)
+    for meta in records:
+        if commit_race(token,meta,receipts):count+=1
     now=datetime.now(timezone.utc)
     award_previous(token,week_start(now),now)
     # Staging is not a permanent archive. Cleanup failures should never stop
