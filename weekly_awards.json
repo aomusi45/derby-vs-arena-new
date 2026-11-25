@@ -235,20 +235,9 @@
     {
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 28138500000,
-      "starts": 216,
+      "prizeYen": 28278500000,
+      "starts": 217,
       "raceResults": [
-        {
-          "slot": 1995127,
-          "raceName": "日本ダービー",
-          "place": 1,
-          "prizeYen": 300000000,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ナリタブライワン",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "4 1/4馬身"
-        },
         {
           "slot": 1995129,
           "raceName": "宝塚記念",
@@ -457,6 +446,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "4 3/4馬身"
+        },
+        {
+          "slot": 1995157,
+          "raceName": "桜花賞",
+          "place": 1,
+          "prizeYen": 140000000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "アパパネコ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "2 1/2馬身"
         }
       ]
     },
@@ -1375,20 +1375,9 @@
     {
       "horseName": "ブエナビスター",
       "ownerName": "",
-      "prizeYen": 4710500000,
-      "starts": 199,
+      "prizeYen": 4745500000,
+      "starts": 200,
       "raceResults": [
-        {
-          "slot": 1995124,
-          "raceName": "NHKマイルカップ",
-          "place": 2,
-          "prizeYen": 52000000,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ブエナビスター",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "6 1/2馬身"
-        },
         {
           "slot": 1995125,
           "raceName": "ヴィクトリアマイル",
@@ -1597,6 +1586,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "4 3/4馬身"
+        },
+        {
+          "slot": 1995157,
+          "raceName": "桜花賞",
+          "place": 3,
+          "prizeYen": 35000000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "アパパネコ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "2 1/2馬身"
         }
       ]
     },
@@ -1831,20 +1831,9 @@
     {
       "horseName": "アパパネコ",
       "ownerName": "",
-      "prizeYen": 4106500000,
-      "starts": 203,
+      "prizeYen": 4162500000,
+      "starts": 204,
       "raceResults": [
-        {
-          "slot": 1995127,
-          "raceName": "日本ダービー",
-          "place": 18,
-          "prizeYen": 0,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ナリタブライワン",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "4 1/4馬身"
-        },
         {
           "slot": 1995128,
           "raceName": "安田記念",
@@ -2053,26 +2042,26 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "5馬身"
+        },
+        {
+          "slot": 1995157,
+          "raceName": "桜花賞",
+          "place": 2,
+          "prizeYen": 56000000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "アパパネコ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "2 1/2馬身"
         }
       ]
     },
     {
       "horseName": "ダイワスカーレッタ",
       "ownerName": "",
-      "prizeYen": 4072000000,
-      "starts": 183,
+      "prizeYen": 4093000000,
+      "starts": 184,
       "raceResults": [
-        {
-          "slot": 1995127,
-          "raceName": "日本ダービー",
-          "place": 9,
-          "prizeYen": 0,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ナリタブライワン",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "4 1/4馬身"
-        },
         {
           "slot": 1995128,
           "raceName": "安田記念",
@@ -2281,6 +2270,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "3 3/4馬身"
+        },
+        {
+          "slot": 1995157,
+          "raceName": "桜花賞",
+          "place": 4,
+          "prizeYen": 21000000,
+          "firstHorseName": "アーモンドアイス",
+          "secondHorseName": "アパパネコ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "2 1/2馬身"
         }
       ]
     }
@@ -2296,7 +2296,7 @@
       "rank": 2,
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 28138500000
+      "prizeYen": 28278500000
     },
     {
       "rank": 3,
@@ -2326,7 +2326,7 @@
       "rank": 7,
       "horseName": "ブエナビスター",
       "ownerName": "",
-      "prizeYen": 4710500000
+      "prizeYen": 4745500000
     },
     {
       "rank": 8,
@@ -2338,13 +2338,13 @@
       "rank": 9,
       "horseName": "アパパネコ",
       "ownerName": "",
-      "prizeYen": 4106500000
+      "prizeYen": 4162500000
     },
     {
       "rank": 10,
       "horseName": "ダイワスカーレッタ",
       "ownerName": "",
-      "prizeYen": 4072000000
+      "prizeYen": 4093000000
     },
     {
       "rank": 11,
@@ -2374,7 +2374,7 @@
       "rank": 15,
       "horseName": "グランアレグリラ",
       "ownerName": "",
-      "prizeYen": 2287500000
+      "prizeYen": 2301500000
     },
     {
       "rank": 16,
