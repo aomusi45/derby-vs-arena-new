@@ -7,20 +7,9 @@
     {
       "horseName": "ディープインパルス",
       "ownerName": "",
-      "prizeYen": 26310000000,
-      "starts": 96,
+      "prizeYen": 26510000000,
+      "starts": 97,
       "raceResults": [
-        {
-          "slot": 1995055,
-          "raceName": "日本ダービー",
-          "place": 1,
-          "prizeYen": 300000000,
-          "firstHorseName": "ディープインパルス",
-          "secondHorseName": "シンボリルドルフィ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "6 1/4馬身"
-        },
         {
           "slot": 1995060,
           "raceName": "菊花賞",
@@ -224,6 +213,17 @@
           "raceName": "日本ダービー",
           "place": 1,
           "prizeYen": 300000000,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "ナリタブライワン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "大差"
+        },
+        {
+          "slot": 1995114,
+          "raceName": "菊花賞",
+          "place": 1,
+          "prizeYen": 200000000,
           "firstHorseName": "ディープインパルス",
           "secondHorseName": "ナリタブライワン",
           "firstOwnerName": "",
@@ -463,20 +463,9 @@
     {
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
-      "prizeYen": 10365000000,
-      "starts": 140,
+      "prizeYen": 10415000000,
+      "starts": 141,
       "raceResults": [
-        {
-          "slot": 1995081,
-          "raceName": "マイルチャンピオンシップ",
-          "place": 12,
-          "prizeYen": 0,
-          "firstHorseName": "ダイワスカーレッタ",
-          "secondHorseName": "アパパネコ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "3/4馬身"
-        },
         {
           "slot": 1995082,
           "raceName": "ジャパンカップ",
@@ -685,26 +674,26 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "2馬身"
+        },
+        {
+          "slot": 1995114,
+          "raceName": "菊花賞",
+          "place": 3,
+          "prizeYen": 50000000,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "ナリタブライワン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "大差"
         }
       ]
     },
     {
       "horseName": "キタサンブラッキー",
       "ownerName": "",
-      "prizeYen": 5920000000,
-      "starts": 134,
+      "prizeYen": 5950000000,
+      "starts": 135,
       "raceResults": [
-        {
-          "slot": 1995070,
-          "raceName": "NHKマイルカップ",
-          "place": 13,
-          "prizeYen": 0,
-          "firstHorseName": "ヒシアケボーノ",
-          "secondHorseName": "グランアレグリラ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "4 3/4馬身"
-        },
         {
           "slot": 1995074,
           "raceName": "安田記念",
@@ -913,26 +902,26 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "ハナ"
+        },
+        {
+          "slot": 1995114,
+          "raceName": "菊花賞",
+          "place": 4,
+          "prizeYen": 30000000,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "ナリタブライワン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "大差"
         }
       ]
     },
     {
       "horseName": "ナリタブライワン",
       "ownerName": "",
-      "prizeYen": 5335000000,
-      "starts": 117,
+      "prizeYen": 5415000000,
+      "starts": 118,
       "raceResults": [
-        {
-          "slot": 1995078,
-          "raceName": "菊花賞",
-          "place": 4,
-          "prizeYen": 30000000,
-          "firstHorseName": "ディープインパルス",
-          "secondHorseName": "シンボリルドルフィ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "7 1/4馬身"
-        },
         {
           "slot": 1995079,
           "raceName": "天皇賞（秋）",
@@ -1141,6 +1130,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "ハナ"
+        },
+        {
+          "slot": 1995114,
+          "raceName": "菊花賞",
+          "place": 2,
+          "prizeYen": 80000000,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "ナリタブライワン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "大差"
         }
       ]
     },
@@ -1148,19 +1148,8 @@
       "horseName": "テイエムオペラオン",
       "ownerName": "",
       "prizeYen": 4760000000,
-      "starts": 102,
+      "starts": 103,
       "raceResults": [
-        {
-          "slot": 1995064,
-          "raceName": "ジャパンカップ",
-          "place": 3,
-          "prizeYen": 125000000,
-          "firstHorseName": "ディープインパルス",
-          "secondHorseName": "シンボリルドルフィ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "3 1/4馬身"
-        },
         {
           "slot": 1995065,
           "raceName": "有馬記念",
@@ -1362,6 +1351,17 @@
         {
           "slot": 1995109,
           "raceName": "日本ダービー",
+          "place": 7,
+          "prizeYen": 0,
+          "firstHorseName": "ディープインパルス",
+          "secondHorseName": "ナリタブライワン",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "大差"
+        },
+        {
+          "slot": 1995114,
+          "raceName": "菊花賞",
           "place": 7,
           "prizeYen": 0,
           "firstHorseName": "ディープインパルス",
@@ -2290,7 +2290,7 @@
       "rank": 1,
       "horseName": "ディープインパルス",
       "ownerName": "",
-      "prizeYen": 26310000000
+      "prizeYen": 26510000000
     },
     {
       "rank": 2,
@@ -2302,19 +2302,19 @@
       "rank": 3,
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
-      "prizeYen": 10365000000
+      "prizeYen": 10415000000
     },
     {
       "rank": 4,
       "horseName": "キタサンブラッキー",
       "ownerName": "",
-      "prizeYen": 5920000000
+      "prizeYen": 5950000000
     },
     {
       "rank": 5,
       "horseName": "ナリタブライワン",
       "ownerName": "",
-      "prizeYen": 5335000000
+      "prizeYen": 5415000000
     },
     {
       "rank": 6,
@@ -2434,7 +2434,7 @@
       "rank": 25,
       "horseName": "スペシャルウインク",
       "ownerName": "",
-      "prizeYen": 795000000
+      "prizeYen": 815000000
     },
     {
       "rank": 26,
