@@ -107,6 +107,13 @@ def normalize(row: dict) -> dict:
               'health','temperament','form','fatigue','g1Wins','earnedPrize'):
         runner[k] = source[k]
     runner['going'] = {k:going[k] for k in ('良','稍重','重','不良')}
+    jockey = source.get('df32MainJockey')
+    skills = source.get('df32MainJockeySkills')
+    if jockey is not None or skills is not None:
+        if not isinstance(jockey, str) or not 1 <= len(jockey) <= 60 or not isinstance(skills, dict) or skills.get('name') != jockey:
+            raise ValueError('Invalid VS jockey data')
+        runner['df32MainJockey'] = jockey
+        runner['df32MainJockeySkills'] = dict(skills)
     runner['isCom'] = False
     submitted_at = row.get('updatedAt', '')
     registered_week = jst_week_index(timestamp_us(submitted_at)//1000)
