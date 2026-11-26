@@ -464,19 +464,8 @@
       "horseName": "シンボリルドルフィ",
       "ownerName": "",
       "prizeYen": 14645000000,
-      "starts": 197,
+      "starts": 198,
       "raceResults": [
-        {
-          "slot": 1995178,
-          "raceName": "NHKマイルカップ",
-          "place": 7,
-          "prizeYen": 0,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ダイワメジャック",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "3 1/2馬身"
-        },
         {
           "slot": 1995184,
           "raceName": "スプリンターズステークス",
@@ -685,6 +674,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "6 1/4馬身"
+        },
+        {
+          "slot": 1995214,
+          "raceName": "NHKマイルカップ",
+          "place": 11,
+          "prizeYen": 0,
+          "firstHorseName": "ウオッカナ",
+          "secondHorseName": "ラッキーライラッキ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/4馬身"
         }
       ]
     },
@@ -692,19 +692,8 @@
       "horseName": "キタサンブラッキー",
       "ownerName": "",
       "prizeYen": 8050000000,
-      "starts": 181,
+      "starts": 182,
       "raceResults": [
-        {
-          "slot": 1995171,
-          "raceName": "マイルチャンピオンシップ",
-          "place": 11,
-          "prizeYen": 0,
-          "firstHorseName": "イクイノマックス",
-          "secondHorseName": "ジャンタルマンダル",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "5馬身"
-        },
         {
           "slot": 1995172,
           "raceName": "ジャパンカップ",
@@ -913,6 +902,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "6 1/4馬身"
+        },
+        {
+          "slot": 1995214,
+          "raceName": "NHKマイルカップ",
+          "place": 9,
+          "prizeYen": 0,
+          "firstHorseName": "ウオッカナ",
+          "secondHorseName": "ラッキーライラッキ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/4馬身"
         }
       ]
     },
@@ -1148,19 +1148,8 @@
       "horseName": "ブエナビスター",
       "ownerName": "",
       "prizeYen": 6084500000,
-      "starts": 236,
+      "starts": 237,
       "raceResults": [
-        {
-          "slot": 1995182,
-          "raceName": "安田記念",
-          "place": 4,
-          "prizeYen": 27000000,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ダイワメジャック",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "4 1/4馬身"
-        },
         {
           "slot": 1995185,
           "raceName": "秋華賞",
@@ -1369,6 +1358,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "1馬身"
+        },
+        {
+          "slot": 1995214,
+          "raceName": "NHKマイルカップ",
+          "place": 12,
+          "prizeYen": 0,
+          "firstHorseName": "ウオッカナ",
+          "secondHorseName": "ラッキーライラッキ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "1 1/4馬身"
         }
       ]
     },
@@ -2356,7 +2356,7 @@
       "rank": 12,
       "horseName": "ウオッカナ",
       "ownerName": "",
-      "prizeYen": 3803000000
+      "prizeYen": 3933000000
     },
     {
       "rank": 13,
@@ -2368,13 +2368,13 @@
       "rank": 14,
       "horseName": "エアグルービー",
       "ownerName": "",
-      "prizeYen": 3191000000
+      "prizeYen": 3223500000
     },
     {
       "rank": 15,
       "horseName": "グランアレグリラ",
       "ownerName": "",
-      "prizeYen": 2598500000
+      "prizeYen": 2618000000
     },
     {
       "rank": 16,
@@ -2386,7 +2386,7 @@
       "rank": 17,
       "horseName": "ヒシアケボーノ",
       "ownerName": "",
-      "prizeYen": 2293000000
+      "prizeYen": 2306000000
     },
     {
       "rank": 18,
@@ -2404,7 +2404,7 @@
       "rank": 20,
       "horseName": "ラッキーライラッキ",
       "ownerName": "",
-      "prizeYen": 2051000000
+      "prizeYen": 2103000000
     },
     {
       "rank": 21,
