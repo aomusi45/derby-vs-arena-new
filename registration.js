@@ -8,6 +8,10 @@
   const preview=$('vs-entry-preview'),loginStatus=$('vs-entry-login-status');
   const google=$('vs-entry-google');
   const consent=$('vs-fair-play-consent');
+  const consentStorageKey='dbf.vs.fairPlayConsent.v1';
+  if(consent){
+    try{consent.checked=localStorage.getItem(consentStorageKey)==='1';}catch(_){}
+  }
   const hasEntryConsent=()=>!!consent?.checked;
   const ownerInput=$('vs-entry-ownername'),ownerHint=$('vs-entry-owner-status');
   if(!file||!submit||!message||!preview||!loginStatus||!google||!ownerInput)return;
@@ -719,6 +723,10 @@
     }
   });
   if(consent)consent.addEventListener('change',()=>{
+    try{
+      if(consent.checked)localStorage.setItem(consentStorageKey,'1');
+      else localStorage.removeItem(consentStorageKey);
+    }catch(_){}
     bookingRenderKey='';renderTodayBookings();updateSubmit();
   });
   ownerInput.addEventListener('input',updateSubmit);
