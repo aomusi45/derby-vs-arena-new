@@ -331,6 +331,60 @@ def load_race_receipts(token,records):
     return receipts
 
 
+def lifetime_owner_id(name):
+    return hashlib.sha256(name.encode('utf-8')).hexdigest()
+
+
+def initialize_lifetime_owners(token):
+    # Existing weekly counters already include all receipted races. Seed once,
+    # before processing any new receipts. Missing parent docs are normal.
+    marker='vs_lifetime_owner_meta/initialized'
+    if doc_get(token,marker):return
+    totals={}
+    page=None
+    while True:
+        qs={'pageSize':'500','showMissing':'true'}
+        if page:qs['pageToken']=page
+        data=request(token,quote(BASE+'/vs_weekly_horses',safe='/()')+'?'+urlencode(qs))
+        for parent in data.get('documents',[]):
+            week=parent['name'].rsplit('/',1)[-1]
+            for row in ranking(token,week):
+                name=row['ownerName']
+                if name and not row['rankingId'].startswith('c_'):
+                    totals[name]=totals.get(name,0)+row['prizeYen']
+        page=data.get('nextPageToken')
+        if not page:break
+    writes=[{'update':{'name':BASE+'/vs_lifetime_owner_seed/'+lifetime_owner_id(name),
+                       'fields':fields({'ownerName':name,'prizeYen':prize})}}
+            for name,prize in totals.items()]
+    for i in range(0,len(writes),400):commit(token,writes[i:i+400])
+    commit(token,[{'update':{'name':BASE+'/'+marker,'fields':fields({'version':1})},
+                   'currentDocument':{'exists':False}}])
+
+
+def lifetime_owner_writes(rows):
+    totals={}
+    for row in rows:
+        if not row['isCom'] and row['ownerName']:
+            name=row['ownerName'];totals[name]=totals.get(name,0)+row['prizeYen']
+    return [{'update':{'name':BASE+'/vs_lifetime_owner_totals/'+lifetime_owner_id(name),
+                       'fields':fields({'ownerName':name})},
+             'updateMask':{'fieldPaths':['ownerName']},
+             'updateTransforms':[{'fieldPath':'prizeYen','increment':{'integerValue':str(prize)}}]}
+            for name,prize in totals.items()]
+
+
+def lifetime_owner_board(token):
+    totals={}
+    for collection in ('vs_lifetime_owner_seed','vs_lifetime_owner_totals'):
+        for doc in list_docs(token,collection):
+            f=doc['fields'];name=f['ownerName']['stringValue'];prize=int(f['prizeYen']['integerValue'])
+            if not name or prize<0:raise ValueError('Invalid lifetime owner total')
+            totals[name]=totals.get(name,0)+prize
+    return [{'rank':i,'ownerName':name} for i,(name,prize) in enumerate(
+        sorted(totals.items(),key=lambda x:(-x[1],x[0])),1)][:70]
+
+
 def commit_race(token,meta,receipts=None):
     rows=race_rows(meta)
     if not rows:return False
@@ -393,6 +447,7 @@ def commit_race(token,meta,receipts=None):
                 {'fieldPath':'starts','increment':{'integerValue':'1'}},
                 *([{'fieldPath':f'places.p{row["place"]}','increment':{'integerValue':'1'}}] if 1<=row['place']<=5 else []),
                 result_transform(row)]})
+    writes.extend(lifetime_owner_writes(rows))
     try:
         commit(token,writes)
     except HTTPError as e:
@@ -600,7 +655,8 @@ def public_board(token,now):
                      for row in board[:10]],
             'standings':standings,
             'raceResults':race_results,
-            'awards':archive(token)}
+            'awards':archive(token),
+            'lifetimeOwners':lifetime_owner_board(token)}
     return result
 
 
@@ -610,6 +666,7 @@ def main():
     token=registered_horses._access_token(secret)
     raw=json.loads((ROOT/'race_playlist.json').read_text(encoding='utf-8'))
     if raw.get('version')!=2:raise ValueError('開催一覧が不正です')
+    initialize_lifetime_owners(token)
     count=0
     records=sorted(raw['records'],key=lambda x:x['slot'])
     receipts=load_race_receipts(token,records)
