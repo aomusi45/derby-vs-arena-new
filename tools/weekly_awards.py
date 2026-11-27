@@ -381,7 +381,7 @@ def lifetime_owner_board(token):
             f=doc['fields'];name=f['ownerName']['stringValue'];prize=int(f['prizeYen']['integerValue'])
             if not name or prize<0:raise ValueError('Invalid lifetime owner total')
             totals[name]=totals.get(name,0)+prize
-    return [{'rank':i,'ownerName':name} for i,(name,prize) in enumerate(
+    return [{'rank':i,'ownerName':name,'prizeYen':prize} for i,(name,prize) in enumerate(
         sorted(totals.items(),key=lambda x:(-x[1],x[0])),1)][:70]
 
 

@@ -16,12 +16,17 @@
     else path('M6 14L20 28L32 7L44 28L58 14L49 47H15Z M15 50H49V56H15Z');
     return svg;
   }
+  function formatPrize(yen){
+    if(!Number.isFinite(yen)||yen<0)return '—';
+    const trillion=yen>=1e12;
+    return (yen/(trillion?1e12:1e8)).toLocaleString('ja-JP',{minimumFractionDigits:2,maximumFractionDigits:2})+(trillion?'兆円':'億円');
+  }
   function render(){
     list.replaceChildren();
     for(const start of [1,26]){const col=document.createElement('div');col.style.minWidth='0';
       for(let i=start;i<start+25;i++){const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:4px;min-height:29px;border-bottom:1px solid #ffffff20;font-size:clamp(11px,2.5vw,14px)';
         const n=document.createElement('span');n.style.flex='0 0 2.4em';n.textContent=i+'位';row.append(n);
-        const owner=ranks[i-1];if(owner){row.append(mark(i));const name=document.createElement('span');name.style.overflowWrap='anywhere';name.textContent=owner.ownerName;row.append(name);}else row.append('—');col.append(row);}
+        const owner=ranks[i-1];if(owner){row.append(mark(i));const name=document.createElement('span');name.style.overflowWrap='anywhere';name.textContent=owner.ownerName;name.style.minWidth='0';row.append(name);const prize=document.createElement('span');prize.style.cssText='margin-left:auto;flex-shrink:0;white-space:nowrap;font-variant-numeric:tabular-nums';prize.textContent=formatPrize(owner.prizeYen);row.append(prize);}else row.append('—');col.append(row);}
       list.append(col);}
   }
   function own(){const target=document.getElementById('vs-saved-owner');if(!target)return;
