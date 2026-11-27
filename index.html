@@ -236,6 +236,8 @@
 .dbf-feedback-reply-form button{margin-top:10px}
 .dbf-feedback-note{color:#aec1b4;font-size:11px;line-height:1.7}
 @media(max-width:520px){#vs-feedback-panel{padding:15px 12px}.dbf-feedback-item{padding:11px}.dbf-feedback-tools .vs-action-btn{width:100%}}
+ .vs-lifetime-champion-layout #vs-awards-panel{min-width:0;margin:0;text-align:left;padding:14px}
+@media(max-width:850px){.vs-lifetime-champion-layout{grid-template-columns:minmax(0,1fr)!important}}
 </style>
 </head>
 <body>
@@ -258,11 +260,20 @@
       <div class="line"></div>
       <div style="text-align:center;margin:20px auto 18px;max-width:650px"><a href="./g1-prediction.html" style="display:block;padding:22px 18px;border:3px solid #ffe9a0;border-radius:16px;background:linear-gradient(180deg,#fff0b6,#e3aa36);color:#17251c;font-size:clamp(20px,4vw,27px);font-weight:900;text-decoration:none;box-shadow:0 8px 30px #d9a43a88">🏇 今週の予想レース</a></div>
        <a class="dbf-feedback-quicklink" href="#vs-feedback-panel">ご意見・不具合報告掲示板はこちら</a>
-      <section id="vs-lifetime-owner-panel" aria-labelledby="vs-lifetime-owner-title" style="max-width:650px;margin:20px auto 0;padding:14px;border:1px solid #b99b59;border-radius:12px;background:#102e26;text-align:left">
+      <div class="vs-lifetime-champion-layout" style="display:grid;grid-template-columns:minmax(0,650px) minmax(0,1fr);gap:16px;max-width:1100px;margin:20px auto 0;align-items:start">
+      <section id="vs-lifetime-owner-panel" aria-labelledby="vs-lifetime-owner-title" style="min-width:0;margin:0;padding:14px;border:1px solid #b99b59;border-radius:12px;background:#102e26;text-align:left">
         <h2 id="vs-lifetime-owner-title" style="text-align:center;margin:0 0 8px;color:#f4d68a">総獲得賞金ランキング</h2>
         <p style="text-align:center;font-size:12px;margin:0 0 10px">公式VS 永久累計獲得賞金</p>
         <div id="vs-lifetime-owner-list" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px">集計データを確認中です。</div>
       </section>
+      <section class="panel" id="vs-awards-panel" aria-label="歴代年度代表馬">
+        <div class="num">05 / HALL OF CHAMPIONS</div>
+        <h2>歴代年度代表馬</h2>
+        <p class="small">毎週の獲得賞金1位を第1代、第2代…と永久記録します。</p>
+        <div id="vs-awards-list" aria-live="polite">受賞記録を読み込み中…</div>
+        <button class="vs-action-btn" type="button" id="vs-awards-more" hidden>もっと見る（20件ずつ）</button>
+      </section>
+      </div>
     </header>
 
     <main>
@@ -470,13 +481,7 @@
         <table class="vs-ranking-grid"><thead><tr><th>順位</th><th>馬名</th><th>オーナー</th><th>終了戦数</th><th>週間賞金</th></tr></thead>
           <tbody id="vs-ranking-body"><tr><td colspan="5">集計中です。</td></tr></tbody></table>
       </section>
-      <section class="panel" id="vs-awards-panel" aria-label="歴代年度代表馬">
-        <div class="num">05 / HALL OF CHAMPIONS</div>
-        <h2>歴代年度代表馬</h2>
-        <p class="small">毎週の獲得賞金1位を第1代、第2代…と永久記録します。</p>
-        <div id="vs-awards-list" aria-live="polite">受賞記録を読み込み中…</div>
-        <button class="vs-action-btn" type="button" id="vs-awards-more" hidden>もっと見る（20件ずつ）</button>
-      </section>
+
 
       <!-- V36: feedback board; server stores in separate Firestore collections. -->
       <section class="panel" id="vs-feedback-panel" aria-labelledby="dbf-feedback-heading">
