@@ -235,20 +235,9 @@
     {
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 45823500000,
-      "starts": 347,
+      "prizeYen": 45837500000,
+      "starts": 348,
       "raceResults": [
-        {
-          "slot": 1995308,
-          "raceName": "安田記念",
-          "place": 1,
-          "prizeYen": 180000000,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "マイネルラブリー",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "4馬身"
-        },
         {
           "slot": 1995310,
           "raceName": "スプリンターズステークス",
@@ -457,6 +446,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "1/2馬身"
+        },
+        {
+          "slot": 1995337,
+          "raceName": "桜花賞",
+          "place": 5,
+          "prizeYen": 14000000,
+          "firstHorseName": "アパパネコ",
+          "secondHorseName": "グランアレグリラ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "6 1/2馬身"
         }
       ]
     },
@@ -920,19 +920,8 @@
       "horseName": "ブエナビスター",
       "ownerName": "",
       "prizeYen": 8797000000,
-      "starts": 322,
+      "starts": 323,
       "raceResults": [
-        {
-          "slot": 1995307,
-          "raceName": "日本ダービー",
-          "place": 12,
-          "prizeYen": 0,
-          "firstHorseName": "ディープインパルス",
-          "secondHorseName": "アーモンドアイス",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "8 1/4馬身"
-        },
         {
           "slot": 1995311,
           "raceName": "秋華賞",
@@ -1141,6 +1130,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "3 1/4馬身"
+        },
+        {
+          "slot": 1995337,
+          "raceName": "桜花賞",
+          "place": 11,
+          "prizeYen": 0,
+          "firstHorseName": "アパパネコ",
+          "secondHorseName": "グランアレグリラ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "6 1/2馬身"
         }
       ]
     },
@@ -1603,20 +1603,9 @@
     {
       "horseName": "アパパネコ",
       "ownerName": "",
-      "prizeYen": 6460500000,
-      "starts": 318,
+      "prizeYen": 6600500000,
+      "starts": 319,
       "raceResults": [
-        {
-          "slot": 1995301,
-          "raceName": "桜花賞",
-          "place": 3,
-          "prizeYen": 35000000,
-          "firstHorseName": "アーモンドアイス",
-          "secondHorseName": "ブエナビスター",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "5 1/4馬身"
-        },
         {
           "slot": 1995305,
           "raceName": "ヴィクトリアマイル",
@@ -1825,6 +1814,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "4馬身"
+        },
+        {
+          "slot": 1995337,
+          "raceName": "桜花賞",
+          "place": 1,
+          "prizeYen": 140000000,
+          "firstHorseName": "アパパネコ",
+          "secondHorseName": "グランアレグリラ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "6 1/2馬身"
         }
       ]
     },
@@ -2296,7 +2296,7 @@
       "rank": 2,
       "horseName": "アーモンドアイス",
       "ownerName": "",
-      "prizeYen": 45823500000
+      "prizeYen": 45837500000
     },
     {
       "rank": 3,
@@ -2332,7 +2332,7 @@
       "rank": 8,
       "horseName": "アパパネコ",
       "ownerName": "",
-      "prizeYen": 6460500000
+      "prizeYen": 6600500000
     },
     {
       "rank": 9,
@@ -2356,7 +2356,7 @@
       "rank": 12,
       "horseName": "ウオッカナ",
       "ownerName": "",
-      "prizeYen": 4954000000
+      "prizeYen": 4989000000
     },
     {
       "rank": 13,
@@ -2368,7 +2368,7 @@
       "rank": 14,
       "horseName": "エアグルービー",
       "ownerName": "",
-      "prizeYen": 3931000000
+      "prizeYen": 3952000000
     },
     {
       "rank": 15,
@@ -2380,7 +2380,7 @@
       "rank": 16,
       "horseName": "グランアレグリラ",
       "ownerName": "",
-      "prizeYen": 3347000000
+      "prizeYen": 3403000000
     },
     {
       "rank": 17,
