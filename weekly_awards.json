@@ -692,19 +692,8 @@
       "horseName": "ナリタブライワン",
       "ownerName": "",
       "prizeYen": 9945000000,
-      "starts": 225,
+      "starts": 226,
       "raceResults": [
-        {
-          "slot": 1995303,
-          "raceName": "天皇賞（春）",
-          "place": 4,
-          "prizeYen": 45000000,
-          "firstHorseName": "ディープインパルス",
-          "secondHorseName": "シンボリルドルフィ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "3 3/4馬身"
-        },
         {
           "slot": 1995308,
           "raceName": "安田記念",
@@ -913,6 +902,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "1 3/4馬身"
+        },
+        {
+          "slot": 1995351,
+          "raceName": "マイルチャンピオンシップ",
+          "place": 15,
+          "prizeYen": 0,
+          "firstHorseName": "ウオッカナ",
+          "secondHorseName": "ダイワスカーレッタ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "3馬身"
         }
       ]
     },
@@ -920,19 +920,8 @@
       "horseName": "ブエナビスター",
       "ownerName": "",
       "prizeYen": 8901000000,
-      "starts": 330,
+      "starts": 331,
       "raceResults": [
-        {
-          "slot": 1995322,
-          "raceName": "NHKマイルカップ",
-          "place": 14,
-          "prizeYen": 0,
-          "firstHorseName": "ウオッカナ",
-          "secondHorseName": "モーリスコ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "1 1/2馬身"
-        },
         {
           "slot": 1995323,
           "raceName": "ヴィクトリアマイル",
@@ -1141,6 +1130,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "4 1/2馬身"
+        },
+        {
+          "slot": 1995351,
+          "raceName": "マイルチャンピオンシップ",
+          "place": 8,
+          "prizeYen": 0,
+          "firstHorseName": "ウオッカナ",
+          "secondHorseName": "ダイワスカーレッタ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "3馬身"
         }
       ]
     },
@@ -1603,20 +1603,9 @@
     {
       "horseName": "アパパネコ",
       "ownerName": "",
-      "prizeYen": 6710000000,
-      "starts": 327,
+      "prizeYen": 6755000000,
+      "starts": 328,
       "raceResults": [
-        {
-          "slot": 1995318,
-          "raceName": "大阪杯",
-          "place": 16,
-          "prizeYen": 0,
-          "firstHorseName": "ディープインパルス",
-          "secondHorseName": "イクイノマックス",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "大差"
-        },
         {
           "slot": 1995319,
           "raceName": "桜花賞",
@@ -1825,6 +1814,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "4 1/2馬身"
+        },
+        {
+          "slot": 1995351,
+          "raceName": "マイルチャンピオンシップ",
+          "place": 3,
+          "prizeYen": 45000000,
+          "firstHorseName": "ウオッカナ",
+          "secondHorseName": "ダイワスカーレッタ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "3馬身"
         }
       ]
     },
@@ -2059,20 +2059,9 @@
     {
       "horseName": "マイネルラブリー",
       "ownerName": "",
-      "prizeYen": 5720000000,
-      "starts": 77,
+      "prizeYen": 5738000000,
+      "starts": 78,
       "raceResults": [
-        {
-          "slot": 1995238,
-          "raceName": "スプリンターズステークス",
-          "place": 1,
-          "prizeYen": 170000000,
-          "firstHorseName": "マイネルラブリー",
-          "secondHorseName": "ヒシアケボーノ",
-          "firstOwnerName": "",
-          "secondOwnerName": "",
-          "firstSecondMargin": "1 1/2馬身"
-        },
         {
           "slot": 1995250,
           "raceName": "NHKマイルカップ",
@@ -2281,6 +2270,17 @@
           "firstOwnerName": "",
           "secondOwnerName": "",
           "firstSecondMargin": "2 1/4馬身"
+        },
+        {
+          "slot": 1995351,
+          "raceName": "マイルチャンピオンシップ",
+          "place": 5,
+          "prizeYen": 18000000,
+          "firstHorseName": "ウオッカナ",
+          "secondHorseName": "ダイワスカーレッタ",
+          "firstOwnerName": "",
+          "secondOwnerName": "",
+          "firstSecondMargin": "3馬身"
         }
       ]
     }
@@ -2332,7 +2332,7 @@
       "rank": 8,
       "horseName": "アパパネコ",
       "ownerName": "",
-      "prizeYen": 6710000000
+      "prizeYen": 6755000000
     },
     {
       "rank": 9,
@@ -2344,19 +2344,19 @@
       "rank": 10,
       "horseName": "マイネルラブリー",
       "ownerName": "",
-      "prizeYen": 5720000000
+      "prizeYen": 5738000000
     },
     {
       "rank": 11,
       "horseName": "ダイワスカーレッタ",
       "ownerName": "",
-      "prizeYen": 5630500000
+      "prizeYen": 5702500000
     },
     {
       "rank": 12,
       "horseName": "ウオッカナ",
       "ownerName": "",
-      "prizeYen": 5221000000
+      "prizeYen": 5401000000
     },
     {
       "rank": 13,
@@ -2416,7 +2416,7 @@
       "rank": 22,
       "horseName": "ロードカナリア",
       "ownerName": "",
-      "prizeYen": 1794500000
+      "prizeYen": 1821500000
     },
     {
       "rank": 23,
