@@ -263,50 +263,54 @@ def update_com(token,row,slot,race_name,top_two):
     return write,completed,completed_places,count,completed_results
 
 
-def com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts,completed_results,
-                     slot,race_name,top_two):
-    """Credit each new COM appearance to the current JST week's standings.
+def com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts,completed_results):
+    """Only completed 20-start blocks may earn COM ranking money.
 
-    The caller's create-only race receipt and COM lastSlot check ensure that
-    each race is credited at most once.  The 20-start career cycle remains
-    independent and unchanged.
+    Per-week best completed block wins; active partial blocks stay out of the
+    standings. Cycles themselves persist in vs_com_career across Mondays.
     """
     previous=doc_get(token,path)
     f=previous.get('fields',{}) if previous else {}
     if previous and f.get('rankingId',{}).get('stringValue') not in ('',row['rankingId']):
         raise ValueError('COM馬IDが既存の週間賞金記録と不一致です')
-
     version=int(f.get('comPrizeVersion',{}).get('integerValue','0'))
-    # V2 was a best-20-start board, not a weekly running total.  Do not
-    # reinterpret it as weekly money or retroactively re-credit old races.
-    if version==3:
-        starts=int(f.get('starts',{}).get('integerValue','0'))
-        prize=int(f.get('prizeYen',{}).get('integerValue','0'))
-        p=f.get('places',{}).get('mapValue',{}).get('fields',{})
-        places={f'p{i}':int(p.get(f'p{i}',{}).get('integerValue','0')) for i in range(1,6)}
-        history=read_history(f.get('raceResults'))
+    if version in (1,2):
+        best=int(f.get('comBest20PrizeYen',{}).get('integerValue','0'))
+        if best<0:raise ValueError('COM馬の完成ブロック賞金が不正です')
+        blocks=int(f.get('comCompletedBlocks',{}).get('integerValue',
+                   '1' if best>0 else '0')) if version==2 else (1 if best>0 else 0)
+        best_map=f.get('comBest20Places',{}).get('mapValue',{}).get('fields',{})
+        best_places={f'p{i}':int(best_map.get(f'p{i}',{}).get('integerValue','0')) for i in range(1,6)}
     else:
-        starts=prize=0
-        places={f'p{i}':0 for i in range(1,6)}
-        history=[]
-    if starts<0 or prize<0 or any(n<0 for n in places.values()):
-        raise ValueError('COM馬の週間賞金記録が不正です')
-    starts+=1
-    prize+=row['prizeYen']
-    if 1<=row['place']<=5:
-        places[f'p{row["place"]}']+=1
-    history.append(race_history_entry(slot,race_name,row,top_two))
-    # History is display-only, limited to 20 entries. Weekly money and
-    # starts remain complete even if a horse races more than 20 times.
-    history=history[-20:]
+        # Legacy weekly total is NOT a verified 20-race block. Only an exact
+        # 20-start record can be safely imported as one completed block.
+        old_starts=0 if version==3 else int(f.get('starts',{}).get('integerValue','0'))
+        old_sum=int(f.get('prizeYen',{}).get('integerValue','0'))
+        if old_starts<0 or old_sum<0:raise ValueError('COM馬の旧週間記録が不正です')
+        best=old_sum if old_starts==20 else 0
+        blocks=1 if old_starts==20 else 0
+        best_places={f'p{i}':0 for i in range(1,6)}
+    best_results=read_history(f.get('comBest20RaceResults'))
+    if blocks<0 or any(n<0 for n in best_places.values()):
+        raise ValueError('COM馬の完成ブロック情報が不正です')
+    if completed is not None:
+        if completed<0 or not isinstance(completed_places,dict):
+            raise ValueError('COM馬の20戦完了情報が不正です')
+        blocks+=1
+        if completed>best or (completed==best and tuple(completed_places.values())>tuple(best_places.values())):
+            best=completed
+            best_places=completed_places.copy()
+            best_results=completed_results.copy() if completed_results is not None else []
     data={'horseName':row['horseName'],'ownerName':row['ownerName'],
           'isCom':True,'weekStart':week,'rankingId':row['rankingId'],
-          'starts':starts,'prizeYen':prize,'places':places,
-          'raceResults':history,'comPrizeVersion':3}
+          'starts':20 if blocks else 0,'prizeYen':best,
+          'comPrizeVersion':2,'comCompletedBlocks':blocks,
+          'comCycleStarts':cycle_starts,
+          'comBest20PrizeYen':best,'comBest20Places':best_places,
+          'comBest20RaceResults':best_results}
+    # Old partial-block fields are intentionally deleted, not used for ranking.
     old_fields=['comBlockStarts','comBlockPrizeYen','comLegacyStarts',
-                'comLegacyTotalYen','comLegacyIncomplete',
-                'comCompletedBlocks','comCycleStarts','comBest20PrizeYen',
-                'comBest20Places','comBest20RaceResults']
+                'comLegacyTotalYen','comLegacyIncomplete','places','raceResults']
     return {'update':{'name':BASE+'/'+path,'fields':fields(data)},
             'updateMask':{'fieldPaths':list(data)+old_fields},
             'currentDocument':{'updateTime':previous['updateTime']} if previous else {'exists':False}}
@@ -435,7 +439,7 @@ def commit_race(token,meta,receipts=None):
             if com_update is None:
                 continue  # Already credited in persistent COM career; no double payment.
             career,completed,completed_places,cycle_starts,completed_results=com_update
-            writes.append(com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts,completed_results,slot,race_name,top_two))
+            writes.append(com_weekly_write(token,path,row,week,completed,completed_places,cycle_starts,completed_results))
             writes.append(career)
             continue
         current={'horseName':row['horseName'],'ownerName':row['ownerName'],'isCom':False,
@@ -468,24 +472,19 @@ def ranking(token,week):
         com=identity.startswith('c_')
         if com:
             version=int(f.get('comPrizeVersion',{}).get('integerValue','0'))
-            if version==3:
-                prizes=int(f.get('prizeYen',{}).get('integerValue','0'))
-                starts=int(f.get('starts',{}).get('integerValue','0'))
-                p=f.get('places',{}).get('mapValue',{}).get('fields',{})
-            elif version in (1,2):
-                # Preserve legacy completed-20 results until this horse's
-                # next new appearance migrates its weekly record to V3.
-                best=int(f.get('comBest20PrizeYen',{}).get('integerValue','0'))
-                if best<0:raise ValueError('COM馬の確定賞金が不正です')
-                if version==2 and int(f.get('comCompletedBlocks',{}).get('integerValue','0'))<1:
-                    continue
-                if version==1 and best==0:
-                    continue
-                prizes=best
-                starts=20
-                p=f.get('comBest20Places',{}).get('mapValue',{}).get('fields',{})
-            else:
+            if version not in (1,2):
+                # Unknown old COM sums may contain incomplete 20-race cycles.
                 continue
+            best=int(f.get('comBest20PrizeYen',{}).get('integerValue','0'))
+            if best<0:raise ValueError('COM馬の確定賞金が不正です')
+            if version==2:
+                blocks=int(f.get('comCompletedBlocks',{}).get('integerValue','0'))
+                if blocks<1:continue
+            elif best==0:
+                continue
+            prizes=best
+            starts=20  # show the completed 20-race set, never lifetime totals
+            p=f.get('comBest20Places',{}).get('mapValue',{}).get('fields',{})
         else:
             prizes=int(f.get('prizeYen',{}).get('integerValue','0'))
             starts=int(f.get('starts',{}).get('integerValue','0'))
@@ -495,7 +494,7 @@ def ranking(token,week):
         if any(n<0 for n in counts):raise ValueError('着順記録の数値が不正です')
         # COM: best completed 20-start block only. Player: this week's official starts.
         # Older blocks without a saved per-race breakdown remain intentionally partial.
-        race_results=read_history(f.get('comBest20RaceResults' if com and version in (1,2) else 'raceResults'))
+        race_results=read_history(f.get('comBest20RaceResults' if com else 'raceResults'))
         result.append({'horseName':f['horseName']['stringValue'],
             'ownerName':f['ownerName']['stringValue'],'prizeYen':prizes,
             'rankingId':identity,'starts':starts,'places':counts,
@@ -621,6 +620,25 @@ def award_previous(token,current_week,now):
     print('Archived weekly champion:',past_week,record['generation'],winner['horseName'],flush=True)
 
 
+def repair_first_champion(token):
+    path='vs_weekly_awards/2026-11-16'
+    doc=doc_get(token,path)
+    if not doc:return
+    f=doc['fields']
+    if (f.get('generation',{}).get('integerValue')!='1' or
+        f.get('horseName',{}).get('stringValue')!='ディープインパルス' or
+        f.get('ownerName',{}).get('stringValue')!='' or
+        not f.get('rankingId',{}).get('stringValue','').startswith('c_')):return
+    history=read_history(f.get('raceResults'))
+    expected=[(1994798, '皐月賞', 2, 80000000), (1994799, '天皇賞（春）', 1, 300000000), (1994803, '日本ダービー', 1, 300000000), (1994805, '宝塚記念', 1, 300000000), (1994808, '菊花賞', 1, 200000000), (1994809, '天皇賞（秋）', 1, 300000000), (1994812, 'ジャパンカップ', 1, 500000000), (1994813, '有馬記念', 1, 500000000), (1994814, '大阪杯', 4, 45000000), (1994816, '皐月賞', 1, 200000000), (1994817, '天皇賞（春）', 1, 300000000), (1994821, '日本ダービー', 1, 300000000), (1994826, '菊花賞', 1, 200000000), (1994827, '天皇賞（秋）', 1, 300000000), (1994830, 'ジャパンカップ', 1, 500000000), (1994831, '有馬記念', 1, 500000000), (1994834, '皐月賞', 9, 0), (1994835, '天皇賞（春）', 1, 300000000), (1994839, '日本ダービー', 1, 300000000), (1994841, '宝塚記念', 1, 300000000)]
+    if [(r['slot'],r['raceName'],r['place'],r['prizeYen']) for r in history]!=expected:return
+    if f.get('prizeYen',{}).get('integerValue')!='22805000000':return
+    commit(token,[{'update':{'name':BASE+'/'+path,'fields':fields({'prizeYen':sum(r['prizeYen'] for r in history)})},
+                   'updateMask':{'fieldPaths':['prizeYen']},
+                   'currentDocument':{'updateTime':doc['updateTime']}}])
+    print('Repaired first champion prize from saved 20 results',flush=True)
+
+
 def archive(token):
     result=[]
     for doc in list_docs(token,'vs_weekly_awards'):
@@ -673,6 +691,7 @@ def main():
     for meta in records:
         if commit_race(token,meta,receipts):count+=1
     now=datetime.now(timezone.utc)
+    repair_first_champion(token)
     award_previous(token,week_start(now),now)
     # Staging is not a permanent archive. Cleanup failures should never stop
     # the racing cycle or break a successfully stored championship.
